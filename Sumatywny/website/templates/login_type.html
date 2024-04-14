@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Calendar{% endblock %}
+{% block content %}
+    <div style="text-align: center;">
+        <div style="display: inline-block;">
+            <img src="{{ url_for('static', filename='użytkownik.png') }}"  width="300" height="200">
+            <img src="{{ url_for('static', filename='mcdonalds.png') }}"  width="300" height="200">
+            <img src="{{ url_for('static', filename='papież.jpg') }}"  width="300" height="200">
+        </div>
+        <div>
+            <button onclick="ChooseType(1)">Użytkownik</button>
+            <button onclick="ChooseType(2)">Organizacja</button>
+            <button onclick="ChooseType(3)">Admin</button>
+        </div>
+    </div>
+    <script>
+        function ChooseType(Number) {
+            switch(Number) {
+                case 1:
+                    window.location.href = "{{ url_for('auth.login') }}";
+                    break;
+            }
+        }
+    </script>
+{% endblock %}
