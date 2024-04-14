@@ -3,6 +3,10 @@ from flask_login import login_required, current_user
 from .models import Note
 from . import db
 import json
+import calendar
+from django.shortcuts import render
+from datetime import datetime
+
 
 views = Blueprint('views', __name__)
 
@@ -35,3 +39,21 @@ def delete_note():
             db.session.commit()
 
     return jsonify({})
+
+@views.route('/calendar', methods=['GET'])
+def calendar_view():
+    import datetime
+    today = datetime.date.today()
+    year = today.year
+    month = today.month
+    cal = calendar.monthcalendar(year, month)
+    weeks = []
+    for week in cal:
+        current_week = []
+        for day in week:
+            if day == 0:
+                current_week.append("")
+            else:
+                current_week.append(day)
+        weeks.append(current_week)
+    return render_template("calendar.html", user=current_user, calendar=weeks)
