@@ -20,8 +20,12 @@ def verify_password(hashed_password, user_password):
     user_hashed_password = hash_object.hexdigest()
     return hashed_password == user_hashed_password
 
-
 @auth.route('/login', methods=['GET', 'POST'])
+def choose_login():
+    return render_template("login_type.html", user=current_user)
+
+
+@auth.route('/login/user', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
