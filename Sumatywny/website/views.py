@@ -53,3 +53,13 @@ def calendar_view():
                 current_week.append(day)
         weeks.append(current_week)
     return render_template("calendar.html", user=current_user, calendar=weeks)
+
+@views.route('/maps', methods=['GET'])
+def maps():
+    # Pobierz dane dotyczące koszy na śmieci
+    trash_bins = [
+        {"lat": 37.7749, "lng": -122.4194},
+        {"lat": 40.7128, "lng": -74.0060},
+        {"lat": 34.0522, "lng": -118.2437}
+    ]
+    return render_template("maps.html", user=current_user, trash_bins=trash_bins)  # Przekazujemy dane do szablonu
