@@ -63,3 +63,7 @@ def maps():
         {"lat": 34.0522, "lng": -118.2437}
     ]
     return render_template("maps.html", user=current_user, trash_bins=trash_bins)  # Przekazujemy dane do szablonu
+
+@views.route('/type', methods=['GET'])
+def type():
+    return render_template("type.html", user=current_user)

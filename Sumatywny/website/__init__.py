@@ -23,9 +23,11 @@ def create_app():
     
     with app.app_context():
         db.create_all()
-
+        create_admin(app)
+        
+            
     login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'
+    login_manager.login_view = 'auth.login_user'
     login_manager.init_app(app)
 
     @login_manager.user_loader
@@ -39,3 +41,18 @@ def create_database(app):
     if not path.exists('website/' + DB_NAME):
         db.create_all(app=app)
         print('Created Database!')
+        
+def create_admin(app):
+    from .models import User
+    from .auth import hash_password
+    with app.app_context():
+        admin_email = "elo@zelo"
+        if User.query.filter_by(email=admin_email).first() is None:
+            admin_password = "admin"
+            admin = User(email=admin_email, password=hash_password(admin_password), role='admin')
+            db.session.add(admin)
+            db.session.commit()
+            print("Admin account created successfully!")
+        else:
+            print("Admin account already exists.")
+        

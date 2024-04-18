@@ -14,7 +14,10 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), unique=True)
     password = db.Column(db.String(150))
-    first_name = db.Column(db.String(150))
-    last_name = db.Column(db.String(150))
+    name = db.Column(db.String(150))
+    surname = db.Column(db.String(150))
     address = db.Column(db.String(150))
+    uid = db.Column(db.Integer, unique=True)
+    role = db.Column(db.String(50), default='user')
     Events = db.relationship('Event')
+    
