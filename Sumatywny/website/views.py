@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, jsonify
+from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
 from .models import Event
 from . import db
@@ -11,24 +11,14 @@ views = Blueprint('views', __name__)
 
 @views.route('/', methods=['GET', 'POST'])
 def home():
-    if request.method == 'POST': 
-        note = request.form.get('note')
-
-        if len(note) < 1:
-            flash('Event name is too short!', category='error') 
-        else:
-            new_note = Event(data=note, user_id=current_user.id) 
-            db.session.add(new_note)
-            db.session.commit()
-            flash('Event added!', category='success')
-
-    return render_template("home.html", user=current_user)
+    all_events = Event.query.all()
+    return render_template("home.html", user=current_user,all_events = all_events)
 
 
-@views.route('/delete-note', methods=['POST'])
-def delete_note():  
+@views.route('/delete-event', methods=['POST'])
+def delete_event():  
     event = json.loads(request.data)
-    eventId = event['noteId']
+    eventId = event['eventId']
     event = Event.query.get(eventId)
     if event:
         if event.user_id == current_user.id:
@@ -64,6 +54,27 @@ def maps():
     ]
     return render_template("maps.html", user=current_user, trash_bins=trash_bins)  # Przekazujemy dane do szablonu
 
-@views.route('/type', methods=['GET'])
-def type():
-    return render_template("type.html", user=current_user)
+@views.route('/events', methods=['GET', 'POST'])
+def event():
+    user_events = current_user.Events
+    if request.method == 'POST':
+        data = request.form.get('data')
+        date = request.form.get('date')
+        place = request.form.get('place')
+        name = request.form.get('name')
+        
+        if data and date and place and name:
+            try:
+                date = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M')
+            except ValueError:
+                return 'Invalid date format'
+            
+            new_event = Event(data=data, date=date, place=place, name=name,user_id=current_user.id)
+            
+            db.session.add(new_event)
+            db.session.commit()
+            flash('Event added!', category='success')
+            
+            return redirect(url_for('views.home'))  
+    
+    return render_template('events.html', user=current_user,user_events=user_events)

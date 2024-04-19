@@ -1,14 +1,15 @@
-{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
-    %}
-    <h1 align="center">Events</h1>
-    <ul class="list-group list-group-flush" id="Events">
-      {% for Event in user.Events %}
-      <li class="list-group-item">
-        {{ Event.data }}
-        <button type="button" class="close" onClick="deleteEvent({{ Event.id }})">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </li>
-      {% endfor %}
-    </ul>
-    {% endblock %}
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1 align="center">Events</h1>
+<ul class="list-group list-group-flush" id="Events">
+  {% for event in all_events %}
+  <li class="list-group-item">
+    {{ event.name }}
+    {{ event.data }}
+    {{ event.date }}
+    {{ event.place }}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

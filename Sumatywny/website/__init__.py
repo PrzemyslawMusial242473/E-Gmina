@@ -53,6 +53,4 @@ def create_admin(app):
             db.session.add(admin)
             db.session.commit()
             print("Admin account created successfully!")
-        else:
-            print("Admin account already exists.")
         
