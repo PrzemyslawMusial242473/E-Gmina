@@ -41,19 +41,20 @@
 
         // Pętla tworząca markery dla wszystkich znaczników z bazy danych
         {% for marker in markers %}
-        var infoWindowContent = '<div><h5>{{ marker.address }}</h5><p>{{ marker.description }}</p></div>';
-        var infoWindow = new google.maps.InfoWindow({
-            content: infoWindowContent
-        });
-
         var marker = new google.maps.Marker({
             position: { lat: parseFloat('{{ marker.lat }}'), lng: parseFloat('{{ marker.lng }}') },
             map: map,
-            title: '{{ marker.address }}'
+            title: '{{ marker.address }}',
+            address: '{{ marker.address }}',  // Przechowujemy adres w właściwości markerów
+            description: '{{ marker.description }}'  // Przechowujemy opis w właściwości markerów
         });
 
+        var infoWindow = new google.maps.InfoWindow(); // Tworzymy infoWindow dla danego markera
+
         marker.addListener('click', function() {
-            infoWindow.open(map, marker);
+            var infoWindowContent = '<div><h5>' + this.address + '</h5><p>' + this.description + '</p></div>';
+            infoWindow.setContent(infoWindowContent); // Ustawiamy treść infoWindow dla danego markera
+            infoWindow.open(map, this); // Otwieramy infoWindow dla danego markera
         });
         {% endfor %}
     }
