@@ -59,7 +59,7 @@ def maps():
     if request.method == 'POST':
         address = request.form['address']
         description = request.form['description']
-        api_key = 'YOUR_GOOGLE_MAPS_API_KEY'
+        api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'
         geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}'
 
         response = requests.get(geocoding_url)
