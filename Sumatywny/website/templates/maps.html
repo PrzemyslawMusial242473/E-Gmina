@@ -39,6 +39,7 @@
             zoom: 15
         });
 
+        // Pętla tworząca markery dla wszystkich znaczników z bazy danych
         {% for marker in markers %}
         var infoWindowContent = '<div><h5>{{ marker.address }}</h5><p>{{ marker.description }}</p></div>';
         var infoWindow = new google.maps.InfoWindow({

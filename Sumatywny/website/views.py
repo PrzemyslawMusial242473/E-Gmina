@@ -59,19 +59,16 @@ def maps():
     if request.method == 'POST':
         address = request.form['address']
         description = request.form['description']
-        api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'  # Zastąp to swoim kluczem API Google Maps
+        api_key = 'YOUR_GOOGLE_MAPS_API_KEY'
         geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}'
 
-        # Wykonujemy zapytanie do Google Maps Geocoding API
         response = requests.get(geocoding_url)
         data = response.json()
 
         if data['status'] == 'OK':
-            # Wyodrębniamy szerokość geograficzną i długość geograficzną z odpowiedzi
             lat = data['results'][0]['geometry']['location']['lat']
             lng = data['results'][0]['geometry']['location']['lng']
 
-            # Zapisujemy znacznik do bazy danych
             new_marker = MapMarker(lat=lat, lng=lng, address=address, description=description, user_id=current_user.id)
             db.session.add(new_marker)
             db.session.commit()
@@ -82,9 +79,9 @@ def maps():
             flash('Could not find coordinates for the provided address', category='error')
             return redirect(url_for('views.maps'))
 
-    # Pobieramy znaczniki z bazy danych
-    markers = MapMarker.query.filter_by(user_id=current_user.id).all()
+    markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
     return render_template("maps.html", user=current_user, markers=markers)
+
 @views.route('/delete-marker/<int:marker_id>', methods=['POST'])
 def delete_marker(marker_id):
     marker = MapMarker.query.get(marker_id)
