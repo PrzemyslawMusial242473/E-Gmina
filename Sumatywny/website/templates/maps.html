@@ -1,40 +1,61 @@
 {% extends "base.html" %}
-{% block title %}Trash Bins Map{% endblock %}
+{% block title %}Map{% endblock %}
 {% block content %}
-  <h1 align="center">Trash Bins Map</h1>
-  <div id="map" style="height: 400px; width: 100%;"></div>
-  <script>
+<h1 align="center">Map</h1>
+<div id="map" style="height: 400px; width: 100%;"></div>
+<div class="container">
+    <h2>Add Marker</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="address">Address:</label>
+            <input type="text" class="form-control" id="address" name="address" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <input type="text" class="form-control" id="description" name="description">
+        </div>
+        <button type="submit" class="btn btn-primary">Add Marker</button>
+    </form>
+</div>
+<div class="container">
+    <h2>Markers</h2>
+    {% for marker in markers %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Address: {{ marker.address }}</h5>
+            <p class="card-text">Description: {{ marker.description }}</p>
+            <form action="{{ url_for('views.delete_marker', marker_id=marker.id) }}" method="post">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+    <br>
+    {% endfor %}
+</div>
+<script>
     function initMap() {
-        var konstantynow = {lat: 51.7456, lng: 19.3452}; // Współrzędne Konstantynowa Łódzkiego
         var map = new google.maps.Map(document.getElementById('map'), {
-            center: konstantynow, // Ustawienie punktu startowego na Konstantynów Łódzki
-            zoom: 14, // Trochę większy zoom
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
-            gestureHandling: 'greedy',
-            zoomControl: true,
-            mapTypeControl: true,
-            scaleControl: true,
-            streetViewControl: true,
-            rotateControl: true,
-            fullscreenControl: true
+            center: { lat: 51.747585, lng: 19.325453 },
+            zoom: 15
         });
 
-        // Dane dotyczące śmietników w Konstantynowie Łódzkim
-        var trashBins = [
-            {#{"lat": 51.7512, "lng": 19.3413}, // Przykładowe współrzędne śmietnika#}
-            {#{"lat": 51.7498, "lng": 19.3435},#}
-            // Tutaj dodaj więcej współrzędnych dla pozostałych śmietników
-        ];
-
-        // Dodawanie markerów na mapie dla każdego śmietnika
-        trashBins.forEach(trashBin => {
-            var marker = new google.maps.Marker({
-                position: {lat: trashBin.lat, lng: trashBin.lng},
-                map: map,
-                title: 'Trash Bin'
-            });
+        {% for marker in markers %}
+        var infoWindowContent = '<div><h5>{{ marker.address }}</h5><p>{{ marker.description }}</p></div>';
+        var infoWindow = new google.maps.InfoWindow({
+            content: infoWindowContent
         });
+
+        var marker = new google.maps.Marker({
+            position: { lat: parseFloat('{{ marker.lat }}'), lng: parseFloat('{{ marker.lng }}') },
+            map: map,
+            title: '{{ marker.address }}'
+        });
+
+        marker.addListener('click', function() {
+            infoWindow.open(map, marker);
+        });
+        {% endfor %}
     }
-  </script>
+</script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M&callback=initMap" async defer></script>
 {% endblock %}
