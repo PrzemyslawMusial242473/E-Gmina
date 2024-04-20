@@ -1,40 +1,163 @@
 {% extends "base.html" %}
 {% block title %}Calendar{% endblock %}
 {% block content %}
-  <h1 align="center">{{ current_month }}</h1> <!-- Aktualny miesiąc -->
-  <div class="calendar">
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Monday</th>
-          <th>Tuesday</th>
-          <th>Wednesday</th>
-          <th>Thursday</th>
-          <th>Friday</th>
-          <th>Saturday</th>
-          <th>Sunday</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for week in calendar %}
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .calendar-container {
+      min-height: 80vh; /* Zajmowanie całej wysokości ekranu */
+      display: flex;
+      flex-direction: column;
+      border-radius: 15px; /* Zaokrąglenie krawędzi */
+      overflow: hidden; /* Zapobieganie wyświetlaniu zawartości poza zaokrąglonymi krawędziami */
+    }
+
+    .header {
+      background-color: #191d21;
+      color: white;
+      text-align: center;
+      padding: 20px 0;
+      border-top-left-radius: 15px; /* Zaokrąglenie krawędzi górnych rogowych */
+      border-top-right-radius: 15px; /* Zaokrąglenie krawędzi górnych rogowych */
+        border-bottom-left-radius: 15px; /* Zaokrąglenie krawędzi dolnyc rogowych */
+      border-bottom-right-radius: 15px; /* Zaokrąglenie krawędzi dolnych rogowych */
+    }
+
+    .calendar {
+      flex-grow: 1;
+      max-width: 100%;
+      margin: 15px 100px;
+      border-radius: 15px; /* Zaokrąglenie krawędzi */
+      overflow: hidden; /* Zapobieganie wyświetlaniu zawartości poza zaokrąglonymi krawędziami */
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+      position: relative;
+      cursor: pointer;
+      width: calc(100% / 7); /* Rozszerzanie komórek w poziomie */
+
+    }
+
+    th {
+      background-color: #FF4500;
+      color: white;
+    }
+
+    td:hover {
+      background-color: #f5f5f5;
+    }
+
+    .event-info {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #FF4500;
+    color: white;
+    padding: 10px;
+    z-index: 1;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease; /* Animacja przejścia */
+    border-radius: 5px; /* Zaokrąglenie krawędzi */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Cień */
+    max-width: 1000px; /* Maksymalna szerokość */
+    white-space: normal; /* Ustawienie normalnego zachowania białych znaków */
+        width:fit-content;
+  }
+
+
+    td:hover .event-info {
+      display: block;
+      opacity: 1;
+
+    }
+
+    .event-info ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      text-align: left;
+    }
+
+    .event-info ul li {
+      margin-bottom: 5px;
+    }
+
+    .dot {
+      height: 10px;
+      width: 10px;
+      background-color: #FF4500;
+      border-radius: 50%;
+      position: absolute;
+      bottom: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+    }
+td.has-event .event-info{
+      display: block;
+    max-width: 1500px;
+    width: 200%;
+    }
+    td.has-event .dot {
+      display: block;
+    }
+  </style>
+
+  <div class="calendar-container">
+    <div class="header">
+      <h1>{{ current_month }}</h1>
+    </div>
+    <div class="calendar">
+      <table class="table table-bordered">
+        <thead>
           <tr>
-            {% for day, events in week %}
-              <td>
-                {% if day %}
-                  {{ day }}
-                  <ul>
-                    {% for event in events %}
-                      <li>{{ event.name }}</li>
-                      <li>{{ event.date }}</li>
-                      <li>{{ event.place }}</li>
-                    {% endfor %}
-                  </ul>
-                {% endif %}
-              </td>
-            {% endfor %}
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+            <th>Saturday</th>
+            <th>Sunday</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for week in calendar %}
+            <tr>
+              {% for day, events in week %}
+                <td class="{% if events %}has-event{% endif %}">
+                  {% if day %}
+                    <span class="day">{{ day }}</span>
+                    <div class="dot"></div>
+                    <div class="event-info">
+                      <ul>
+                        {% for event in events %}
+                          <li><strong>{{ event.name }}</strong></li>
+                          <li><em>{{ event.date }}</em></li>
+                          <li>{{ event.place }}</li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 {% endblock %}
