@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Calendar{% endblock %}
 {% block content %}
-  <h1 align="center">Calendar</h1>
+  <h1 align="center">{{ current_month }}</h1> <!-- Aktualny miesiąc -->
   <div class="calendar">
     <table class="table table-bordered">
       <thead>
@@ -18,8 +18,19 @@
       <tbody>
         {% for week in calendar %}
           <tr>
-            {% for day in week %}
-              <td>{{ day }}</td>
+            {% for day, events in week %}
+              <td>
+                {% if day %}
+                  {{ day }}
+                  <ul>
+                    {% for event in events %}
+                      <li>{{ event.name }}</li>
+                      <li>{{ event.date }}</li>
+                      <li>{{ event.place }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </td>
             {% endfor %}
           </tr>
         {% endfor %}
