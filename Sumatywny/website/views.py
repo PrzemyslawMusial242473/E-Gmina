@@ -108,11 +108,11 @@ def event():
             except ValueError:
                 return 'Invalid date format'
             
-            new_event = Event(data=data, date=date, place=place, name=name,user_id=current_user.id)
+            new_event = Event(data=data, date=date, place=place, name=name,user_id=current_user.id,status = 'pending')
             
             db.session.add(new_event)
             db.session.commit()
-            flash('Event added!', category='success')
+            flash('Event requested!', category='success')
             
             return redirect(url_for('views.home'))  
     
