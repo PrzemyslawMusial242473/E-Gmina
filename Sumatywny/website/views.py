@@ -114,6 +114,6 @@ def event():
             db.session.commit()
             flash('Event requested!', category='success')
             
-            return redirect(url_for('views.home'))  
+            return redirect(url_for('views.event'))  
     
     return render_template('events.html', user=current_user,user_events=user_events)
