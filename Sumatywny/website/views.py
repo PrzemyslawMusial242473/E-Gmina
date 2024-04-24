@@ -1,7 +1,7 @@
 import requests
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import Event, MapMarker
+from .models import Event, MapMarker, User
 from . import db
 import json
 import calendar
@@ -117,3 +117,58 @@ def event():
             return redirect(url_for('views.event'))  
     
     return render_template('events.html', user=current_user,user_events=user_events)
+
+
+@views.route('/invite-friends', methods=['GET', 'POST'])
+@login_required
+def search_user():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = User.query.filter_by(email=email).first()
+        if user:
+            if user == current_user:
+                flash('You cannot add yourself as a friend!', category='error')
+            else:
+                if user in current_user.friends:
+                    flash(f'{user.email} is already your friend!', category='error')
+                elif user in current_user.sent:
+                    flash(f'Invitation already sent to {user.email}!', category='error')
+                elif user in current_user.invitations:
+                    flash(f'Invitation already received from {user.email}!', category='error')
+                else:
+                    current_user.sent.append(user)
+                    user.invitations.append(current_user)
+                    db.session.commit()
+                    flash(f'Invitation sent to {user.email}!', category='success')
+        else:
+            flash('User not found!', category='error')
+        return redirect(url_for('views.search_user'))
+    return render_template('invite-friends.html', user=current_user)
+
+
+@views.route('/accept-invite', methods=['POST'])
+@login_required
+def accept_invite():
+    data = json.loads(request.data)
+    inviter_email = data['inviter_email']
+    inviter = User.query.filter_by(email=inviter_email).first()
+    if inviter in current_user.invitations:
+        current_user.invitations.remove(inviter)
+        current_user.friends.append(inviter)
+        inviter.friends.append(current_user)
+        inviter.sent.remove(current_user)
+        db.session.commit()
+    return jsonify({})
+
+
+@views.route('/reject-invite', methods=['POST'])
+@login_required
+def reject_invite():
+    data = json.loads(request.data)
+    inviter_email = data['inviter_email']
+    inviter = User.query.filter_by(email=inviter_email).first()
+    if inviter in current_user.invitations:
+        current_user.invitations.remove(inviter)
+        inviter.sent.remove(current_user)
+        db.session.commit()
+    return jsonify({})
