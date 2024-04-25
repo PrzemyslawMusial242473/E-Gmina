@@ -1,15 +1,42 @@
 {% extends "base.html" %}
-{% block title %}Home{% endblock %}
+{% block title %}E-Gmina{% endblock %}
 {% block content %}
-<h1 align="center">Events</h1>
+<h1 align="center">Wydarzenia</h1>
 <ul class="list-group list-group-flush" id="Events">
   {% for event in all_events %}
-  <li class="list-group-item">
-    {{ event.name }}
-    {{ event.data }}
-    {{ event.date }}
-    {{ event.place }}
+    <li class="list-group-item">
+      <strong>Nazwa:</strong> {{ event.name }}<br>
+      <strong>Opis:</strong> {{ event.data }}<br>
+      <strong>Data:</strong> {{ event.date }}<br>
+      <strong>Adres:</strong> {{ event.place }}<br>
+    <div id="map-{{ event.id }}" style="height: 200px;"></div>
   </li>
   {% endfor %}
 </ul>
+{% if current_user.is_authenticated %}
+<a href="/invite-friends">Znajomi</a>
+{% endif %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M"></script>
+<script>
+  {% for event in all_events %}
+    var map{{ event.id }} = new google.maps.Map(document.getElementById('map-{{ event.id }}'), {
+      center: {lat: -34.397, lng: 150.644}, 
+      zoom: 15 
+    });
+
+    var geocoder{{ event.id }} = new google.maps.Geocoder();
+    var address{{ event.id }} = "{{ event.place }}"; 
+    geocoder{{ event.id }}.geocode({'address': address{{ event.id }}}, function(results, status) {
+      if (status === 'OK') {
+        map{{ event.id }}.setCenter(results[0].geometry.location); 
+        var marker{{ event.id }} = new google.maps.Marker({
+          map: map{{ event.id }},
+          position: results[0].geometry.location
+        });
+      } else {
+        console.error('Geocode was not successful for the following reason: ' + status);
+      }
+    });
+  {% endfor %}
+</script>
 {% endblock %}

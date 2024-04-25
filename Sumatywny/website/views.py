@@ -73,10 +73,10 @@ def maps():
             db.session.add(new_marker)
             db.session.commit()
 
-            flash('Marker added successfully', category='success')
+            flash('Znacznik dodany pomyślnie', category='success')
             return redirect(url_for('views.maps'))
         else:
-            flash('Could not find coordinates for the provided address', category='error')
+            flash('Nie znaleziono koordynatów dla podanego adresu', category='error')
             return redirect(url_for('views.maps'))
 
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
@@ -88,9 +88,9 @@ def delete_marker(marker_id):
     if marker:
         db.session.delete(marker)
         db.session.commit()
-        flash('Marker deleted successfully', category='success')
+        flash('Znacznik usunięty pomyślnie', category='success')
     else:
-        flash('Marker not found', category='error')
+        flash('Znacznik nie znaleziony', category='error')
     return redirect(url_for('views.maps'))
 
 @views.route('/events', methods=['GET', 'POST'])
@@ -106,13 +106,13 @@ def event():
             try:
                 date = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M')
             except ValueError:
-                return 'Invalid date format'
+                return 'Zły format daty'
             
             new_event = Event(data=data, date=date, place=place, name=name,user_id=current_user.id,status = 'pending')
             
             db.session.add(new_event)
             db.session.commit()
-            flash('Event requested!', category='success')
+            flash('Wydarzenie zawnioskowano!', category='success')
             
             return redirect(url_for('views.event'))  
     
@@ -127,21 +127,21 @@ def search_user():
         user = User.query.filter_by(email=email).first()
         if user:
             if user == current_user:
-                flash('You cannot add yourself as a friend!', category='error')
+                flash('Nie możesz dodać samego siebie jako znajomego!', category='error')
             else:
                 if user in current_user.friends:
-                    flash(f'{user.email} is already your friend!', category='error')
+                    flash(f'{user.email} jest już twoim znajomym!', category='error')
                 elif user in current_user.sent:
-                    flash(f'Invitation already sent to {user.email}!', category='error')
+                    flash(f'Zaproszenie wysłano do {user.email}!', category='error')
                 elif user in current_user.invitations:
-                    flash(f'Invitation already received from {user.email}!', category='error')
+                    flash(f'Zaproszenie otrzymane od {user.email}!', category='error')
                 else:
                     current_user.sent.append(user)
                     user.invitations.append(current_user)
                     db.session.commit()
-                    flash(f'Invitation sent to {user.email}!', category='success')
+                    flash(f'Zaproszenie pomyślnie wysłano do {user.email}!', category='success')
         else:
-            flash('User not found!', category='error')
+            flash('Użytkownik nie znaleziony!', category='error')
         return redirect(url_for('views.search_user'))
     return render_template('invite-friends.html', user=current_user)
 

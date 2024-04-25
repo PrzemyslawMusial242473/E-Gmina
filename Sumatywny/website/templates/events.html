@@ -1,34 +1,58 @@
 {% extends "base.html" %}
-{% block title %}Event{% endblock %}
+{% block title %}Wydarzenia{% endblock %}
 {% block content %}
-  <h1 align="center">Add Event</h1>
+  <h1 align="center">Dodaj wydarzenie</h1>
   <body>
     <form method="POST">
-        <label for="name">Name:</label>
+        <label for="name">Nazwa:</label>
         <input type="text" id="name" name="name" required><br><br>
 
-        <label for="data">Description:</label>
+        <label for="data">Opis:</label>
         <input type="text" id="data" name="data" required><br><br>
         
-        <label for="date">Date:</label>
+        <label for="date">Data:</label>
         <input type="datetime-local" id="date" name="date" required><br><br>
         
-        <label for="place">Place:</label>
+        <label for="place">Adres:</label>
         <input type="text" id="place" name="place" required><br><br>       
         
-        <button type="submit" class="btn btn-primary" align="center">Add Event</button>
+        <button type="submit" class="btn btn-primary" align="center">Dodaj wydarzenie</button>
     </form>
 </body>
-<h2 align="center">My Events</h2>
+<h2 align="center">Moje wydarzenia</h2>
 <ul class="list-group list-group-flush" id="Events">
   {% for event in user_events %}
   <li class="list-group-item">
-    <strong>Name:</strong> {{ event.name }}<br>
-    <strong>Description:</strong> {{ event.data }}<br>
-    <strong>Date:</strong> {{ event.date }}<br>
-    <strong>Place:</strong> {{ event.place }}<br>
-    <button type="button" class="btn btn-danger" onClick="deleteEvent({{ event.id }})">Delete</button>
+    <strong>Nazwa:</strong> {{ event.name }}<br>
+    <strong>Opis:</strong> {{ event.data }}<br>
+    <strong>Data:</strong> {{ event.date }}<br>
+    <strong>Adres:</strong> {{ event.place }}<br>
+    <div id="map-{{ event.id }}" style="height: 200px;"></div>
+    <button type="button" class="btn btn-danger" onClick="deleteEvent({{ event.id }})">Usuń</button>
   </li>
   {% endfor %}
 </ul>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M"></script>
+<script>
+  {% for event in user_events %}
+    var map{{ event.id }} = new google.maps.Map(document.getElementById('map-{{ event.id }}'), {
+      center: {lat: -34.397, lng: 150.644}, 
+      zoom: 15 
+    });
+
+    var geocoder{{ event.id }} = new google.maps.Geocoder();
+    var address{{ event.id }} = "{{ event.place }}"; 
+    geocoder{{ event.id }}.geocode({'address': address{{ event.id }}}, function(results, status) {
+      if (status === 'OK') {
+        map{{ event.id }}.setCenter(results[0].geometry.location); 
+        var marker{{ event.id }} = new google.maps.Marker({
+          map: map{{ event.id }},
+          position: results[0].geometry.location
+        });
+      } else {
+        console.error('Geocode was not successful for the following reason: ' + status);
+      }
+    });
+  {% endfor %}
+</script>
 {% endblock %}
