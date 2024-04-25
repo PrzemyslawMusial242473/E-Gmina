@@ -9,11 +9,37 @@ import datetime
 
 views = Blueprint('views', __name__)
 
+def get_month_events(year, month):
+    start_date = datetime.date(year, month, 1)
+    end_date = datetime.date(year, month, calendar.monthrange(year, month)[1])
+    month_events = Event.query.filter(Event.date.between(start_date, end_date)).all()
+    return month_events
+
+
+def generate_calendar(year, month, month_events):
+    cal = calendar.monthcalendar(year, month)
+    weeks = []
+    for week in cal:
+        current_week = []
+        for day in week:
+            events_for_day = [event for event in month_events if event.date.day == day]
+            current_week.append((day, events_for_day))
+        weeks.append(current_week)
+    return weeks
+
 
 @views.route('/', methods=['GET', 'POST'])
 def home():
+    today = datetime.date.today()
+    current_month = today.strftime("%B")
+    year = today.year
+    month = today.month
+    month_events = get_month_events(year, month)
+    weeks = generate_calendar(year, month, month_events)
     all_events = Event.query.all()
-    return render_template("home.html", user=current_user,all_events = all_events)
+    markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
+    return render_template("home.html", calendar=weeks, current_month=current_month, user=current_user,
+                           all_events=all_events, markers=markers)
 
 
 @views.route('/delete-event', methods=['POST'])
@@ -32,25 +58,11 @@ def delete_event():
 @views.route('/calendar', methods=['GET'])
 def calendar_view():
     today = datetime.date.today()
-    current_month = today.strftime("%B")  # Pobieranie nazwy aktualnego miesiąca
+    current_month = today.strftime("%B")
     year = today.year
     month = today.month
-    cal = calendar.monthcalendar(year, month)
-
-    # Pobieranie wydarzeń z bazy danych dla bieżącego miesiąca
-    start_date = datetime.date(year, month, 1)
-    end_date = datetime.date(year, month, calendar.monthrange(year, month)[1])
-    month_events = Event.query.filter(Event.date.between(start_date, end_date)).all()
-
-    # Tworzenie listy tygodni z wydarzeniami
-    weeks = []
-    for week in cal:
-        current_week = []
-        for day in week:
-            events_for_day = [event for event in month_events if event.date.day == day]
-            current_week.append((day, events_for_day))
-        weeks.append(current_week)
-
+    month_events = get_month_events(year, month)
+    weeks = generate_calendar(year, month, month_events)
     return render_template("calendar.html", user=current_user, calendar=weeks, current_month=current_month)
 
 
