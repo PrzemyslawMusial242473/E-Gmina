@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Weryfikacja Wydarzeń{% endblock %}
+{% block content %}
+  <h1 align="center">Weryfikacja Wydarzeń</h1>
+  <ul class="list-group list-group-flush" id="PendingEvents">
+    {% for event in pending_events %}
+      <li class="list-group-item">
+        <strong>Nazwa:</strong> {{ event.name }}
+        <br>
+        <strong>Opis:</strong> {{ event.data }}
+        <br>
+        <strong>Data:</strong> {{ event.date }}
+        <br>
+        <strong>Adres:</strong> {{ event.place }}
+        <br>
+        <form method="POST" action="{{ url_for('views.update_event_status', event_id=event.id, action='accept') }}">
+          <button type="submit" class="btn btn-success">Zatwierdź</button>
+        </form>
+        <form method="POST" action="{{ url_for('views.update_event_status', event_id=event.id, action='reject') }}">
+          <button type="submit" class="btn btn-danger">Odrzuć</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

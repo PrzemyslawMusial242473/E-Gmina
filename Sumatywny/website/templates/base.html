@@ -53,6 +53,9 @@
                     {% if current_user.role != 'user' %}
                         <a class="nav-item nav-link" id="events" href="/events">Wydarzenia</a>
                     {% endif %}
+                    {% if current_user.role == 'admin' %}
+                    <a class="nav-item nav-link" id="admin_events" href="/admin-events">Zarządzaj wydarzeniami</a>
+                    {% endif %}
                 {% else %}
                     <a class="nav-item nav-link" id="login" href="/login">Zaloguj</a>
                     <a class="nav-item nav-link" id="signUp" href="/sign-up">Zarejestruj</a>

@@ -35,11 +35,12 @@ def home():
     year = today.year
     month = today.month
     month_events = get_month_events(year, month)
-    weeks = generate_calendar(year, month, month_events)
-    all_events = Event.query.all()
+    accepted_month_events = [event for event in month_events if event.status == 'accepted']
+    weeks = generate_calendar(year, month, accepted_month_events)
+    accepted_events = Event.query.filter_by(status='accepted').all()
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
     return render_template("home.html", calendar=weeks, current_month=current_month, user=current_user,
-                           all_events=all_events, markers=markers)
+                           accepted_events=accepted_events, markers=markers)
 
 
 @views.route('/delete-event', methods=['POST'])
@@ -62,7 +63,8 @@ def calendar_view():
     year = today.year
     month = today.month
     month_events = get_month_events(year, month)
-    weeks = generate_calendar(year, month, month_events)
+    accepted_month_events = [event for event in month_events if event.status == 'accepted']
+    weeks = generate_calendar(year, month, accepted_month_events)
     return render_template("calendar.html", user=current_user, calendar=weeks, current_month=current_month)
 
 
@@ -106,6 +108,7 @@ def delete_marker(marker_id):
     return redirect(url_for('views.maps'))
 
 @views.route('/events', methods=['GET', 'POST'])
+@login_required
 def event():
     user_events = current_user.Events
     if request.method == 'POST':
@@ -120,11 +123,11 @@ def event():
             except ValueError:
                 return 'Zły format daty'
             
-            new_event = Event(data=data, date=date, place=place, name=name,user_id=current_user.id,status = 'pending')
-            
-            db.session.add(new_event)
-            db.session.commit()
+            new_event = Event(data=data, date=date, place=place, name=name, user_id=current_user.id, status='pending')
+            db.session.add(new_event) 
+            db.session.commit()  
             flash('Wydarzenie zawnioskowano!', category='success')
+            
             
             return redirect(url_for('views.event'))  
     
@@ -184,3 +187,54 @@ def reject_invite():
         inviter.sent.remove(current_user)
         db.session.commit()
     return jsonify({})
+
+@views.route('/admin-events', methods=['GET', 'POST'])
+@login_required
+def admin_events():
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej strony.', category='danger')
+        return redirect(url_for('views.home'))
+    
+    pending_events = Event.query.filter_by(status='pending').all()
+    
+    if request.method == 'POST':
+        event_id = request.form.get('event_id')
+        action = request.form.get('action')  
+        
+        if action == 'accept':
+            event = Event.query.get(event_id)
+            event.status = 'accepted'
+            db.session.add(event)
+            db.session.commit()
+            flash('Wydarzenie zostało zaakceptowane.', category='success')
+        elif action == 'reject':
+            event = Event.query.get(event_id)
+            event.status = 'rejected'
+            flash('Wydarzenie zostało odrzucone.', category='warning')
+        
+        return redirect(url_for('views.admin_events'))
+
+    return render_template('admin_events.html',user=current_user, pending_events=pending_events)
+
+@views.route('/update_event_status/<int:event_id>/<string:action>', methods=['POST'])
+@login_required
+def update_event_status(event_id, action):
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej akcji.', category='danger')
+        return redirect(url_for('views.admin_events'))
+
+    event = Event.query.get(event_id)
+    if not event:
+        flash('Nie znaleziono wydarzenia.', category='danger')
+        return redirect(url_for('views.admin_events'))
+
+    if action == 'accept':
+        event.status = 'accepted'
+        db.session.commit()
+        flash('Wydarzenie zostało zaakceptowane.', category='success')
+    elif action == 'reject':
+        event.status = 'rejected'
+        db.session.commit()
+        flash('Wydarzenie zostało odrzucone.', category='warning')
+
+    return redirect(url_for('views.admin_events'))

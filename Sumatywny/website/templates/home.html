@@ -5,7 +5,7 @@
   <div class="col-md-7" style="margin-right: 100px;">
     <h1 align="center">Wydarzenia</h1>
     <ul class="list-group list-group-flush" id="Events">
-      {% for event in all_events %}
+      {% for event in accepted_events %}
         <li class="list-group-item">
           <strong>Nazwa:</strong> {{ event.name }}<br>
           <strong>Opis:</strong> {{ event.data }}<br>
@@ -26,7 +26,7 @@
 </div>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M"></script>
 <script>
-  {% for event in all_events %}
+  {% for event in accepted_events %}
     var map{{ event.id }} = new google.maps.Map(document.getElementById('map-{{ event.id }}'), {
       center: {lat: -34.397, lng: 150.644},
       zoom: 15
