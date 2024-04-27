@@ -25,11 +25,13 @@
             background-size: cover; /* Dopasowanie obrazu do rozmiaru okna przeglądarki */
         }
         .container {
-            background-color: #fff; /* Białe tło kontenera */
+            {#background-color: #fff; /* Białe tło kontenera */#}
+            background-color: #f0f0f0; /* Szare tło kontenera */
             border-radius: 5px; /* Zaokrąglenie rogów kontenera */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Cień kontenera */
-            padding: 20px; /* Wypełnienie kontenera */
-            margin-top: 20px; /* Margines od góry */
+            {#box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Cień kontenera */#}
+            max-width: 1650px; /* Zwiększenie maksymalnej szerokości kontenera */
+            margin: 20px auto; /* Ustawienie marginesu poziomego na 20px z lewej i prawej strony */
+            padding: 0 15px; /* Dodanie wewnętrznego wypełnienia poziomego */
         }
         .alert {
             margin-bottom: 20px; /* Margines od dolnej krawędzi alertu */
