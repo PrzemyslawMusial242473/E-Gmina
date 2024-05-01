@@ -14,7 +14,7 @@
   <ul>
     {% if user.friends %}
       {% for friend in user.friends %}
-        <li>{{ friend.email }}</li>
+        <li>{{ friend.email }} <a class="btn btn-primary" href="/chat/{{ friend.id }}">Chat</a></li>
       {% endfor %}
     {% else %}
       <p>No friends yet.</p>
