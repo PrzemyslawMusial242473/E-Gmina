@@ -30,13 +30,13 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user:
             if verify_password(user.password, password):
-                flash('Logged in successfully!', category='success')
+                flash('Zalogowano!', category='success')
                 login_user(user, remember=True)
                 return redirect(url_for('views.home'))
             else:
-                flash('Incorrect password, try again.', category='error')
+                flash('Błędne hasło, spróbuj ponownie.', category='error')
         else:
-            flash('Email does not exist.', category='error')
+            flash('Email jest błędny.', category='error')
 
     return render_template("login.html", user=current_user)
 
@@ -65,28 +65,28 @@ def sign_up_user():
 
         user = User.query.filter_by(email=email).first()
         if user:
-            flash('User already exists.', category='error')
-        elif len(email) < 4:
-            flash('Email must be greater than 3 characters.', category='error')
+            flash('Konto już istnieje.', category='error')
+        elif len(email) < 3:
+            flash('Email musi mieć więcej niż 3 znaki.', category='error')
         elif len(name) < 2:
-            flash('Name must be greater than 1 character.', category='error')
+            flash('Imię musi być dłuższe niż 2 znaki.', category='error')
         elif len(surname) < 2:
-            flash('Surname must be greater than 1 character.', category='error')
+            flash('Nazwisko musi być dłuższe niż 2 znaki.', category='error')
         elif len(address) < 2:
-            flash('Address name must be greater than 3 character.', category='error')
+            flash('Adres musi być dłuższy niż 2 znaki.', category='error')
         elif len(pesel) != 11:
-            flash('Pesel must contain exactly 11 digits.', category='error')
+            flash('Peselmusi posiadać równo 11 liczb.', category='error')
         elif password1 != password2:
-            flash('Passwords don\'t match.', category='error')
+            flash('Hasła nie są takie same.', category='error')
         elif len(password1) < 7:
-            flash('Password must be at least 7 characters.', category='error')
+            flash('Hasło musi się składać z 7 znaków.', category='error')
         else:
             new_user = User(email=email, name=name, surname=surname,address=address,uid=pesel,password=hash_password(
                 password1))
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user, remember=True)
-            flash('Account created!', category='success')
+            flash('Konto zostało stworzone!', category='success')
             return redirect(url_for('views.home'))
 
     return render_template("sign_up_user.html", user=current_user)
@@ -103,26 +103,26 @@ def sign_up_org():
 
         user = User.query.filter_by(email=email).first()
         if user:
-            flash('User already exists.', category='error')
-        elif len(email) < 4:
-            flash('Email must be greater than 3 characters.', category='error')
+            flash('Konto już istnieje.', category='error')
+        elif len(email) < 3:
+            flash('Email musi mieć więcej niż 3 znaki.', category='error')
         elif len(name) < 2:
-            flash('Name must be greater than 1 character.', category='error')
+            flash('Imię musi być dłuższe niż 2 znaki.', category='error')
         elif len(address) < 2:
-            flash('Address name must be greater than 3 character.', category='error')
+            flash('Adres musi być dłuższy niż 2 znaki.', category='error')
         elif len(nip) != 10:
-            flash('NIP must contain exactly 10 digits.', category='error')
+            flash('NIP musi posiadać równo 10 liczb.', category='error')
         elif password1 != password2:
-            flash('Passwords don\'t match.', category='error')
+            flash('Hasła nie są takie same.', category='error')
         elif len(password1) < 7:
-            flash('Password must be at least 7 characters.', category='error')
+            flash('Hasło musi się składać z 7 znaków.', category='error')
         else:
             new_user = User(email=email, name=name,address=address,uid=nip,role='organisation',password=hash_password(
                 password1))
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user, remember=True)
-            flash('Account created!', category='success')
+            flash('Konto zostało stworzone!', category='success')
             return redirect(url_for('views.home'))
 
     return render_template("sign_up_org.html", user=current_user)

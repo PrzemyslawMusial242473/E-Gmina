@@ -25,11 +25,13 @@
             background-size: cover; /* Dopasowanie obrazu do rozmiaru okna przeglądarki */
         }
         .container {
-            background-color: #fff; /* Białe tło kontenera */
+            {#background-color: #fff; /* Białe tło kontenera */#}
+            background-color: #f0f0f0; /* Szare tło kontenera */
             border-radius: 5px; /* Zaokrąglenie rogów kontenera */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Cień kontenera */
-            padding: 20px; /* Wypełnienie kontenera */
-            margin-top: 20px; /* Margines od góry */
+            {#box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Cień kontenera */#}
+            max-width: 1650px; /* Zwiększenie maksymalnej szerokości kontenera */
+            margin: 20px auto; /* Ustawienie marginesu poziomego na 20px z lewej i prawej strony */
+            padding: 0 15px; /* Dodanie wewnętrznego wypełnienia poziomego */
         }
         .alert {
             margin-bottom: 20px; /* Margines od dolnej krawędzi alertu */
@@ -38,29 +40,30 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <a class="navbar-brand" href="#">E-gmina</a> <!-- Dodanie napisu E-gmina -->
+        <a class="navbar-brand" id="home" href="/">E-gmina</a> <!-- Dodanie napisu E-gmina -->
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbar">
             <div class="navbar-nav mr-auto"> <!-- Używamy klasy mr-auto, aby przesunąć opcje "Home", "Calendar" i "Map" w lewo -->
                 {% if current_user.is_authenticated %}
-                <a class="nav-item nav-link" id="home" href="/">Home</a>
-                <a class="nav-item nav-link" id="calendar" href="/calendar">Calendar</a>
-                <a class="nav-item nav-link" id="maps" href="/maps">Map</a>
-                <a class="nav-item nav-link" id="invite-friends" href="/invite-friends">Invite Friends</a>
+                <a class="nav-item nav-link" id="calendar" href="/calendar">Kalendarz</a>
+                <a class="nav-item nav-link" id="maps" href="/maps">Mapa</a>
+                <a class="nav-item nav-link" id="invite-friends" href="/invite-friends">Znajomi</a>
                     {% if current_user.role != 'user' %}
-                        <a class="nav-item nav-link" id="events" href="/events">Events</a>
+                        <a class="nav-item nav-link" id="events" href="/events">Wydarzenia</a>
+                    {% endif %}
+                    {% if current_user.role == 'admin' %}
+                    <a class="nav-item nav-link" id="admin_events" href="/admin-events">Zarządzaj wydarzeniami</a>
                     {% endif %}
                 {% else %}
-                    <a class="nav-item nav-link" id="home" href="/">Home</a>
-                    <a class="nav-item nav-link" id="login" href="/login">Login</a>
-                    <a class="nav-item nav-link" id="signUp" href="/sign-up">Sign Up</a>
+                    <a class="nav-item nav-link" id="login" href="/login">Zaloguj</a>
+                    <a class="nav-item nav-link" id="signUp" href="/sign-up">Zarejestruj</a>
                 {% endif %}
             </div>
             <div class="navbar-nav ml-auto"> <!-- Dodanie klasy ml-auto, aby opcja "Logout" była na prawym kraju -->
                 {% if user.is_authenticated %}
-                <a class="nav-item nav-link" id="logout" href="/logout">Logout</a> <!-- Przeniesienie opcji Logout do prawej strony -->
+                <a class="nav-item nav-link" id="logout" href="/logout">Wyloguj</a> <!-- Przeniesienie opcji Logout do prawej strony -->
                 {% endif %}
             </div>
         </div>
