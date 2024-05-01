@@ -1,7 +1,7 @@
 import requests
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import Event, MapMarker, User
+from .models import Event, MapMarker, User, Message
 from . import db
 import json
 import calendar
@@ -159,6 +159,39 @@ def search_user():
             flash('Użytkownik nie znaleziony!', category='error')
         return redirect(url_for('views.search_user'))
     return render_template('invite-friends.html', user=current_user)
+
+
+@views.route('/send-message/<int:user_id>', methods=['POST'])
+@login_required
+def send_message(user_id):
+    if request.method == 'POST':
+        content = request.form.get('content')
+        receiver = User.query.get(user_id)
+        if receiver:
+            new_message = Message(sender_id=current_user.id, receiver_id=user_id, content=content)
+            db.session.add(new_message)
+            db.session.commit()
+            flash('Wiadomość została wysłana!', category='success')
+            return redirect(url_for('views.user_chat', user_id=user_id))
+        else:
+            flash('Nie znaleziono użytkownika.', category='error')
+    return redirect(url_for('views.home'))
+
+
+@views.route('/chat/<int:user_id>', methods=['GET'])
+@login_required
+def user_chat(user_id):
+    receiver = User.query.get(user_id)
+    if not receiver:
+        flash('Nie znaleziono użytkownika.', category='error')
+        return redirect(url_for('views.home'))
+
+    messages_sent_by_user = Message.query.filter_by(sender_id=current_user.id, receiver_id=user_id).all()
+    messages_received_by_user = Message.query.filter_by(sender_id=user_id, receiver_id=current_user.id).all()
+    messages = messages_sent_by_user + messages_received_by_user
+    messages.sort(key=lambda x: x.timestamp)
+
+    return render_template('user_chat.html', user=current_user, receiver=receiver, messages=messages)
 
 
 @views.route('/accept-invite', methods=['POST'])
