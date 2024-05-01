@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Send Invitation{% endblock %}
 {% block content %}
-  <h1 align="center">Send Invitation</h1>
+  <h1 align="center">Znajomi</h1>
   <form method="POST">
     <div class="form-group">
-      <label for="inputEmail">Email Address</label>
-      <input type="email" class="form-control" id="inputEmail" name="email" placeholder="Enter email">
+      <label for="inputEmail">Adres email</label>
+      <input type="email" class="form-control" id="inputEmail" name="email" placeholder="Wpisz email">
     </div>
-    <button type="submit" class="btn btn-primary">Send Invitation</button>
+    <button type="submit" class="btn btn-primary">Wyślij zaproszenie</button>
   </form>
 
-  <h1>Friends List</h1>
+  <h1>Lista znajomych</h1>
   <ul>
     {% if user.friends %}
       {% for friend in user.friends %}
@@ -21,11 +21,11 @@
     {% endif %}
   </ul>
 
-  <h1>Invitations</h1>
+  <h1>Wysłane zaproszenia</h1>
   <ul>
     {% if user.invitations %}
       {% for invite in user.invitations %}
-        <li>{{ invite.email }}<button class="btn btn-success" onclick="acceptInvite('{{ invite.email }}')">Accept</button> <button class="btn btn-danger" onclick="rejectInvite('{{ invite.email }}')">Reject</button></li>
+        <li>{{ invite.email }}<button class="btn btn-success" onclick="acceptInvite('{{ invite.email }}')">Zaakceptuj</button> <button class="btn btn-danger" onclick="rejectInvite('{{ invite.email }}')">Odrzuć</button></li>
       {% endfor %}
     {% else %}
       <p>No invitations.</p>

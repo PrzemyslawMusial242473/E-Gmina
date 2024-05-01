@@ -1,19 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Chat{% endblock %}
+{% block title %}Czat{% endblock %}
 {% block content %}
-  <h1>Chat with {{ receiver.email }}</h1>
+  <h1>Czat z {{ receiver.email }}</h1>
   <div id="messages">
     {% for message in messages %}
       {% if message.sender_id == current_user.id %}
-        <p><strong>You: </strong>{{ message.content }}</p>
+        <p><strong>Ty: </strong>{{ message.content }}</p>
       {% else %}
         <p><strong>{{ receiver.email }}: </strong>{{ message.content }}</p>
       {% endif %}
     {% endfor %}
   </div>
   <form id="message-form">
-    <input type="text" id="message-content" name="content" placeholder="Type your message">
-    <button type="submit">Send</button>
+    <input type="text" id="message-content" name="content" placeholder="Wpisz wiadomość">
+    <button type="submit">Wyślij</button>
   </form>
   <script>
     document.getElementById('message-form').addEventListener('submit', function(e) {

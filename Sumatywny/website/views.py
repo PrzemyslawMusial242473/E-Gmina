@@ -104,7 +104,7 @@ def delete_marker(marker_id):
         db.session.commit()
         flash('Znacznik usunięty pomyślnie', category='success')
     else:
-        flash('Znacznik nie znaleziony', category='error')
+        flash('Znacznik nie został znaleziony', category='error')
     return redirect(url_for('views.maps'))
 
 @views.route('/events', methods=['GET', 'POST'])
@@ -156,7 +156,7 @@ def search_user():
                     db.session.commit()
                     flash(f'Zaproszenie pomyślnie wysłano do {user.email}!', category='success')
         else:
-            flash('Użytkownik nie znaleziony!', category='error')
+            flash('Użytkownik nie został znaleziony!', category='error')
         return redirect(url_for('views.search_user'))
     return render_template('invite-friends.html', user=current_user)
 
