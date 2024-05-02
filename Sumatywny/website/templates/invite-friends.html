@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Send Invitation{% endblock %}
+{% block content %}
+    <style>
+    body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+    .container1,.container2,.container3{
+    background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+        padding-top:4px;
+        border-radius: 15px;
+        width: 95%;
+        margin-top: 2%;
+        margin-left: 2%;
+    }
+    .container_invitation{
+         position: relative;
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top:20px;
+    }
+    </style>
+    <div class="container1">
+    <h1 align="center">Wyślij zaproszenie</h1>
+    <div class="container_invitation">
+
+  <form method="POST">
+    <div class="form-group">
+      <label for="inputEmail">Adres e-mail</label>
+      <input type="email" class="form-control" id="inputEmail" name="email" placeholder="Enter email">
+    </div>
+    <button type="submit" class="btn btn-primary">Wyślij zaproszenie</button>
+  </form>
+    </div></div>
+    <div class="container3">
+    <h1>Lista znajomych</h1>
+    <div class="container_invitation">
+  <ul>
+    {% if user.friends %}
+      {% for friend in user.friends %}
+        <li>{{ friend.email }}</li>
+      {% endfor %}
+    {% else %}
+      <p>No friends yet.</p>
+    {% endif %}
+  </ul>
+    </div></div>
+<div class="container2">
+<h1>Zaproszenia</h1>
+<div class="container_invitation">
+  <ul>
+    {% if user.invitations %}
+      {% for invite in user.invitations %}
+        <li>{{ invite.email }}<button class="btn btn-success" onclick="acceptInvite('{{ invite.email }}')">Accept</button> <button class="btn btn-danger" onclick="rejectInvite('{{ invite.email }}')">Reject</button></li>
+      {% endfor %}
+    {% else %}
+      <p>No invitations.</p>
+    {% endif %}
+  </ul>
+
+</div></div>
+  <script>
+    function acceptInvite(email) {
+        fetch("/accept-invite", {
+            method: "POST",
+            body: JSON.stringify({ inviter_email: email }),
+        }).then((_res) => {
+            window.location.reload();
+        });
+    }
+
+    function rejectInvite(email) {
+        fetch("/reject-invite", {
+            method: "POST",
+            body: JSON.stringify({ inviter_email: email }),
+        }).then((_res) => {
+            window.location.reload();
+        });
+    }
+  </script>
+{% endblock %}
