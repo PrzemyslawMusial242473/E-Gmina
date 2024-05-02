@@ -1,15 +1,41 @@
-git config --global --add safe.directory C:/Users/Mateusz/Desktop/E-Gmina{% extends "base.html" %}
+{% extends "base.html" %}
 {% block title %}Sign Up Type{% endblock %}
 {% block content %}
+    <style>
+    .container{
+    background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+        padding-top:4px;
+        border-radius: 15px;
+        width: 80%;
+        margin-top: 7%;
+    }
+    .container_signup_type{
+         position: relative;
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        padding: 30px;
+    }
+    </style>
+    <div class="container">
+     <h1 align="center">Zarejestruj się</h1>
+    <div class="container_signup_type">
     <div style="text-align: center;">
         <div style="display: inline-block;">
             <img src="{{ url_for('static', filename='użytkownik.png') }}"  width="300" height="200">
             <img src="{{ url_for('static', filename='mcdonalds.png') }}"  width="300" height="200">
         </div>
         <div>
-            <button onclick="ChooseType(1)">Użytkownik</button>
-            <button onclick="ChooseType(2)">Organizacja</button>
+            <button type="submit" onclick="ChooseType(1)">Użytkownik</button>
+            <button type="submit" onclick="ChooseType(2)">Organizacja</button>
         </div>
+    </div>
+    </div>
     </div>
     <script>
         function ChooseType(Number) {

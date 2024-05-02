@@ -1,15 +1,156 @@
 {% extends "base.html" %}
-{% block title %}Home{% endblock %}
+{% block title %}E-Gmina{% endblock %}
 {% block content %}
-<h1 align="center">Events</h1>
-<ul class="list-group list-group-flush" id="Events">
-  {% for event in all_events %}
-  <li class="list-group-item">
-    {{ event.name }}
-    {{ event.data }}
-    {{ event.date }}
-    {{ event.place }}
-  </li>
-  {% endfor %}
-</ul>
+    <style>
+    .col-md-12 {
+        background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+        border-radius: 15px;
+    }
+
+    .list-group-item.event-item {
+        position: relative;
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+    }
+
+    .mapa {
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        border-radius: 15px;
+    }
+
+    .row {
+        margin-top: 20px;
+    }
+
+    .event-item {
+        display: none;
+    }
+
+    .event-item:first-child {
+        display: block;
+    }
+
+    .left-arrow,
+    .right-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        width: 28px;
+        height: 28px;
+        background-color: #f8f9fa; /* Jasny szary */
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .left-arrow svg,
+    .right-arrow svg {
+        width: 20px;
+        height: 20px;
+        fill: #333333; /* Ciemnoszary */
+    }
+    </style>
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Wydarzenia</h1>
+            <div class="events-wrapper">
+                <ul class="list-group list-group-flush" id="Events">
+                    {% for event in accepted_events %}
+                    <li class="list-group-item event-item">
+                        <strong>Nazwa:</strong> {{ event.name }}<br>
+                        <strong>Opis:</strong> {{ event.data }}<br>
+                        <strong>Data:</strong> {{ event.date }}<br>
+                        <strong>Adres:</strong> {{ event.place }}<br>
+                        <div id="map-{{ event.id }}" class="mapa" style="height: 200px"></div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                 <div class="left-arrow" style="position: absolute; top: 50%; transform: translateY(-50%); left: 0; cursor: pointer;">
+  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M3.646 12.354a.5.5 0 0 1 0-.708l4-4a.5.5 0 0 1 .708.708L4.707 12l3.647 3.646a.5.5 0 0 1-.708.708l-4-4a.5.5 0 0 1 0-.708z"/>
+  </svg>
+</div>
+<div class="right-arrow" style="position: absolute; top: 50%; transform: translateY(-50%); right: 0; cursor: pointer;">
+  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M5.646 12.354a.5.5 0 0 0 .708 0l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L8.293 8 5.646 10.646a.5.5 0 0 0 0 .708z"/>
+  </svg>
+</div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            {% include 'calendar_home.html' %}
+        </div>
+        <div class="col-md-6">
+            {% include 'maps_home.html' %}
+        </div>
+    </div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M&callback=initMap"></script>
+    <script>
+        var currentEvent = 0;
+        var eventItems = document.querySelectorAll('.event-item');
+
+        function showEvent(index) {
+            eventItems.forEach(function(item, i) {
+                if (i === index) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            showEvent(currentEvent);
+        });
+
+        function nextEvent() {
+            currentEvent++;
+            if (currentEvent >= eventItems.length) {
+                currentEvent = 0;
+            }
+            showEvent(currentEvent);
+        }
+
+        function prevEvent() {
+            currentEvent--;
+            if (currentEvent < 0) {
+                currentEvent = eventItems.length - 1;
+            }
+            showEvent(currentEvent);
+        }
+
+        document.querySelector('.left-arrow').addEventListener('click', prevEvent);
+        document.querySelector('.right-arrow').addEventListener('click', nextEvent);
+
+        {% for event in accepted_events %}
+        var map{{ event.id }} = new google.maps.Map(document.getElementById('map-{{ event.id }}'), {
+            center: { lat: -34.397, lng: 150.644 },
+            zoom: 15
+        });
+
+        var geocoder{{ event.id }} = new google.maps.Geocoder();
+        var address{{ event.id }} = "{{ event.place }}";
+        geocoder{{ event.id }}.geocode({ 'address': address{{ event.id }} }, function(results, status) {
+            if (status === 'OK') {
+                map{{ event.id }}.setCenter(results[0].geometry.location);
+                var marker{{ event.id }} = new google.maps.Marker({
+                    map: map{{ event.id }},
+                    position: results[0].geometry.location
+                });
+            } else {
+                console.error('Geocode was not successful for the following reason: ' + status);
+            }
+        });
+        {% endfor %}
+    </script>
 {% endblock %}
