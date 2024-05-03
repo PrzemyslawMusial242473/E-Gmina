@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Weryfikacja Użytkowników{% endblock %}
+{% block content %}
+  <h1 align="center">Weryfikacja Użytkowników</h1>
+  <ul class="list-group list-group-flush" id="PendingUsers">
+    {% for user in pending_users %}
+      <li class="list-group-item">
+        {% if user.role == 'organisation' %}
+          <strong>Nazwa:</strong> {{ user.name }}
+          <br>
+          <strong>Adres:</strong> {{ user.address }}
+          <br>
+          <strong>Email:</strong> {{ user.email }}
+          <br>
+          <strong>NIP:</strong> {{ user.uid }}
+        {% else %}
+          <strong>Imię:</strong> {{ user.name }}
+          <br>
+          <strong>Nazwisko:</strong> {{ user.surname }}
+          <br>
+          <strong>Adres:</strong> {{ user.address }}
+          <br>
+          <strong>Email:</strong> {{ user.email }}
+          <br>
+          <strong>Pesel:</strong> {{ user.uid }}
+          <br>
+        {% endif %}
+        <br>
+        <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
+          <button type="submit" class="btn btn-success">Zatwierdź</button>
+        </form>
+        <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
+          <button type="submit" class="btn btn-danger">Odrzuć</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}
