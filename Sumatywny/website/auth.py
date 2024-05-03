@@ -29,12 +29,18 @@ def login():
 
         user = User.query.filter_by(email=email).first()
         if user:
-            if verify_password(user.password, password):
-                flash('Zalogowano!', category='success')
-                login_user(user, remember=True)
-                return redirect(url_for('views.home'))
+            if user.status != "rejected":
+                if user.status == "accepted":
+                    if verify_password(user.password, password):
+                        flash('Zalogowano!', category='success')
+                        login_user(user, remember=True)
+                        return redirect(url_for('views.home'))
+                    else:
+                        flash('Błędne hasło spróbuj ponownie.', category='error')
+                else:
+                    flash('Twoje konto nie zostało jeszcze zatwierdzone.', category='error')
             else:
-                flash('Błędne hasło, spróbuj ponownie.', category='error')
+                flash('Twoje konto zostało odrzucone.', category='error')
         else:
             flash('Email jest błędny.', category='error')
 
@@ -85,8 +91,7 @@ def sign_up_user():
                 password1))
             db.session.add(new_user)
             db.session.commit()
-            login_user(new_user, remember=True)
-            flash('Konto zostało stworzone!', category='success')
+            flash('Konto musi przejść jeszcze etap zatwierdzenia!', category='success')
             return redirect(url_for('views.home'))
 
     return render_template("sign_up_user.html", user=current_user)
@@ -121,8 +126,7 @@ def sign_up_org():
                 password1))
             db.session.add(new_user)
             db.session.commit()
-            login_user(new_user, remember=True)
-            flash('Konto zostało stworzone!', category='success')
+            flash('Konto musi przejść jeszcze etap zatwierdzenia!', category='success')
             return redirect(url_for('views.home'))
 
     return render_template("sign_up_org.html", user=current_user)

@@ -271,3 +271,54 @@ def update_event_status(event_id, action):
         flash('Wydarzenie zostało odrzucone.', category='warning')
 
     return redirect(url_for('views.admin_events'))
+
+@views.route('/admin-users', methods=['GET', 'POST'])
+@login_required
+def admin_users():
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej strony.', category='danger')
+        return redirect(url_for('views.home'))
+    
+    pending_users = User.query.filter_by(status='pending').all()
+    
+    if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        action = request.form.get('action')  
+        
+        if action == 'accept':
+            user = User.query.get(user_id)
+            user.status = 'accepted'
+            db.session.add(user)
+            db.session.commit()
+            flash('Stworzenie konta zostało zatwierdzone.', category='success')
+        elif action == 'reject':
+            user = User.query.get(user_id)
+            user.status = 'rejected'
+            flash('Stworzenie konta zostało odrzucone.', category='warning')
+        
+        return redirect(url_for('views.admin_users'))
+
+    return render_template('admin_users.html', user=current_user, pending_users=pending_users)
+
+@views.route('/update_user_status/<int:user_id>/<string:action>', methods=['POST'])
+@login_required
+def update_user_status(user_id, action):
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej akcji.', category='danger')
+        return redirect(url_for('views.admin_users'))
+
+    user = User.query.get(user_id)
+    if not user:
+        flash('Nie znaleziono użytkownika.', category='danger')
+        return redirect(url_for('views.admin_users'))
+
+    if action == 'accept':
+        user.status = 'accepted'
+        db.session.commit()
+        flash('Użytkownik został zaakceptowany.', category='success')
+    elif action == 'reject':
+        user.status = 'rejected'
+        db.session.commit()
+        flash('Użytkownik został odrzucony.', category='warning')
+
+    return redirect(url_for('views.admin_users'))
