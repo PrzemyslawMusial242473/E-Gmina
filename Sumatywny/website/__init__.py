@@ -49,7 +49,7 @@ def create_admin(app):
         admin_email = "elo@zelo"
         if User.query.filter_by(email=admin_email).first() is None:
             admin_password = "admin"
-            admin = User(email=admin_email, password=hash_password(admin_password), role='admin')
+            admin = User(email=admin_email, password=hash_password(admin_password), role='admin',status="accepted")
             db.session.add(admin)
             db.session.commit()
             print("Admin account created successfully!")

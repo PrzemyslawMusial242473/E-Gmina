@@ -40,6 +40,7 @@ class User(db.Model, UserMixin):
     surname = db.Column(db.String(150))
     address = db.Column(db.String(150))
     uid = db.Column(db.Integer, unique=True)
+    status = db.Column(db.String(50), default='pending')
     role = db.Column(db.String(50), default='user')
     Events = db.relationship('Event')
     friends = db.relationship(

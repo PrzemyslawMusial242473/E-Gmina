@@ -1,37 +1,85 @@
 {% extends "base.html" %}
 {% block title %}Mapa{% endblock %}
 {% block content %}
-<h1 align="center">Mapa</h1>
-<div id="map" style="height: 400px; width: 100%;"></div>
-<div class="container">
-    <h2>Dodaj Znacznik</h2>
-    <form method="POST">
-        <div class="form-group">
-            <label for="address">Adres:</label>
-            <input type="text" class="form-control" id="address" name="address" required>
-        </div>
-        <div class="form-group">
-            <label for="description">Opis:</label>
-            <input type="text" class="form-control" id="description" name="description">
-        </div>
-        <button type="submit" class="btn btn-primary">Dodaj Znacznik</button>
-    </form>
-</div>
-<div class="container">
-    <h2>Znaczniki</h2>
-    {% for marker in markers %}
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Adres: {{ marker.address }}</h5>
-            <p class="card-text">Opis: {{ marker.description }}</p>
-            <form action="{{ url_for('views.delete_marker', marker_id=marker.id) }}" method="post">
-                <button type="submit" class="btn btn-danger">Usuń</button>
-            </form>
+    <style>
+    body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+    .container1,.container2,.container3{
+    background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+        padding-top:4px;
+        border-radius: 15px;
+        width: 95%;
+        margin-top: 2%;
+        margin-left: 2%;
+    }
+    .container_map{
+         position: relative;
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top:20px;
+    }
+    #map{
+        border-radius: 15px;
+    }
+    </style>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="container1">
+                    <h1 align="center">Mapa</h1>
+                    <div class="container_map">
+                        <div id="map" style="height: 400px; width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="container2">
+                    <h2>Dodaj Znacznik</h2>
+                    <div class="container_map">
+                        <form method="POST">
+                            <div class="form-group">
+                                <label for="address">Adres:</label>
+                                <input type="text" class="form-control" id="address" name="address" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Opis:</label>
+                                <input type="text" class="form-control" id="description" name="description">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Dodaj Znacznik</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="container3">
+                    <h2>Znaczniki</h2>
+                    <div class="container_map">
+                        {% for marker in markers %}
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Adres: {{ marker.address }}</h5>
+                                <p class="card-text">Opis: {{ marker.description }}</p>
+                                <form action="{{ url_for('views.delete_marker', marker_id=marker.id) }}" method="post">
+                                    <button type="submit" class="btn btn-danger">Usuń</button>
+                                </form>
+                            </div>
+                        </div>
+                        <br>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <br>
-    {% endfor %}
-</div>
+
 <script>
     function initMap() {
         var map = new google.maps.Map(document.getElementById('map'), {
@@ -59,5 +107,5 @@
         {% endfor %}
     }
 </script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M&callback=initMap" async defer></script>
 {% endblock %}
