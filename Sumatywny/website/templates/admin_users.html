@@ -1,38 +1,62 @@
 {% extends "base.html" %}
 {% block title %}Weryfikacja Użytkowników{% endblock %}
 {% block content %}
-  <h1 align="center">Weryfikacja Użytkowników</h1>
-  <ul class="list-group list-group-flush" id="PendingUsers">
-    {% for user in pending_users %}
-      <li class="list-group-item">
+<div class="container">
+  <div class="bg-primary rounded p-3 mb-4">
+    <h1 class="text-white text-center mb-4">Użytkownicy</h1>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">Weryfikacja Organizacji</h2>
+    </div>
+    <ul class="list-group list-group-flush">
+      {% for user in pending_users %}
         {% if user.role == 'organisation' %}
-          <strong>Nazwa:</strong> {{ user.name }}
-          <br>
-          <strong>Adres:</strong> {{ user.address }}
-          <br>
-          <strong>Email:</strong> {{ user.email }}
-          <br>
-          <strong>NIP:</strong> {{ user.uid }}
-        {% else %}
-          <strong>Imię:</strong> {{ user.name }}
-          <br>
-          <strong>Nazwisko:</strong> {{ user.surname }}
-          <br>
-          <strong>Adres:</strong> {{ user.address }}
-          <br>
-          <strong>Email:</strong> {{ user.email }}
-          <br>
-          <strong>Pesel:</strong> {{ user.uid }}
-          <br>
+          <li class="list-group-item">
+            <strong>Nazwa:</strong> {{ user.name }}<br>
+            <strong>Adres:</strong> {{ user.address }}<br>
+            <strong>Email:</strong> {{ user.email }}<br>
+            <strong>NIP:</strong> {{ user.uid }}<br>
+            <div class="btn-group mt-2" role="group">
+              <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
+                <button type="submit" class="btn btn-success">Zatwierdź</button>
+              </form>
+              <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
+                <button type="submit" class="btn btn-danger">Odrzuć</button>
+              </form>
+            </div>
+          </li>
         {% endif %}
-        <br>
-        <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
-          <button type="submit" class="btn btn-success">Zatwierdź</button>
-        </form>
-        <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
-          <button type="submit" class="btn btn-danger">Odrzuć</button>
-        </form>
-      </li>
-    {% endfor %}
-  </ul>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">Weryfikacja Użytkowników</h2>
+    </div>
+    <ul class="list-group list-group-flush">
+      {% for user in pending_users %}
+        {% if user.role != 'organisation' %}
+          <li class="list-group-item">
+            <strong>Imię:</strong> {{ user.name }}<br>
+            <strong>Nazwisko:</strong> {{ user.surname }}<br>
+            <strong>Adres:</strong> {{ user.address }}<br>
+            <strong>Email:</strong> {{ user.email }}<br>
+            <strong>Pesel:</strong> {{ user.uid }}<br>
+            <div class="btn-group mt-2" role="group">
+              <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
+                <button type="submit" class="btn btn-success">Zatwierdź</button>
+              </form>
+              <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
+                <button type="submit" class="btn btn-danger">Odrzuć</button>
+              </form>
+            </div>
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endblock %}
