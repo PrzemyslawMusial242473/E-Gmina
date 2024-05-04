@@ -1,55 +1,65 @@
 {% extends "base.html" %}
 {% block title %}Znajomi{% endblock %}
 {% block content %}
+<style>
+  .container1, .container2, .container3 {
+    border-radius: 15px;
+    border: 2px solid white; /* Dodajemy białą obwódkę */
+    overflow: hidden; /* Zapobiega wydostawaniu się elementów potomnych poza kontener */
+    font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
+  }
+  .container1, .container2, .container3, .container_map {
+    border-radius: 10px; /* Zaokrąglamy rogi */
+  }
+</style>
 <div class="container">
   <div class="row">
     <div class="col-md-4">
-      <div class="card">
-        <div class="card-header bg-primary text-white text-center">
-          <h2 class="mb-0">Dodaj znajomego</h2>
-        </div>
-        <div class="card-body">
+      <div class="container1" style="background-color: #b4dfe5;">
+        <h2 class="text-center">Dodaj znajomego</h2>
+        <div class="container_map">
           <form method="POST">
             <div class="form-group">
               <label for="inputEmail">Adres email</label>
               <input type="email" class="form-control" id="inputEmail" name="email" placeholder="Wpisz email">
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Wyślij zaproszenie</button>
+            <button type="submit" class="btn btn-info btn-block">Wyślij zaproszenie</button>
           </form>
         </div>
       </div>
     </div>
+
     <div class="col-md-4">
-      <div class="card">
-        <div class="card-header bg-primary text-white text-center">
-          <h2 class="mb-0">Wysłane zaproszenia</h2>
+      <div class="container2" style="background-color: #b4dfe5;">
+        <h2 class="text-center">Wysłane zaproszenia</h2>
+        <div class="container_map">
+          <ul class="list-group">
+            {% if user.invitations %}
+              {% for invite in user.invitations %}
+                <li class="list-group-item">{{ invite.email }} <button class="btn btn-success btn-sm" onclick="acceptInvite('{{ invite.email }}')">Zaakceptuj</button> <button class="btn btn-danger btn-sm" onclick="rejectInvite('{{ invite.email }}')">Odrzuć</button></li>
+              {% endfor %}
+            {% else %}
+              <li class="list-group-item">Brak wysłanych zaproszeń.</li>
+            {% endif %}
+          </ul>
         </div>
-        <ul class="list-group list-group-flush">
-          {% if user.invitations %}
-            {% for invite in user.invitations %}
-              <li class="list-group-item">{{ invite.email }} <button class="btn btn-success btn-sm" onclick="acceptInvite('{{ invite.email }}')">Zaakceptuj</button> <button class="btn btn-danger btn-sm" onclick="rejectInvite('{{ invite.email }}')">Odrzuć</button></li>
-            {% endfor %}
-          {% else %}
-            <li class="list-group-item">Brak wysłanych zaproszeń.</li>
-          {% endif %}
-        </ul>
       </div>
     </div>
 
     <div class="col-md-4">
-      <div class="card">
-        <div class="card-header bg-primary text-white text-center">
-          <h2 class="mb-0">Znajomi</h2>
+      <div class="container3" style="background-color: #b4dfe5;">
+        <h2 class="text-center">Znajomi</h2>
+        <div class="container_map">
+          <ul class="list-group">
+            {% if user.friends %}
+              {% for friend in user.friends %}
+                <li class="list-group-item">{{ friend.email }} <a class="btn btn-info btn-sm" href="/chat/{{ friend.id }}">Chat</a></li>
+              {% endfor %}
+            {% else %}
+              <li class="list-group-item">Brak znajomych.</li>
+            {% endif %}
+          </ul>
         </div>
-        <ul class="list-group list-group-flush">
-          {% if user.friends %}
-            {% for friend in user.friends %}
-              <li class="list-group-item">{{ friend.email }} <a class="btn btn-primary btn-sm" href="/chat/{{ friend.id }}">Chat</a></li>
-            {% endfor %}
-          {% else %}
-            <li class="list-group-item">Brak znajomych.</li>
-          {% endif %}
-        </ul>
       </div>
     </div>
   </div>

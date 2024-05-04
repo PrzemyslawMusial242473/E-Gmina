@@ -1,163 +1,174 @@
 {% extends "base.html" %}
 {% block title %}Calendar{% endblock %}
 {% block content %}
-  <style>
-    body, html {
-      height: 100%;
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
+ <style>
+.calendar-container {
+    background-color: #f8f9fa; /* Jasny szary */
+    color: #333333; /* Ciemnoszary */
+    text-align: center;
+    padding: 20px;
+    height: 85vh;
+    border-radius: 15px;
+    overflow: hidden;
+}
 
-    .calendar-container {
-      min-height: 80vh; /* Zajmowanie całej wysokości ekranu */
-      display: flex;
-      flex-direction: column;
-      border-radius: 15px; /* Zaokrąglenie krawędzi */
-      overflow: hidden; /* Zapobieganie wyświetlaniu zawartości poza zaokrąglonymi krawędziami */
-    }
+.header {
+    position: relative;
+    background-color: #b4dfe5; /* Pastelowy niebieski */
+    color: #333333; /* Ciemnoszary */
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    text-align: center;
+    padding: 20px 0;
+    width: 98%; /* Szerokość ustawiona na 70% */
+    margin: 0 auto; /* Wyśrodkowanie w poziomie */
+    height:70vh;
+}
 
-    .header {
-      background-color: #191d21;
-      color: white;
-      text-align: center;
-      padding: 20px 0;
-      border-top-left-radius: 15px; /* Zaokrąglenie krawędzi górnych rogowych */
-      border-top-right-radius: 15px; /* Zaokrąglenie krawędzi górnych rogowych */
-        border-bottom-left-radius: 15px; /* Zaokrąglenie krawędzi dolnyc rogowych */
-      border-bottom-right-radius: 15px; /* Zaokrąglenie krawędzi dolnych rogowych */
-    }
+.calendar {
+    display: inline-block;
+    width: 80%; /* Zajmowanie 80% szerokości diva header */
+    margin-top:5%;
+    border-radius: 15px;
+    overflow: hidden;
+}
 
-    .calendar {
-      flex-grow: 1;
-      max-width: 100%;
-      margin: 15px 100px;
-      border-radius: 15px; /* Zaokrąglenie krawędzi */
-      overflow: hidden; /* Zapobieganie wyświetlaniu zawartości poza zaokrąglonymi krawędziami */
-    }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #53798e;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+th, td {
+    border: 1px solid #ddd;
+    padding: 5px;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    width: calc(100% / 7);
+    font-size: 12px;
+}
 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: center;
-      position: relative;
-      cursor: pointer;
-      width: calc(100% / 7); /* Rozszerzanie komórek w poziomie */
+th {
+    background-color: #42464a;
+    color: white;
+}
 
-    }
+td:hover {
+    background-color: #f5f5f5;
+}
 
-    th {
-      background-color: #FF4500;
-      color: white;
-    }
-
-    td:hover {
-      background-color: #f5f5f5;
-    }
-
-    .event-info {
+.event-info {
     position: absolute;
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background-color: #FF4500;
+    background-color: #42464a;
     color: white;
     padding: 10px;
     z-index: 1;
     display: none;
     opacity: 0;
-    transition: opacity 0.3s ease; /* Animacja przejścia */
-    border-radius: 5px; /* Zaokrąglenie krawędzi */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Cień */
-    max-width: 1000px; /* Maksymalna szerokość */
-    white-space: normal; /* Ustawienie normalnego zachowania białych znaków */
-        width:fit-content;
-  }
+    transition: opacity 0.3s ease;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    max-width: 1000px;
+    white-space: normal;
+    width: fit-content;
+}
 
+td:hover .event-info {
+    display: block;
+    opacity: 1;
+}
 
-    td:hover .event-info {
-      display: block;
-      opacity: 1;
+tbody {
+    color: white;
+}
 
-    }
+.event-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
 
-    .event-info ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      text-align: left;
-    }
+.event-info ul li {
+    margin-bottom: 5px;
+}
 
-    .event-info ul li {
-      margin-bottom: 5px;
-    }
+.dot {
+    height: 10px;
+    width: 10px;
+    background-color: #42464a;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+}
 
-    .dot {
-      height: 10px;
-      width: 10px;
-      background-color: #FF4500;
-      border-radius: 50%;
-      position: absolute;
-      bottom: 3px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-    }
-td.has-event .event-info{
-      display: block;
+td.has-event .event-info {
+    display: block;
     max-width: 1500px;
     width: 200%;
-    }
-    td.has-event .dot {
-      display: block;
-    }
-  </style>
+}
 
-  <div class="calendar-container">
-    <div class="header">
-      <h1>{{ current_month }}</h1>
-    </div>
-    <div class="calendar">
-      <table class="table table-bordered">
-        <thead>
+td.has-event .dot {
+    display: block;
+}
+
+</style>
+
+
+
+<div class="calendar-container">
+<h1 style="width: 100%; text-align: center;">Kalendarz</h1>
+  <div class="header">
+      <div class="calendar">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th colspan="7">{{ current_month }}</th>
+        </tr>
+        <tr>
+          <th>Poniedziałek</th>
+          <th>Wtorek</th>
+          <th>Środa</th>
+          <th>Czwartek</th>
+          <th>Piątek</th>
+          <th>Sobota</th>
+          <th>Niedziela</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for week in calendar %}
           <tr>
-            <th>Monday</th>
-            <th>Tuesday</th>
-            <th>Wednesday</th>
-            <th>Thursday</th>
-            <th>Friday</th>
-            <th>Saturday</th>
-            <th>Sunday</th>
+            {% for day, events in week %}
+              <td class="{% if events %}has-event{% endif %}">
+                {% if day %}
+                  <span class="day">{{ day }}</span>
+                  <div class="dot"></div>
+                  <div class="event-info">
+                    <ul>
+                      {% for event in events %}
+                        <li><strong>{{ event.name }}</strong></li>
+                        <li><em>{{ event.date }}</em></li>
+                        <li>{{ event.place }}</li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                {% endif %}
+              </td>
+            {% endfor %}
           </tr>
-        </thead>
-        <tbody>
-          {% for week in calendar %}
-            <tr>
-              {% for day, events in week %}
-                <td class="{% if events %}has-event{% endif %}">
-                  {% if day %}
-                    <span class="day">{{ day }}</span>
-                    <div class="dot"></div>
-                    <div class="event-info">
-                      <ul>
-                        {% for event in events %}
-                          <li><strong>{{ event.name }}</strong></li>
-                          <li><em>{{ event.date }}</em></li>
-                          <li>{{ event.place }}</li>
-                        {% endfor %}
-                      </ul>
-                    </div>
-                  {% endif %}
-                </td>
-              {% endfor %}
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
+  </div>
+</div>
+
 {% endblock %}

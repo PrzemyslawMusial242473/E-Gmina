@@ -1,9 +1,33 @@
-{% extends "base.html" %} {% block title %}Rejestracja użytkownika{% endblock %} {% block
+{% extends "base.html" %} {% block title %}Sign Up User{% endblock %} {% block
     content %}
+     <style>
+    .container{
+    background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+        padding-top:4px;
+        border-radius: 15px;
+        width: 95%;
+        margin-top: 2%;
+    }
+    .container_signup_user{
+         position: relative;
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top:20px;
+    }
+    </style>
+    <div class="container">
+    <h1 align="center">Zarejestruj się</h1>
+    <div class="container_signup_user">
     <form method="POST">
-      <h3 align="center">Zarejestruj się</h3>
       <div class="form-group">
-        <label for="email">Email</label>
+        <label for="email">Adres e-mail</label>
         <input
           type="email"
           class="form-control"
@@ -75,4 +99,6 @@
       <br />
       <button type="submit" class="btn btn-primary">Zarejestruj</button>
     </form>
+    </div>
+    </div>
     {% endblock %}

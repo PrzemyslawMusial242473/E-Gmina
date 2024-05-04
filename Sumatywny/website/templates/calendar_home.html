@@ -1,19 +1,23 @@
 <style>
 .calendar-container {
-  min-height: 80vh;
+    background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+  min-height: auto;
   border-radius: 15px;
   overflow: hidden;
 }
 
 .header {
-  background-color: #191d21;
-  color: white;
+    position: relative;
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
   text-align: center;
   padding: 20px 0;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-  border-bottom-left-radius: 15px;
-  border-bottom-right-radius: 15px;
   width: 100%; /* Szerokość 100% */
   margin: 0; /* Usunięcie marginesów */
   display: inline-block; /* Wyśrodkowanie */
@@ -21,7 +25,7 @@
 
 .calendar {
   float: left;
-  margin-right: 20px;
+  margin-left: 13%;
   border-radius: 15px;
   overflow: hidden;
 }
@@ -29,6 +33,7 @@
 table {
   width: 100%;
   border-collapse: collapse;
+    background-color: #53798e;
 }
 
 th, td {
@@ -42,7 +47,7 @@ th, td {
 }
 
 th {
-  background-color: #FF4500;
+  background-color: #42464a;
   color: white;
 }
 
@@ -55,7 +60,7 @@ td:hover {
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #FF4500;
+  background-color: #42464a;
   color: white;
   padding: 10px;
   z-index: 1;
@@ -74,6 +79,10 @@ td:hover .event-info {
   opacity: 1;
 }
 
+tbody{
+    color:white;
+}
+
 .event-info ul {
   list-style: none;
   padding: 0;
@@ -88,7 +97,7 @@ td:hover .event-info {
 .dot {
   height: 10px;
   width: 10px;
-  background-color: #FF4500;
+  background-color: #42464a;
   border-radius: 50%;
   position: absolute;
   bottom: 3px;
@@ -112,23 +121,22 @@ td.has-event .dot {
 
 
 <div class="calendar-container">
+<h1 style="width: 100%; text-align: center;">Kalendarz</h1>
   <div class="header">
-    <h1 style="width: 100%; text-align: center;">{{ current_month }}</h1>
-  </div>
-  <div class="calendar">
+      <div class="calendar">
     <table class="table table-bordered">
       <thead>
         <tr>
-          <th colspan="7">Calendar</th>
+          <th colspan="7">{{ current_month }}</th>
         </tr>
         <tr>
-          <th>Monday</th>
-          <th>Tuesday</th>
-          <th>Wednesday</th>
-          <th>Thursday</th>
-          <th>Friday</th>
-          <th>Saturday</th>
-          <th>Sunday</th>
+          <th>Poniedziałek</th>
+          <th>Wtorek</th>
+          <th>Środa</th>
+          <th>Czwartek</th>
+          <th>Piątek</th>
+          <th>Sobota</th>
+          <th>Niedziela</th>
         </tr>
       </thead>
       <tbody>
@@ -155,5 +163,6 @@ td.has-event .dot {
         {% endfor %}
       </tbody>
     </table>
+  </div>
   </div>
 </div>

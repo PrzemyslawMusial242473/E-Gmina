@@ -1,19 +1,38 @@
 {% extends "base.html" %}
 {% block title %}Weryfikacja Użytkowników{% endblock %}
 {% block content %}
+<style>
+  .container1, .container2, .container3 {
+    background-color: #b4dfe5; /* Jasny szary */
+    border-radius: 15px;
+    border: 2px solid white; /* Dodajemy białą obwódkę */
+    overflow: hidden; /* Zapobiega wydostawaniu się elementów potomnych poza kontener */
+    font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
+  }
+  .container_map {
+    background-color: #b4dfe5; /* Pastelowy niebieski */
+    color: #333333; /* Ciemnoszary */
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    padding: 30px;
+    margin-top:20px;
+    font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
+  }
+</style>
 <div class="container">
-  <div class="bg-primary rounded p-3 mb-4">
-    <h1 class="text-white text-center mb-4">Użytkownicy</h1>
+  <div class="container1">
+    <h1 class="text-center">Weryfikacja Użytkowników</h1>
   </div>
 
   <div class="card">
-    <div class="card-header bg-primary text-white">
+    <div class="card-header container2">
       <h2 class="mb-0">Weryfikacja Organizacji</h2>
     </div>
     <ul class="list-group list-group-flush">
       {% for user in pending_users %}
         {% if user.role == 'organisation' %}
-          <li class="list-group-item">
+          <li class="list-group-item container3">
             <strong>Nazwa:</strong> {{ user.name }}<br>
             <strong>Adres:</strong> {{ user.address }}<br>
             <strong>Email:</strong> {{ user.email }}<br>
@@ -33,13 +52,13 @@
   </div>
 
   <div class="card mt-4">
-    <div class="card-header bg-primary text-white">
+    <div class="card-header container2">
       <h2 class="mb-0">Weryfikacja Użytkowników</h2>
     </div>
     <ul class="list-group list-group-flush">
       {% for user in pending_users %}
         {% if user.role != 'organisation' %}
-          <li class="list-group-item">
+          <li class="list-group-item container3">
             <strong>Imię:</strong> {{ user.name }}<br>
             <strong>Nazwisko:</strong> {{ user.surname }}<br>
             <strong>Adres:</strong> {{ user.address }}<br>

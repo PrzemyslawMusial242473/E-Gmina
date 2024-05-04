@@ -1,9 +1,35 @@
-{% extends "base.html" %} {% block title %}Zaloguj{% endblock %} {% block content
+{% extends "base.html" %} {% block title %}Zaloguj się{% endblock %} {% block content
     %}
-    <form method="POST">
-      <h3 align="center">Zaloguj</h3>
+    <style>
+    .container{
+    background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+        padding-top:1px;
+        border-radius: 15px;
+        width: 80%;
+        margin-top: 7%;
+    }
+    .container-login{
+         position: relative;
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top:20px;
+    }
+    </style>
+    <div class="container">
+
+
+      <h1 align="center">Zaloguj się</h1>
+        <div class="container-login">
+            <form method="POST">
       <div class="form-group">
-        <label for="email">Adres Email</label>
+        <label for="email">Adres e-mail</label>
         <input
           type="email"
           class="form-control"
@@ -25,4 +51,6 @@
       <br />
       <button type="submit" class="btn btn-primary">Login</button>
     </form>
+    </div>
+    </div>
     {% endblock %}
