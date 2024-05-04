@@ -1,17 +1,36 @@
 {% extends "base.html" %}
 {% block title %}Weryfikacja Wydarzeń{% endblock %}
 {% block content %}
+<style>
+  .container1, .container2, .container3 {
+    background-color: #b4dfe5; /* Jasny szary */
+    border-radius: 15px;
+    border: 2px solid white; /* Dodajemy białą obwódkę */
+    overflow: hidden; /* Zapobiega wydostawaniu się elementów potomnych poza kontener */
+    font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
+  }
+  .container_map {
+    background-color: #b8d9de; /* Pastelowy niebieski */
+    color: #333333; /* Ciemnoszary */
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    padding: 30px;
+    margin-top:20px;
+    font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
+  }
+</style>
 <div class="container">
-  <div class="bg-primary rounded p-3 mb-4">
-    <h1 class="text-white text-center mb-4">Wydarzenia</h1>
+  <div class="container1">
+    <h1 align="center">Weryfikacja Wydarzeń</h1>
   </div>
   <div class="card">
-    <div class="card-header bg-primary text-white">
+    <div class="card-header container2">
       <h2 class="mb-0">Weryfikacja Wydarzeń</h2>
     </div>
     <ul class="list-group list-group-flush">
       {% for event in pending_events %}
-        <li class="list-group-item">
+        <li class="list-group-item container3">
           <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">{{ event.name }}</h5>
             <small>{{ event.date }}</small>

@@ -5,17 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maps</title>
     <style>
-        /* Dodaj wszystkie style CSS tutaj */
-        /* Przykład: */
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
         }
         #map {
-            height: 400px;
-            width: 100%;
+            height: 300px;
+            width: 80%;
+            margin-left: 10%;
+            border-radius: 15px;
+            margin-top: 20px;
+        }  .container1{
+             background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+  min-height: auto;
+  border-radius: 15px;
+  overflow: hidden;
+            height:100%;
         }
+           .container-map{
+                position: relative;
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+  text-align: center;
+  padding: 20px 0;
+  width: 100%; /* Szerokość 100% */
+  margin: 0; /* Usunięcie marginesów */
+  display: inline-block; /* Wyśrodkowanie */
+           }
     </style>
     <!-- Dodaj wszystkie skrypty JavaScript tutaj -->
     <!-- Przykład: -->
@@ -49,7 +73,12 @@
 </script>
 </head>
 <body>
+<div class="container1">
+    <h1 style="width: 100%; text-align: center;">Mapa punktów odbioru odpadów</h1>
+    <div class="container-map">
     <div id="map"></div>
+        </div>
+</div>
     <!-- Dodaj treść HTML strony tutaj -->
 </body>
 </html>
