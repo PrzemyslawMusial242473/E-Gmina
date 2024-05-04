@@ -1,26 +1,30 @@
 {% extends "base.html" %}
 {% block title %}Sign Up Type{% endblock %}
 {% block content %}
-    <div style="text-align: center;">
-        <div style="display: inline-block;">
-            <img src="{{ url_for('static', filename='użytkownik.png') }}"  width="300" height="200">
-            <img src="{{ url_for('static', filename='mcdonalds.png') }}"  width="300" height="200">
-        </div>
-        <div>
-            <button onclick="ChooseType(1)">Użytkownik</button>
-            <button onclick="ChooseType(2)">Organizacja</button>
-        </div>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6 text-center mb-4">
+      <img src="{{ url_for('static', filename='użytkownik.png') }}" width="200" height="150" alt="Użytkownik">
+      <img src="{{ url_for('static', filename='mcdonalds.png') }}" width="200" height="150" alt="Organizacja">
     </div>
-    <script>
-        function ChooseType(Number) {
-            switch(Number) {
-                case 1:
-                    window.location.href = "{{ url_for('auth.sign_up_user') }}";
-                    break;
-                case 2:
-                    window.location.href = "{{ url_for('auth.sign_up_org') }}";
-                    break;
-            }
-        }
-    </script>
+  </div>
+  <div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+      <button class="btn btn-primary mr-2" onclick="ChooseType(1)">Użytkownik</button>
+      <button class="btn btn-primary" onclick="ChooseType(2)">Organizacja</button>
+    </div>
+  </div>
+</div>
+<script>
+  function ChooseType(Number) {
+    switch(Number) {
+      case 1:
+        window.location.href = "{{ url_for('auth.sign_up_user') }}";
+        break;
+      case 2:
+        window.location.href = "{{ url_for('auth.sign_up_org') }}";
+        break;
+    }
+  }
+</script>
 {% endblock %}

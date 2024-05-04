@@ -1,35 +1,45 @@
 {% extends "base.html" %}
 {% block title %}Czat{% endblock %}
 {% block content %}
-  <h1>Czat z {{ receiver.email }}</h1>
-  <div id="messages">
+<div class="container">
+  <div class="bg-primary rounded p-3 mb-4">
+    <h1 class="text-white text-center mb-0">Chat z {{ receiver.email }}</h1>
+  </div>
+  <div id="messages" class="mb-4">
     {% for message in messages %}
       {% if message.sender_id == current_user.id %}
-        <p><strong>Ty: </strong>{{ message.content }}</p>
+        <div class="alert alert-primary" role="alert">
+          <strong>Ty: </strong>{{ message.content }}
+        </div>
       {% else %}
-        <p><strong>{{ receiver.email }}: </strong>{{ message.content }}</p>
+        <div class="alert alert-secondary" role="alert">
+          <strong>{{ receiver.email }}: </strong>{{ message.content }}
+        </div>
       {% endif %}
     {% endfor %}
   </div>
   <form id="message-form">
-    <input type="text" id="message-content" name="content" placeholder="Wpisz wiadomość">
-    <button type="submit">Wyślij</button>
+    <div class="input-group mb-3">
+      <input type="text" id="message-content" name="content" class="form-control" placeholder="Wpisz wiadomość" aria-label="Wpisz wiadomość" aria-describedby="button-send">
+      <button class="btn btn-primary" type="submit" id="button-send">Wyślij</button>
+    </div>
   </form>
-  <script>
-    document.getElementById('message-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const content = document.getElementById('message-content').value;
-      fetch("/send-message/{{ receiver.id }}", {
-        method: "POST",
-        body: new URLSearchParams({ content: content }),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(response => {
-        if (response.ok) {
-          window.location.reload();
-        }
-      });
+</div>
+<script>
+  document.getElementById('message-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const content = document.getElementById('message-content').value;
+    fetch("/send-message/{{ receiver.id }}", {
+      method: "POST",
+      body: new URLSearchParams({ content: content }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).then(response => {
+      if (response.ok) {
+        window.location.reload();
+      }
     });
-  </script>
+  });
+</script>
 {% endblock %}

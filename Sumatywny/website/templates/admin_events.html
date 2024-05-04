@@ -1,25 +1,34 @@
 {% extends "base.html" %}
 {% block title %}Weryfikacja Wydarzeń{% endblock %}
 {% block content %}
-  <h1 align="center">Weryfikacja Wydarzeń</h1>
-  <ul class="list-group list-group-flush" id="PendingEvents">
-    {% for event in pending_events %}
-      <li class="list-group-item">
-        <strong>Nazwa:</strong> {{ event.name }}
-        <br>
-        <strong>Opis:</strong> {{ event.data }}
-        <br>
-        <strong>Data:</strong> {{ event.date }}
-        <br>
-        <strong>Adres:</strong> {{ event.place }}
-        <br>
-        <form method="POST" action="{{ url_for('views.update_event_status', event_id=event.id, action='accept') }}">
-          <button type="submit" class="btn btn-success">Zatwierdź</button>
-        </form>
-        <form method="POST" action="{{ url_for('views.update_event_status', event_id=event.id, action='reject') }}">
-          <button type="submit" class="btn btn-danger">Odrzuć</button>
-        </form>
-      </li>
-    {% endfor %}
-  </ul>
+<div class="container">
+  <div class="bg-primary rounded p-3 mb-4">
+    <h1 class="text-white text-center mb-4">Wydarzenia</h1>
+  </div>
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">Weryfikacja Wydarzeń</h2>
+    </div>
+    <ul class="list-group list-group-flush">
+      {% for event in pending_events %}
+        <li class="list-group-item">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{ event.name }}</h5>
+            <small>{{ event.date }}</small>
+          </div>
+          <p class="mb-1">{{ event.data }}</p>
+          <p class="mb-1">{{ event.place }}</p>
+          <div class="btn-group" role="group">
+            <form method="POST" action="{{ url_for('views.update_event_status', event_id=event.id, action='accept') }}">
+              <button type="submit" class="btn btn-success">Zatwierdź</button>
+            </form>
+            <form method="POST" action="{{ url_for('views.update_event_status', event_id=event.id, action='reject') }}">
+              <button type="submit" class="btn btn-danger">Odrzuć</button>
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
 {% endblock %}
