@@ -150,6 +150,10 @@ def search_user():
                     flash(f'Zaproszenie wysłano do {user.email}!', category='error')
                 elif user in current_user.invitations:
                     flash(f'Zaproszenie otrzymane od {user.email}!', category='error')
+                elif user in current_user.blocked:
+                    flash(f'{user.email} jest zablokowany!', category='error')
+                elif user in current_user.y_blocked:
+                    flash(f'Zostałeś zablokowany przez {user.email}!', category='error')
                 else:
                     current_user.sent.append(user)
                     user.invitations.append(current_user)
@@ -176,6 +180,61 @@ def send_message(user_id):
         else:
             flash('Nie znaleziono użytkownika.', category='error')
     return redirect(url_for('views.home'))
+
+
+@views.route('/remove-friend/<int:friend_id>', methods=['POST'])
+@login_required
+def remove_friend(friend_id):
+    friend = User.query.get(friend_id)
+    if friend:
+        current_user.friends.remove(friend)
+        friend.friends.remove(current_user)
+        db.session.commit()
+        flash(f'{friend.email} został usunięty z listy znajomych.', category='success')
+    else:
+        flash('Nie znaleziono użytkownika.', category='error')
+    return redirect(url_for('views.search_user'))
+
+
+@views.route('/block-user/<int:user_id>', methods=['POST'])
+@login_required
+def block_user(user_id):
+    user = User.query.get(user_id)
+    if user:
+        if user in current_user.friends:
+            current_user.blocked.append(user)
+            user.y_blocked.append(current_user)
+            current_user.friends.remove(user)
+            user.friends.remove(current_user)
+            db.session.commit()
+            flash(f'{user.email} został zablokowany.', category='success')
+        else:
+            current_user.blocked.append(user)
+            user.y_blocked.append(current_user)
+            current_user.invitations.remove(user)
+            user.sent.remove(current_user)
+            db.session.commit()
+            flash(f'{user.email} został zablokowany.', category='success')
+    else:
+        flash('Nie znaleziono użytkownika.', category='error')
+    return redirect(url_for('views.search_user'))
+
+
+@views.route('/unblock-user/<int:user_id>', methods=['POST'])
+@login_required
+def unblock_user(user_id):
+    user = User.query.get(user_id)
+    if user:
+        if user in current_user.blocked:
+            current_user.blocked.remove(user)
+            user.y_blocked.remove(current_user)
+            db.session.commit()
+            flash(f'{user.email} został odblokowany.', category='success')
+        else:
+            flash('Użytkownik nie jest zablokowany.', category='error')
+    else:
+        flash('Nie znaleziono użytkownika.', category='error')
+    return redirect(url_for('views.search_user'))
 
 
 @views.route('/chat/<int:user_id>', methods=['GET'])
