@@ -21,6 +21,18 @@ sent = db.Table(
     db.Column('receiver_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
 )
 
+blocked = db.Table(
+    'blocked',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('blocked_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
+)
+
+y_blocked = db.Table(
+    'y_blocked',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('blocked_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
+)
+
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -65,6 +77,22 @@ class User(db.Model, UserMixin):
         primaryjoin=(sent.c.sender_id == id),
         secondaryjoin=(sent.c.receiver_id == id),
         backref=db.backref('sent_by', lazy='dynamic'),
+        lazy='dynamic'
+    )
+    blocked = db.relationship(
+        'User',
+        secondary=blocked,
+        primaryjoin=(blocked.c.user_id == id),
+        secondaryjoin=(blocked.c.blocked_id == id),
+        backref=db.backref('blocked_by', lazy='dynamic'),
+        lazy='dynamic'
+    )
+    y_blocked = db.relationship(
+        'User',
+        secondary=y_blocked,
+        primaryjoin=(y_blocked.c.user_id == id),
+        secondaryjoin=(y_blocked.c.blocked_id == id),
+        backref=db.backref('y_blocked_by', lazy='dynamic'),
         lazy='dynamic'
     )
 

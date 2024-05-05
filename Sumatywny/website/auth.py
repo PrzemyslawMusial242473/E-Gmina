@@ -81,7 +81,9 @@ def sign_up_user():
         elif len(address) < 2:
             flash('Adres musi być dłuższy niż 2 znaki.', category='error')
         elif len(pesel) != 11:
-            flash('Peselmusi posiadać równo 11 liczb.', category='error')
+            flash('Pesel musi posiadać równo 11 liczb.', category='error')
+        elif pesel:
+            flash('Pesel już istnieje.', category='error')
         elif password1 != password2:
             flash('Hasła nie są takie same.', category='error')
         elif len(password1) < 7:
@@ -117,6 +119,8 @@ def sign_up_org():
             flash('Adres musi być dłuższy niż 2 znaki.', category='error')
         elif len(nip) != 10:
             flash('NIP musi posiadać równo 10 liczb.', category='error')
+        elif nip:
+            flash('NIP już istnieje.', category='error')
         elif password1 != password2:
             flash('Hasła nie są takie same.', category='error')
         elif len(password1) < 7:
