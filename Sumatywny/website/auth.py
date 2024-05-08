@@ -62,6 +62,7 @@ def choose_signup():
 def sign_up_user():
     if request.method == 'POST':
         email = request.form.get('email')
+        username = request.form.get('username')
         name = request.form.get('name')
         surname = request.form.get('surname')
         address = request.form.get('address')
@@ -70,10 +71,16 @@ def sign_up_user():
         password2 = request.form.get('password2')
 
         user = User.query.filter_by(email=email).first()
+        check_pesel = User.query.filter_by(uid=pesel).first()
+        check_username = User.query.filter_by(username=username).first()
         if user:
             flash('Konto już istnieje.', category='error')
         elif len(email) < 3:
             flash('Email musi mieć więcej niż 3 znaki.', category='error')
+        elif len(username) < 3:
+            flash('Nazwa użytkownika musi mieć więcej niż 3 znaki.', category='error')
+        elif check_username:
+            flash('Nazwa użytkownika już istnieje.', category='error')
         elif len(name) < 2:
             flash('Imię musi być dłuższe niż 2 znaki.', category='error')
         elif len(surname) < 2:
@@ -82,14 +89,14 @@ def sign_up_user():
             flash('Adres musi być dłuższy niż 2 znaki.', category='error')
         elif len(pesel) != 11:
             flash('Pesel musi posiadać równo 11 liczb.', category='error')
-        elif pesel:
+        elif check_pesel:
             flash('Pesel już istnieje.', category='error')
         elif password1 != password2:
             flash('Hasła nie są takie same.', category='error')
         elif len(password1) < 7:
             flash('Hasło musi się składać z 7 znaków.', category='error')
         else:
-            new_user = User(email=email, name=name, surname=surname,address=address,uid=pesel,password=hash_password(
+            new_user = User(email=email, username=username, name=name, surname=surname,address=address,uid=pesel,password=hash_password(
                 password1))
             db.session.add(new_user)
             db.session.commit()
@@ -109,6 +116,7 @@ def sign_up_org():
         password2 = request.form.get('password2')
 
         user = User.query.filter_by(email=email).first()
+        check_nip = User.query.filter_by(uid=nip).first()
         if user:
             flash('Konto już istnieje.', category='error')
         elif len(email) < 3:
@@ -119,7 +127,7 @@ def sign_up_org():
             flash('Adres musi być dłuższy niż 2 znaki.', category='error')
         elif len(nip) != 10:
             flash('NIP musi posiadać równo 10 liczb.', category='error')
-        elif nip:
+        elif check_nip:
             flash('NIP już istnieje.', category='error')
         elif password1 != password2:
             flash('Hasła nie są takie same.', category='error')

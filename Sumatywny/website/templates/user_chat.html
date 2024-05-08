@@ -19,7 +19,7 @@
 </style>
 <div class="container">
   <div class="bg-custom rounded p-3 mb-4">
-    <h1 class="text-custom text-center mb-0">Chat z {{ receiver.email }}</h1>
+    <h1 class="text-custom text-center mb-0">Chat z {{ receiver.username }}</h1>
   </div>
   <div id="messages" class="mb-4">
     {% for message in messages %}
@@ -29,7 +29,7 @@
         </div>
       {% else %}
         <div class="alert alert-secondary" role="alert">
-          <strong>{{ receiver.email }}: </strong>{{ message.content }}
+          <strong>{{ receiver.username }}: </strong>{{ message.content }}
         </div>
       {% endif %}
     {% endfor %}
