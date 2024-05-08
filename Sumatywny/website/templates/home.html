@@ -58,6 +58,25 @@
     fill: #333333; /* Ciemnoszary */
 }
 
+.event-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.event-name {
+    font-size: 24px; /* Możesz dostosować wielkość czcionki według preferencji */
+    font-weight: bold;
+    margin-bottom: 10px; /* Dodatkowy odstęp między nazwą wydarzenia a opisem */
+}
+
+.event-details {
+    flex-grow: 1;
+    margin-right: 20px;
+}
+
+
+
 /* Nowa klasa dla przycisku "Znajomi" */
 .friends-button {
     background-color: #467a7a; /* Odcień #467a7a */
@@ -82,11 +101,17 @@
             <ul class="list-group list-group-flush" id="Events">
                 {% for event in accepted_events %}
                 <li class="list-group-item event-item">
-                    <strong>Nazwa:</strong> {{ event.name }}<br>
-                    <strong>Opis:</strong> {{ event.data }}<br>
-                    <strong>Data:</strong> {{ event.date }}<br>
-                    <strong>Adres:</strong> {{ event.place }}<br>
-                    <div id="map-{{ event.id }}" class="mapa" style="height: 200px"></div>
+                    <div class="event-details">
+                        <strong class="event-name">{{ event.name }}</strong><br>
+                        <div class="event-description">
+                            {{ event.data }}<br>
+                            {{ event.date }}<br>
+                        </div>
+                    </div>
+                    <div class="event-location">
+                        <div id="map-{{ event.id }}" class="mapa" style="height: 200px"></div>
+                         {{ event.place }}<br>
+                    </div>
                 </li>
                 {% endfor %}
             </ul>
