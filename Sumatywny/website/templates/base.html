@@ -51,7 +51,9 @@
         <div class="collapse navbar-collapse" id="navbar">
             <div class="navbar-nav mr-auto"> <!-- Używamy klasy mr-auto, aby przesunąć opcje "Home", "Calendar" i "Map" w lewo -->
                 {% if current_user.is_authenticated %}
-                    <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
+                    {% if current_user.role != 'admin' and current_user.role != 'organisation'%}
+                        <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
+                    {% endif %}
                     {% if current_user.role != 'user' %}
                         <a class="nav-item nav-link" id="events" href="/events">Wydarzenia</a>
                     {% endif %}

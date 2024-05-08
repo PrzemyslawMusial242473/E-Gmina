@@ -154,6 +154,10 @@ def search_user():
                     flash(f'{user.email} jest zablokowany!', category='error')
                 elif user in current_user.y_blocked:
                     flash(f'Zostałeś zablokowany przez {user.email}!', category='error')
+                elif user.role == 'admin':
+                    flash(f'Nie można wysłać wiadomości do admina!', category='error')
+                elif user.role == 'organisation':
+                    flash(f'Nie można wysłać wiadomości do organizacji!', category='error')
                 else:
                     current_user.sent.append(user)
                     user.invitations.append(current_user)
