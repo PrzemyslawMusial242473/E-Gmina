@@ -138,22 +138,22 @@ def event():
 @login_required
 def search_user():
     if request.method == 'POST':
-        email = request.form.get('email')
-        user = User.query.filter_by(email=email).first()
+        username = request.form.get('username')
+        user = User.query.filter_by(username=username).first()
         if user:
             if user == current_user:
                 flash('Nie możesz dodać samego siebie jako znajomego!', category='error')
             else:
                 if user in current_user.friends:
-                    flash(f'{user.email} jest już twoim znajomym!', category='error')
+                    flash(f'{user.username} jest już twoim znajomym!', category='error')
                 elif user in current_user.sent:
-                    flash(f'Zaproszenie wysłano do {user.email}!', category='error')
+                    flash(f'Zaproszenie wysłano do {user.username}!', category='error')
                 elif user in current_user.invitations:
-                    flash(f'Zaproszenie otrzymane od {user.email}!', category='error')
+                    flash(f'Zaproszenie otrzymane od {user.username}!', category='error')
                 elif user in current_user.blocked:
-                    flash(f'{user.email} jest zablokowany!', category='error')
+                    flash(f'{user.username} jest zablokowany!', category='error')
                 elif user in current_user.y_blocked:
-                    flash(f'Zostałeś zablokowany przez {user.email}!', category='error')
+                    flash(f'Zostałeś zablokowany przez {user.username}!', category='error')
                 elif user.role == 'admin':
                     flash(f'Nie można wysłać wiadomości do admina!', category='error')
                 elif user.role == 'organisation':
@@ -162,7 +162,7 @@ def search_user():
                     current_user.sent.append(user)
                     user.invitations.append(current_user)
                     db.session.commit()
-                    flash(f'Zaproszenie pomyślnie wysłano do {user.email}!', category='success')
+                    flash(f'Zaproszenie pomyślnie wysłano do {user.username}!', category='success')
         else:
             flash('Użytkownik nie został znaleziony!', category='error')
         return redirect(url_for('views.search_user'))
@@ -194,7 +194,7 @@ def remove_friend(friend_id):
         current_user.friends.remove(friend)
         friend.friends.remove(current_user)
         db.session.commit()
-        flash(f'{friend.email} został usunięty z listy znajomych.', category='success')
+        flash(f'{friend.username} został usunięty z listy znajomych.', category='success')
     else:
         flash('Nie znaleziono użytkownika.', category='error')
     return redirect(url_for('views.search_user'))
@@ -211,14 +211,14 @@ def block_user(user_id):
             current_user.friends.remove(user)
             user.friends.remove(current_user)
             db.session.commit()
-            flash(f'{user.email} został zablokowany.', category='success')
+            flash(f'{user.username} został zablokowany.', category='success')
         else:
             current_user.blocked.append(user)
             user.y_blocked.append(current_user)
             current_user.invitations.remove(user)
             user.sent.remove(current_user)
             db.session.commit()
-            flash(f'{user.email} został zablokowany.', category='success')
+            flash(f'{user.username} został zablokowany.', category='success')
     else:
         flash('Nie znaleziono użytkownika.', category='error')
     return redirect(url_for('views.search_user'))
@@ -233,7 +233,7 @@ def unblock_user(user_id):
             current_user.blocked.remove(user)
             user.y_blocked.remove(current_user)
             db.session.commit()
-            flash(f'{user.email} został odblokowany.', category='success')
+            flash(f'{user.username} został odblokowany.', category='success')
         else:
             flash('Użytkownik nie jest zablokowany.', category='error')
     else:
@@ -248,7 +248,14 @@ def user_chat(user_id):
     if not receiver:
         flash('Nie znaleziono użytkownika.', category='error')
         return redirect(url_for('views.home'))
-
+    #username = request.form.get('username')
+    #user = User.query.filter_by(username=username).first()
+    elif receiver in current_user.y_blocked:
+        flash(f'Zostałeś zablokowany przez {receiver.username}!', category='error')
+        return redirect(url_for('views.search_user'))
+    elif receiver not in current_user.friends:
+        flash(f'{receiver.username} nie jest już twoim znajomym!', category='error')
+        return redirect(url_for('views.search_user'))
     messages_sent_by_user = Message.query.filter_by(sender_id=current_user.id, receiver_id=user_id).all()
     messages_received_by_user = Message.query.filter_by(sender_id=user_id, receiver_id=current_user.id).all()
     messages = messages_sent_by_user + messages_received_by_user
@@ -262,7 +269,7 @@ def user_chat(user_id):
 def accept_invite():
     data = json.loads(request.data)
     inviter_email = data['inviter_email']
-    inviter = User.query.filter_by(email=inviter_email).first()
+    inviter = User.query.filter_by(username=inviter_email).first()
     if inviter in current_user.invitations:
         current_user.invitations.remove(inviter)
         current_user.friends.append(inviter)
@@ -277,7 +284,7 @@ def accept_invite():
 def reject_invite():
     data = json.loads(request.data)
     inviter_email = data['inviter_email']
-    inviter = User.query.filter_by(email=inviter_email).first()
+    inviter = User.query.filter_by(username=inviter_email).first()
     if inviter in current_user.invitations:
         current_user.invitations.remove(inviter)
         inviter.sent.remove(current_user)

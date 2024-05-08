@@ -62,6 +62,7 @@ def choose_signup():
 def sign_up_user():
     if request.method == 'POST':
         email = request.form.get('email')
+        username = request.form.get('username')
         name = request.form.get('name')
         surname = request.form.get('surname')
         address = request.form.get('address')
@@ -71,10 +72,15 @@ def sign_up_user():
 
         user = User.query.filter_by(email=email).first()
         check_pesel = User.query.filter_by(uid=pesel).first()
+        check_username = User.query.filter_by(username=username).first()
         if user:
             flash('Konto już istnieje.', category='error')
         elif len(email) < 3:
             flash('Email musi mieć więcej niż 3 znaki.', category='error')
+        elif len(username) < 3:
+            flash('Nazwa użytkownika musi mieć więcej niż 3 znaki.', category='error')
+        elif check_username:
+            flash('Nazwa użytkownika już istnieje.', category='error')
         elif len(name) < 2:
             flash('Imię musi być dłuższe niż 2 znaki.', category='error')
         elif len(surname) < 2:
@@ -90,7 +96,7 @@ def sign_up_user():
         elif len(password1) < 7:
             flash('Hasło musi się składać z 7 znaków.', category='error')
         else:
-            new_user = User(email=email, name=name, surname=surname,address=address,uid=pesel,password=hash_password(
+            new_user = User(email=email, username=username, name=name, surname=surname,address=address,uid=pesel,password=hash_password(
                 password1))
             db.session.add(new_user)
             db.session.commit()

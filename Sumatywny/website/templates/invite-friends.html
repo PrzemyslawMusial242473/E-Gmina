@@ -20,8 +20,8 @@
         <div class="container_map">
           <form method="POST">
             <div class="form-group">
-              <label for="inputEmail">Adres email</label>
-              <input type="email" class="form-control" id="inputEmail" name="email" placeholder="Wpisz email">
+              <label for="inputEmail">Nazwa użytkownika</label>
+              <input type="text" class="form-control" id="inputEmail" name="username" placeholder="Wpisz nazwę użytkownika">
             </div>
             <button type="submit" class="btn btn-info btn-block">Wyślij zaproszenie</button>
           </form>
@@ -36,11 +36,11 @@
           <ul class="list-group">
             {% if user.invitations %}
               {% for invite in user.invitations %}
-                <li class="list-group-item">{{ invite.email }}
-                    <button class="btn btn-success" onclick="acceptInvite('{{ invite.email }}')">Zaakceptuj</button>
-                    <button class="btn btn-danger" onclick="rejectInvite('{{ invite.email }}')">Odrzuć</button>
+                <li class="list-group-item">{{ invite.username }}
+                    <button class="btn btn-success" onclick="acceptInvite('{{ invite.username }}')">Zaakceptuj</button>
+                    <button class="btn btn-danger" onclick="rejectInvite('{{ invite.username }}')">Odrzuć</button>
                     <form action="/block-user/{{ invite.id }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ invite.email }}?')">Zablokuj</button>
+                        <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ invite.username }}?')">Zablokuj</button>
                     </form>
                 </li>
               {% endfor %}
@@ -59,12 +59,12 @@
           <ul class="list-group">
             {% if user.friends %}
               {% for friend in user.friends %}
-                <li class="list-group-item">{{ friend.email }} <a class="btn btn-info" href="/chat/{{ friend.id }}">Chat</a>
+                <li class="list-group-item">{{ friend.username }} <a class="btn btn-info" href="/chat/{{ friend.id }}">Chat</a>
                     <form action="/remove-friend/{{ friend.id }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć {{ friend.email }} z listy znajomych?')">Usuń</button>
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć {{ friend.username }} z listy znajomych?')">Usuń</button>
                     </form>
                     <form action="/block-user/{{ friend.id }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ friend.email }}?')">Zablokuj</button>
+                        <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ friend.username }}?')">Zablokuj</button>
                     </form>
                 </li>
               {% endfor %}
@@ -83,9 +83,9 @@
           <ul class="list-group">
             {% if user.blocked %}
               {% for blocked_user in user.blocked %}
-                <li class="list-group-item">{{ blocked_user.email }}
+                <li class="list-group-item">{{ blocked_user.username }}
                     <form action="/unblock-user/{{ blocked_user.id }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-info" onclick="return confirm('Czy na pewno chcesz odblokować {{ blocked_user.email }}?')">Odblokuj</button>
+                        <button type="submit" class="btn btn-info" onclick="return confirm('Czy na pewno chcesz odblokować {{ blocked_user.username }}?')">Odblokuj</button>
                     </form>
                 </li>
               {% endfor %}
@@ -100,19 +100,19 @@
 </div>
 
 <script>
-  function acceptInvite(email) {
+  function acceptInvite(username) {
     fetch("/accept-invite", {
       method: "POST",
-      body: JSON.stringify({ inviter_email: email }),
+      body: JSON.stringify({ inviter_email: username }),
     }).then((_res) => {
       window.location.reload();
     });
   }
 
-  function rejectInvite(email) {
+  function rejectInvite(username) {
     fetch("/reject-invite", {
       method: "POST",
-      body: JSON.stringify({ inviter_email: email }),
+      body: JSON.stringify({ inviter_email: username }),
     }).then((_res) => {
       window.location.reload();
     });
