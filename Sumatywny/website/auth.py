@@ -70,6 +70,7 @@ def sign_up_user():
         password2 = request.form.get('password2')
 
         user = User.query.filter_by(email=email).first()
+        check_pesel = User.query.filter_by(uid=pesel).first()
         if user:
             flash('Konto już istnieje.', category='error')
         elif len(email) < 3:
@@ -82,7 +83,7 @@ def sign_up_user():
             flash('Adres musi być dłuższy niż 2 znaki.', category='error')
         elif len(pesel) != 11:
             flash('Pesel musi posiadać równo 11 liczb.', category='error')
-        elif pesel:
+        elif check_pesel:
             flash('Pesel już istnieje.', category='error')
         elif password1 != password2:
             flash('Hasła nie są takie same.', category='error')
@@ -109,6 +110,7 @@ def sign_up_org():
         password2 = request.form.get('password2')
 
         user = User.query.filter_by(email=email).first()
+        check_nip = User.query.filter_by(uid=nip).first()
         if user:
             flash('Konto już istnieje.', category='error')
         elif len(email) < 3:
@@ -119,7 +121,7 @@ def sign_up_org():
             flash('Adres musi być dłuższy niż 2 znaki.', category='error')
         elif len(nip) != 10:
             flash('NIP musi posiadać równo 10 liczb.', category='error')
-        elif nip:
+        elif check_nip:
             flash('NIP już istnieje.', category='error')
         elif password1 != password2:
             flash('Hasła nie są takie same.', category='error')
