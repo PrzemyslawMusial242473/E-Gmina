@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Weryfikacja Wydarzeń{% endblock %}
+{% block content %}
+<style>
+  .container1, .container2, .container3 {
+    background-color: #b4dfe5; /* Jasny szary */
+    border-radius: 15px;
+    border: 2px solid white; /* Dodajemy białą obwódkę */
+    overflow: hidden; /* Zapobiega wydostawaniu się elementów potomnych poza kontener */
+    font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
+  }
+  .container_map {
+    background-color: #b8d9de; /* Pastelowy niebieski */
+    color: #333333; /* Ciemnoszary */
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    padding: 30px;
+    margin-top:20px;
+    font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
+  }
+</style>
+<div class="container">
+  <div class="container1">
+    <h1 align="center">Weryfikacja Zgłoszeń</h1>
+  </div>
+  <div class="card">
+    <div class="card-header container2">
+      <h2 class="mb-0">Weryfikacja Zgłoszeń</h2>
+    </div>
+    <ul class="list-group list-group-flush">
+      {% for report in pending_reports %}
+        <li class="list-group-item container3">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{ report.name }}</h5>
+            <small>{{ report.date }}</small>
+          </div>
+          <p class="mb-1">{{ report.data }}</p>
+          <p class="mb-1">{{ report.place }}</p>
+          <div class="btn-group" role="group">
+            <form method="POST" action="{{ url_for('views.update_report_status', report_id=report.id, action='accept') }}">
+              <button type="submit" class="btn btn-success">Zaakceptuj</button>
+            </form>
+            <form method="POST" action="{{ url_for('views.update_report_status', report_id=report.id, action='reject') }}">
+              <button type="submit" class="btn btn-danger">Odmów</button>
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}
