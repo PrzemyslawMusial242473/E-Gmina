@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Zgłoś śmiecia{% endblock %}
+{% block content %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container1, .container2 {
+            background-color: #f8f9fa; /* Jasny szary */
+            color: #333333; /* Ciemnoszary */
+            text-align: center;
+            padding: 20px;
+            padding-top: 4px;
+            border-radius: 15px;
+            width: 95%;
+            margin-top: 2%;
+            margin-left: 2%;
+        }
+        .container_event {
+            position: relative;
+            background-color: #b4dfe5; /* Pastelowy niebieski */
+            color: #333333; /* Ciemnoszary */
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+        input[type="text"],
+        input[type="datetime-local"],
+        button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 90%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff; /* Niebieski */
+            color: #ffffff; /* Biały */
+            cursor: pointer;
+            width:15%;
+        }
+    </style>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="container1">
+                    <div class="container_event">
+                        <h1 align="center">Zgłoś przestępstwo</h1>
+                        <body>
+                            <form method="POST">
+                                <label for="place">Gdzie to jest?:</label><br>
+                                <input type="text" id="place" name="place" required><br>
+
+                                <label for="data">Co się dzieje:</label><br>
+                                <input type="text" id="data" name="data" required><br>
+                                <button type="submit">Zgłoś</button>
+                            </form>
+                        </body>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="container2">
+                    <div class="container_report">
+                        <h2 align="center">Moje zgłoszenia</h2>
+                        <ul class="list-group list-group-flush" id="Reports">
+                            {% for report in user_reports %}
+                                <li class="list-group-item">
+                                    <strong>Opis:</strong> {{ report.data }}<br>
+                                    <strong>Data:</strong> {{ report.date }}<br>
+                                    <strong>Miejsce:</strong> {{ report.place }}<br>
+                                    <div id="map-{{ report.id }}" style="height: 200px;"></div>
+                                    {% if report.status == 'rejected' %}
+                                        <p>Twoje zgłoszenie zostało odrzucone.</p>
+                                    {% elif report.status == 'accepted' %}
+                                        <p>Twoje zgłoszenie zostało zatwierdzone.</p>
+                                    {%else%}
+                                        <p>Twoje zgłoszenie czeka na rozpatrzenie.</p>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M"></script>
+    <script>
+        {% for report in user_reports %}
+            var map{{ report.id }} = new google.maps.Map(document.getElementById('map-{{ report.id }}'), {
+                center: { lat: -34.397, lng: 150.644 },
+                zoom: 15
+            });
+
+            var geocoder{{ report.id }} = new google.maps.Geocoder();
+            var address{{ report.id }} = "{{ report.place }}";
+            geocoder{{ report.id }}.geocode({ 'address': address{{ report.id }} }, function (results, status) {
+                if (status === 'OK') {
+                    map{{ report.id }}.setCenter(results[0].geometry.location);
+                    var marker{{ report.id }} = new google.maps.Marker({
+                        map: map{{ report.id }},
+                        position: results[0].geometry.location
+                    });
+                } else {
+                    console.error('Geocode was not successful for the following reason: ' + status);
+                }
+            });
+        {% endfor %}
+    </script>
+{% endblock %}

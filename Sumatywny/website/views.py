@@ -1,7 +1,8 @@
 import requests
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import Event, MapMarker, User, Message
+from .models import Event, MapMarker, User, Message,Report
+from datetime import datetime
 from . import db
 import json
 import calendar
@@ -370,6 +371,25 @@ def admin_users():
 
     return render_template('admin_users.html', user=current_user, pending_users=pending_users)
 
+@views.route("/report", methods=['GET', 'POST'])
+@login_required
+def report():
+    user_reports = current_user.Reports
+    if request.method == 'POST':
+        data = request.form.get('data')
+        place = request.form.get('place')
+        date = datetime.datetime.now()
+            
+        new_report = Report(data=data, date=date, place=place, user_id=current_user.id, status='pending')
+        db.session.add(new_report) 
+        db.session.commit()  
+        flash('Wydarzenie zawnioskowano!', category='success')
+            
+            
+        return redirect(url_for('views.report'))  
+    
+    return render_template('report.html', user=current_user,user_reports=user_reports)
+
 @views.route('/update_user_status/<int:user_id>/<string:action>', methods=['POST'])
 @login_required
 def update_user_status(user_id, action):
@@ -392,3 +412,54 @@ def update_user_status(user_id, action):
         flash('Użytkownik został odrzucony.', category='warning')
 
     return redirect(url_for('views.admin_users'))
+
+@views.route('/update_report_status/<int:report_id>/<string:action>', methods=['POST'])
+@login_required
+def update_report_status(report_id, action):
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej akcji.', category='danger')
+        return redirect(url_for('views.admin_reports'))
+
+    report = Report.query.get(report_id)
+    if not report:
+        flash('Nie znaleziono zgłoszenia.', category='danger')
+        return redirect(url_for('views.admin_reports'))
+
+    if action == 'accept':
+        report.status = 'accepted'
+        db.session.commit()
+        flash('Zgłoszenie zostało zaakceptowane.', category='success')
+    elif action == 'reject':
+        report.status = 'rejected'
+        db.session.commit()
+        flash('Zgłoszenie zostało odmówione.', category='warning')
+
+    return redirect(url_for('views.admin_reports'))
+
+@views.route('/admin-reports', methods=['GET', 'POST'])
+@login_required
+def admin_reports():
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej strony.', category='danger')
+        return redirect(url_for('views.home'))
+    
+    pending_reports = Report.query.filter_by(status='pending').all()
+    
+    if request.method == 'POST':
+        report_id = request.form.get('report_id')
+        action = request.form.get('action')  
+        
+        if action == 'accept':
+            event = Event.query.get(report_id)
+            event.status = 'accepted'
+            db.session.add(event)
+            db.session.commit()
+            flash('Zgłoszenie zostało zaakceptowane.', category='success')
+        elif action == 'reject':
+            event = Event.query.get(report_id)
+            event.status = 'rejected'
+            flash('Zgłoszenie zostało odmówione.', category='warning')
+        
+        return redirect(url_for('views.admin_reports'))
+
+    return render_template('admin_reports.html',user=current_user, pending_reports=pending_reports)
