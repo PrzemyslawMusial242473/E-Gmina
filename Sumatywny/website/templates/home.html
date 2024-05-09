@@ -2,6 +2,14 @@
 {% block title %}E-Gmina{% endblock %}
 {% block content %}
 <style>
+/* Pozycjonowanie obrazka */
+.banner {
+    width: 100%; /* Rociągnięcie na szerokość strony */
+    background-image: url('{{ url_for('static', filename='baner.png') }}'); /* Ścieżka do twojego pliku PNG */
+    background-size: cover; /* Dopasowanie rozmiaru obrazka */
+    background-position: center; /* Wycentrowanie obrazka */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+}
 .col-md-12 {
     background-color: #f8f9fa; /* Jasny szary */
     color: #333333; /* Ciemnoszary */
@@ -94,6 +102,7 @@
     background-color: #3a625c; /* Ciemniejszy odcień */
 }
 </style>
+<div class="banner"></div>
 <div class="row">
     <div class="col-md-12">
         <h1>Wydarzenia</h1>
