@@ -374,7 +374,7 @@ def admin_users():
 @views.route("/report", methods=['GET', 'POST'])
 @login_required
 def report():
-    user_reports = current_user.Reports
+    user_reports = list(reversed(current_user.Reports))
     if request.method == 'POST':
         data = request.form.get('data')
         place = request.form.get('place')
