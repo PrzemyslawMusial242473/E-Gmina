@@ -80,14 +80,14 @@
                                 <li class="list-group-item">
                                     {% if event.status == 'rejected' %}
                                         <p>Twoje wydarzenie "{{ event.name }}" zostało odrzucone.</p>
-                                        <button type="button">Usuń</button>
+                                        <button type="button"  onclick="deleteEvent({{ event.id }})" >Usuń</button>
                                     {% else %}
                                         <strong>Nazwa:</strong> {{ event.name }}<br>
                                         <strong>Opis:</strong> {{ event.data }}<br>
                                         <strong>Data:</strong> {{ event.date }}<br>
                                         <strong>Adres:</strong> {{ event.place }}<br>
                                         <div id="map-{{ event.id }}" style="height: 200px;"></div>
-                                        <button type="button">Usuń</button>
+                                        <button type="button"  onclick="deleteEvent({{ event.id }})" >Usuń</button>
                                     {% endif %}
                                 </li>
                             {% endfor %}
