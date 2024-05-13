@@ -1,125 +1,151 @@
-<style>
-.calendar-container {
-    background-color: #f8f9fa; /* Jasny szary */
-    color: #333333; /* Ciemnoszary */
-    text-align: center;
-    padding: 20px;
-    min-height: auto;
-    border-radius: 15px;
-    overflow: hidden;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalendarz</title>
+    <style>
+        .calendar-container {
+            background-color: #f8f9fa; /* Jasny szary */
+            color: #333333; /* Ciemnoszary */
+            text-align: center;
+            padding: 20px;
+            min-height: auto;
+            border-radius: 15px;
+            overflow: hidden;
+        }
 
-.header {
-    position: relative;
-    background-color: #b4dfe5; /* Pastelowy niebieski */
-    color: #333333; /* Ciemnoszary */
-    justify-content: center;
-    align-items: center;
-    border-radius: 15px;
-    text-align: center;
-    padding: 20px 0;
-    width: 100%; /* Szerokość 100% */
-    margin: 0; /* Usunięcie marginesów */
-    display: inline-block; /* Wyśrodkowanie */
-}
+        .header {
+            position: relative;
+            background-color: #b4dfe5; /* Pastelowy niebieski */
+            color: #333333; /* Ciemnoszary */
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            text-align: center;
+            padding: 20px 0;
+            width: 100%; /* Szerokość 100% */
+            margin: 0; /* Usunięcie marginesów */
+            display: inline-block; /* Wyśrodkowanie */
+        }
 
-.calendar {
-    float: left;
-    margin-left: 13%;
-    border-radius: 15px;
-    overflow: hidden;
-}
+        .calendar {
+            float: left;
+            margin-left: 13%;
+            border-radius: 15px;
+            overflow: hidden;
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #53798e;
-}
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #53798e;
+        }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 5px;
-    text-align: center;
-    position: relative;
-    cursor: pointer;
-    width: calc(100% / 7);
-    font-size: 12px;
-}
+        th, td {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            width: calc(100% / 7);
+            font-size: 12px;
+        }
 
-th {
-    background-color: #42464a;
-    color: white;
-}
+        th {
+            background-color: #42464a;
+            color: white;
+        }
 
-td:hover {
-    background-color: #177d8d;
-}
+        td:hover {
+            background-color: #177d8d;
+        }
 
-.event-info {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #42464a;
-    color: white;
-    padding: 10px;
-    z-index: 1;
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    max-width: 1000px;
-    white-space: normal;
-    width: fit-content;
-}
+        .event-info {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #42464a;
+            color: white;
+            padding: 10px;
+            z-index: 1;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            max-width: 1000px;
+            white-space: normal;
+            width: fit-content;
+        }
 
-td.has-event:hover .event-info {
-    display: block;
-    opacity: 1;
-}
+        td.has-event:hover .event-info {
+            display: block;
+            opacity: 1;
+        }
 
-tbody {
-    color: white;
-}
+        tbody {
+            color: white;
+        }
 
-.event-info ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    text-align: left;
-}
+        .event-info ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
 
-.event-info ul li {
-    margin-bottom: 5px;
-}
+        .event-info ul li {
+            margin-bottom: 5px;
+        }
 
-.dot {
-    height: 10px;
-    width: 10px;
-    background-color: #42464a;
-    border-radius: 50%;
-    position: absolute;
-    bottom: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: none;
-}
+        .dot {
+            height: 10px;
+            width: 10px;
+            background-color: #42464a;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+        }
 
-td.has-event .dot {
-    display: block;
-}
-</style>
+        td.has-event .dot {
+            display: block;
+        }
 
+        .btn-container {
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 20px;
+            margin: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            border-radius: 5px;
+            background-color: #42464a;
+            color: white;
+            border: none;
+        }
+
+        .btn:hover {
+            background-color: #177d8d;
+        }
+    </style>
+</head>
+<body>
 <div class="calendar-container">
     <h1 style="width: 100%; text-align: center;">Kalendarz</h1>
     <div class="header">
+        <h2>{{ current_month }} {{ current_year }}</h2>
         <div class="calendar">
             <table class="table table-bordered">
                 <thead>
-                    <tr>
-                        <th colspan="7">{{ current_month }}</th>
-                    </tr>
                     <tr>
                         <th>Poniedziałek</th>
                         <th>Wtorek</th>
@@ -132,28 +158,35 @@ td.has-event .dot {
                 </thead>
                 <tbody>
                     {% for week in calendar %}
-                    <tr>
-                        {% for day, events in week %}
-                        <td class="{% if events %}has-event{% endif %}">
-                            {% if day %}
-                            <span class="day">{{ day }}</span>
-                            <div class="dot"></div>
-                            <div class="event-info">
-                                <ul>
-                                    {% for event in events %}
-                                    <li><strong>{{ event.name }}</strong></li>
-                                    <li><em>{{ event.date }}</em></li>
-                                    <li>{{ event.place }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                            {% endif %}
-                        </td>
-                        {% endfor %}
-                    </tr>
+                        <tr>
+                            {% for day, events in week %}
+                                <td class="{% if events %}has-event{% endif %}">
+                                    {% if day %}
+                                        <span class="day">{{ day }}</span>
+                                        <div class="dot"></div>
+                                        <div class="event-info">
+                                            <ul>
+                                                {% for event in events %}
+                                                    <li><strong>{{ event.name }}</strong></li>
+                                                    <li><em>{{ event.date }}</em></li>
+                                                    <li>{{ event.place }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
+    <div class="btn-container">
+        <a class="btn" href="{{ url_for('views.home', prev_month=prev_month, prev_year=prev_year) }}">Poprzedni miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=current_month, current_year=current_year) }}">Aktualny miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', next_month=next_month, next_year=next_year) }}">Następny miesiąc</a>
+    </div>
 </div>
+</body>
+</html>
