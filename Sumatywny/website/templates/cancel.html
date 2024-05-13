@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Anulowana płatność</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #f0f0f0; /* Szare tło */
+      color: #333; /* Ciemny kolor tekstu */
+      font-family: 'Arial', sans-serif; /* Rodzina czcionek */
+    }
+    .container {
+      background-color: #ecf0f1; /* Jasnoszare tło kontenera */
+      border-radius: 5px; /* Zaokrąglenie rogów kontenera */
+      max-width: 600px; /* Ograniczenie szerokości kontenera */
+      margin: 20px auto; /* Centrowanie i margines */
+      padding: 20px; /* Wewnętrzne wypełnienie */
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Cień */
+      text-align: center; /* Wycentrowanie tekstu */
+    }
+    a {
+      color: #2c3e50; /* Kolor odnośników */
+    }
+    .countdown {
+      color: #888; /* Kolor tekstu odliczania */
+      margin-top: 10px; /* Górny margines */
+    }
+  </style>
+  <script>
+    function startCountdown(duration, display) {
+      var timer = duration, seconds;
+      setInterval(function () {
+        seconds = parseInt(timer % 60, 10);
+        display.textContent = seconds + " sekund" + (seconds === 1 ? "e" : "")+(seconds === 2 ? "y":"")+(seconds === 3 ? "y":"");
+
+        if (--timer < 0) {
+          window.location.href = '/';
+        }
+      }, 1000);
+    }
+
+    window.onload = function () {
+      var countdownDuration = 3;
+      var display = document.querySelector('#time');
+      startCountdown(countdownDuration, display);
+    };
+  </script>
+</head>
+<body>
+  <div class="container">
+    <section>
+      <p>Zawsze możesz wrócić do płatności.</p>
+      <p class="countdown">Przekierowanie na stronę główną za <span id="time">3 sekundy</span>.</p>
+    </section>
+  </div>
+</body>
+</html>

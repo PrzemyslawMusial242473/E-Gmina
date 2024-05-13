@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Wydarzenia{% endblock %}
+{% block title %}Zgłoś śmiecia{% endblock %}
 {% block content %}
     <style>
         body {
@@ -42,7 +42,7 @@
             background-color: #007bff; /* Niebieski */
             color: #ffffff; /* Biały */
             cursor: pointer;
-            width:auto;
+            width:15%;
         }
     </style>
     <div class="container">
@@ -50,22 +50,15 @@
             <div class="col-md-6">
                 <div class="container1">
                     <div class="container_event">
-                        <h1 align="center">Dodaj wydarzenie</h1>
+                        <h1 align="center">Zgłoś przestępstwo</h1>
                         <body>
                             <form method="POST">
-                                <label for="name">Nazwa:</label><br>
-                                <input type="text" id="name" name="name" required><br>
-
-                                <label for="data">Opis:</label><br>
-                                <input type="text" id="data" name="data" required><br>
-
-                                <label for="date">Data:</label><br>
-                                <input type="datetime-local" id="date" name="date" required><br>
-
-                                <label for="place">Adres:</label><br>
+                                <label for="place">Gdzie to jest?:</label><br>
                                 <input type="text" id="place" name="place" required><br>
 
-                                <button type="submit">Dodaj wydarzenie</button>
+                                <label for="data">Co się dzieje:</label><br>
+                                <input type="text" id="data" name="data" required><br>
+                                <button type="submit">Zgłoś</button>
                             </form>
                         </body>
                     </div>
@@ -73,21 +66,21 @@
             </div>
             <div class="col-md-6">
                 <div class="container2">
-                    <div class="container_event">
-                        <h2 align="center">Moje wydarzenia</h2>
-                        <ul class="list-group list-group-flush" id="Events">
-                            {% for event in user_events %}
+                    <div class="container_report">
+                        <h2 align="center">Moje zgłoszenia</h2>
+                        <ul class="list-group list-group-flush" id="Reports">
+                            {% for report in user_reports %}
                                 <li class="list-group-item">
-                                    {% if event.status == 'rejected' %}
-                                        <p>Twoje wydarzenie "{{ event.name }}" zostało odrzucone.</p>
-                                        <button type="button"  onclick="deleteEvent({{ event.id }})" >Usuń</button>
-                                    {% else %}
-                                        <strong>Nazwa:</strong> {{ event.name }}<br>
-                                        <strong>Opis:</strong> {{ event.data }}<br>
-                                        <strong>Data:</strong> {{ event.date }}<br>
-                                        <strong>Adres:</strong> {{ event.place }}<br>
-                                        <div id="map-{{ event.id }}" style="height: 200px;"></div>
-                                        <button type="button"  onclick="deleteEvent({{ event.id }})" >Usuń</button>
+                                    <strong>Opis:</strong> {{ report.data }}<br>
+                                    <strong>Data:</strong> {{ report.date }}<br>
+                                    <strong>Miejsce:</strong> {{ report.place }}<br>
+                                    <div id="map-{{ report.id }}" style="height: 200px;"></div>
+                                    {% if report.status == 'rejected' %}
+                                        <p>Twoje zgłoszenie zostało odrzucone.</p>
+                                    {% elif report.status == 'accepted' %}
+                                        <p>Twoje zgłoszenie zostało zatwierdzone.</p>
+                                    {%else%}
+                                        <p>Twoje zgłoszenie czeka na rozpatrzenie.</p>
                                     {% endif %}
                                 </li>
                             {% endfor %}
@@ -99,19 +92,19 @@
     </div>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M"></script>
     <script>
-        {% for event in user_events %}
-            var map{{ event.id }} = new google.maps.Map(document.getElementById('map-{{ event.id }}'), {
+        {% for report in user_reports %}
+            var map{{ report.id }} = new google.maps.Map(document.getElementById('map-{{ report.id }}'), {
                 center: { lat: -34.397, lng: 150.644 },
                 zoom: 15
             });
 
-            var geocoder{{ event.id }} = new google.maps.Geocoder();
-            var address{{ event.id }} = "{{ event.place }}";
-            geocoder{{ event.id }}.geocode({ 'address': address{{ event.id }} }, function (results, status) {
+            var geocoder{{ report.id }} = new google.maps.Geocoder();
+            var address{{ report.id }} = "{{ report.place }}";
+            geocoder{{ report.id }}.geocode({ 'address': address{{ report.id }} }, function (results, status) {
                 if (status === 'OK') {
-                    map{{ event.id }}.setCenter(results[0].geometry.location);
-                    var marker{{ event.id }} = new google.maps.Marker({
-                        map: map{{ event.id }},
+                    map{{ report.id }}.setCenter(results[0].geometry.location);
+                    var marker{{ report.id }} = new google.maps.Marker({
+                        map: map{{ report.id }},
                         position: results[0].geometry.location
                     });
                 } else {

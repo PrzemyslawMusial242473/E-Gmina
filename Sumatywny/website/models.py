@@ -56,6 +56,7 @@ class User(db.Model, UserMixin):
     status = db.Column(db.String(50), default='pending')
     role = db.Column(db.String(50), default='user')
     Events = db.relationship('Event')
+    Reports = db.relationship('Report')
     friends = db.relationship(
         'User',
         secondary=friends,
@@ -116,3 +117,11 @@ class Message(db.Model):
 
     sender = db.relationship('User', foreign_keys=[sender_id])
     receiver = db.relationship('User', foreign_keys=[receiver_id])
+    
+class Report(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    data = db.Column(db.String(10000))
+    date = db.Column(db.DateTime(timezone=True), default=func.now())
+    place = db.Column(db.String(150))
+    status = db.Column(db.String(50), default='pending')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))

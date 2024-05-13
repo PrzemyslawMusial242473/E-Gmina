@@ -1,11 +1,13 @@
 import requests
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import Event, MapMarker, User, Message
+from .models import Event, MapMarker, User, Message,Report
+from datetime import datetime
 from . import db
 import json
 import calendar
 import datetime
+import stripe
 
 views = Blueprint('views', __name__)
 
@@ -28,19 +30,39 @@ def generate_calendar(year, month, month_events):
     return weeks
 
 
+import calendar
+
 @views.route('/', methods=['GET', 'POST'])
 def home():
     today = datetime.date.today()
-    current_month = today.strftime("%B")
     year = today.year
     month = today.month
+
+    # Sprawdź, czy został przesłany formularz z informacją o zmianie miesiąca
+    if request.method == 'GET':
+        if 'prev_month' in request.args:
+            month -= 1
+            if month == 0:
+                month = 12
+                year -= 1
+        elif 'next_month' in request.args:
+            month += 1
+            if month == 13:
+                month = 1
+                year += 1
+
     month_events = get_month_events(year, month)
     accepted_month_events = [event for event in month_events if event.status == 'accepted']
     weeks = generate_calendar(year, month, accepted_month_events)
     accepted_events = Event.query.filter_by(status='accepted').all()
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
-    return render_template("home.html", calendar=weeks, current_month=current_month, user=current_user,
+
+    # Pobierz nazwę aktualnego miesiąca po polsku
+    current_month_name = calendar.month_name[month]
+
+    return render_template("home.html", calendar=weeks, current_month=current_month_name, user=current_user,
                            accepted_events=accepted_events, markers=markers)
+
 
 
 @views.route('/delete-event', methods=['POST'])
@@ -370,6 +392,25 @@ def admin_users():
 
     return render_template('admin_users.html', user=current_user, pending_users=pending_users)
 
+@views.route("/report", methods=['GET', 'POST'])
+@login_required
+def report():
+    user_reports = list(reversed(current_user.Reports))
+    if request.method == 'POST':
+        data = request.form.get('data')
+        place = request.form.get('place')
+        date = datetime.datetime.now()
+            
+        new_report = Report(data=data, date=date, place=place, user_id=current_user.id, status='pending')
+        db.session.add(new_report) 
+        db.session.commit()  
+        flash('Wydarzenie zawnioskowano!', category='success')
+            
+            
+        return redirect(url_for('views.report'))  
+    
+    return render_template('report.html', user=current_user,user_reports=user_reports)
+
 @views.route('/update_user_status/<int:user_id>/<string:action>', methods=['POST'])
 @login_required
 def update_user_status(user_id, action):
@@ -392,3 +433,98 @@ def update_user_status(user_id, action):
         flash('Użytkownik został odrzucony.', category='warning')
 
     return redirect(url_for('views.admin_users'))
+
+@views.route('/update_report_status/<int:report_id>/<string:action>', methods=['POST'])
+@login_required
+def update_report_status(report_id, action):
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej akcji.', category='danger')
+        return redirect(url_for('views.admin_reports'))
+
+    report = Report.query.get(report_id)
+    if not report:
+        flash('Nie znaleziono zgłoszenia.', category='danger')
+        return redirect(url_for('views.admin_reports'))
+
+    if action == 'accept':
+        report.status = 'accepted'
+        db.session.commit()
+        flash('Zgłoszenie zostało zaakceptowane.', category='success')
+    elif action == 'reject':
+        report.status = 'rejected'
+        db.session.commit()
+        flash('Zgłoszenie zostało odmówione.', category='warning')
+
+    return redirect(url_for('views.admin_reports'))
+
+@views.route('/admin-reports', methods=['GET', 'POST'])
+@login_required
+def admin_reports():
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej strony.', category='danger')
+        return redirect(url_for('views.home'))
+    
+    pending_reports = Report.query.filter_by(status='pending').all()
+    
+    if request.method == 'POST':
+        report_id = request.form.get('report_id')
+        action = request.form.get('action')  
+        
+        if action == 'accept':
+            event = Event.query.get(report_id)
+            event.status = 'accepted'
+            db.session.add(event)
+            db.session.commit()
+            flash('Zgłoszenie zostało zaakceptowane.', category='success')
+        elif action == 'reject':
+            event = Event.query.get(report_id)
+            event.status = 'rejected'
+            flash('Zgłoszenie zostało odmówione.', category='warning')
+        
+        return redirect(url_for('views.admin_reports'))
+
+    return render_template('admin_reports.html',user=current_user, pending_reports=pending_reports)
+
+
+stripe.api_key = 'sk_test_51P9F8mAHsD0ooQchiY1nEJu6Q5jpeRG1lvI8JqL0eHXuLbjDdgsZR9ai5TDU6h7qWcBk0EvKWTaWY02K4AIRoB9m00oxqHLQ4m'
+
+
+@views.route('/payment', methods=['GET'])
+def payment():
+    return render_template('checkout.html')
+
+
+@views.route('/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'pln',
+                        'product_data': {
+                            'name': 'Rachunek za prąd',
+                        },
+                        'unit_amount': 9000,
+                    },
+                    'quantity': 1,
+                },
+            ],
+            mode='payment',
+            success_url='http://localhost:5000/success',
+            cancel_url='http://localhost:5000/cancel',
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception as e:
+        return str(e)
+
+
+@views.route('/success')
+def success():
+    return render_template('sucess.html')
+
+
+@views.route('/cancel')
+def cancel():
+    return render_template('cancel.html')
