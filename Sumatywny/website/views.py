@@ -30,19 +30,39 @@ def generate_calendar(year, month, month_events):
     return weeks
 
 
+import calendar
+
 @views.route('/', methods=['GET', 'POST'])
 def home():
     today = datetime.date.today()
-    current_month = today.strftime("%B")
     year = today.year
     month = today.month
+
+    # Sprawdź, czy został przesłany formularz z informacją o zmianie miesiąca
+    if request.method == 'GET':
+        if 'prev_month' in request.args:
+            month -= 1
+            if month == 0:
+                month = 12
+                year -= 1
+        elif 'next_month' in request.args:
+            month += 1
+            if month == 13:
+                month = 1
+                year += 1
+
     month_events = get_month_events(year, month)
     accepted_month_events = [event for event in month_events if event.status == 'accepted']
     weeks = generate_calendar(year, month, accepted_month_events)
     accepted_events = Event.query.filter_by(status='accepted').all()
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
-    return render_template("home.html", calendar=weeks, current_month=current_month, user=current_user,
+
+    # Pobierz nazwę aktualnego miesiąca po polsku
+    current_month_name = calendar.month_name[month]
+
+    return render_template("home.html", calendar=weeks, current_month=current_month_name, user=current_user,
                            accepted_events=accepted_events, markers=markers)
+
 
 
 @views.route('/delete-event', methods=['POST'])
