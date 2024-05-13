@@ -7,6 +7,7 @@ from . import db
 import json
 import calendar
 import datetime
+import stripe
 
 views = Blueprint('views', __name__)
 
@@ -463,3 +464,47 @@ def admin_reports():
         return redirect(url_for('views.admin_reports'))
 
     return render_template('admin_reports.html',user=current_user, pending_reports=pending_reports)
+
+
+stripe.api_key = 'sk_test_51P9F8mAHsD0ooQchiY1nEJu6Q5jpeRG1lvI8JqL0eHXuLbjDdgsZR9ai5TDU6h7qWcBk0EvKWTaWY02K4AIRoB9m00oxqHLQ4m'
+
+
+@views.route('/payment', methods=['GET'])
+def payment():
+    return render_template('checkout.html')
+
+
+@views.route('/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price_data': {
+                        'currency': 'pln',
+                        'product_data': {
+                            'name': 'Rachunek za prąd',
+                        },
+                        'unit_amount': 9000,
+                    },
+                    'quantity': 1,
+                },
+            ],
+            mode='payment',
+            success_url='http://localhost:5000/success',
+            cancel_url='http://localhost:5000/cancel',
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception as e:
+        return str(e)
+
+
+@views.route('/success')
+def success():
+    return render_template('sucess.html')
+
+
+@views.route('/cancel')
+def cancel():
+    return render_template('cancel.html')
