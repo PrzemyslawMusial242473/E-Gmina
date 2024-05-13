@@ -5,36 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalendarz</title>
     <style>
-        .calendar-container {
-            background-color: #f8f9fa; /* Jasny szary */
-            color: #333333; /* Ciemnoszary */
-            text-align: center;
-            padding: 20px;
-            min-height: auto;
-            border-radius: 15px;
-            overflow: hidden;
-        }
+    .calendar-container {
+        background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center; /* Wyśrodkowanie zawartości */
+        padding: 20px;
+        min-height: auto;
+        border-radius: 15px;
+        overflow: hidden;
+    }
 
-        .header {
-            position: relative;
-            background-color: #b4dfe5; /* Pastelowy niebieski */
-            color: #333333; /* Ciemnoszary */
-            justify-content: center;
-            align-items: center;
-            border-radius: 15px;
-            text-align: center;
-            padding: 20px 0;
-            width: 100%; /* Szerokość 100% */
-            margin: 0; /* Usunięcie marginesów */
-            display: inline-block; /* Wyśrodkowanie */
-        }
+    .header {
+        position: relative;
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        text-align: center;
+        padding: 20px 0;
+        width: 100%; /* Szerokość 100% */
+        margin: 0; /* Usunięcie marginesów */
+        display: inline-block; /* Wyśrodkowanie */
+    }
 
-        .calendar {
-            float: left;
-            margin-left: 13%;
-            border-radius: 15px;
-            overflow: hidden;
-        }
+    .calendar {
+        /* Usunięcie atrybutu float: left; */
+        /* float: left; */
+        /* margin: 0 auto; */ /* Usunięcie marginesu automatycznego */
+        border-radius: 15px;
+        overflow: hidden;
+        display: inline-block; /* Dodanie inline-block */
+    }
 
         table {
             width: 100%;

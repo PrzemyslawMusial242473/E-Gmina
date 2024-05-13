@@ -2,100 +2,102 @@
 {% block title %}Znajomi{% endblock %}
 {% block content %}
 <style>
-  .container1, .container2, .container3 {
+  /* Nowy styl CSS */
+  .container1, .container2, .container3, .container4 {
+    background-color: #f8f9fa; /* Jasny szary */
+    color: #333333; /* Ciemnoszary */
+    text-align: center;
+    padding: 20px;
+    padding-top: 1px;
     border-radius: 15px;
-    border: 2px solid white; /* Dodajemy białą obwódkę */
-    overflow: hidden; /* Zapobiega wydostawaniu się elementów potomnych poza kontener */
-    font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
+    width: 100%;
+    margin-top: 7%;
+    margin-bottom: 20px; /* Dodatkowy margines na dole kontenera */
+    margin-left: auto; /* Wyśrodkowanie kontenerów */
+    margin-right: auto; /* Wyśrodkowanie kontenerów */
   }
-  .container1, .container2, .container3, .container_map {
-    border-radius: 10px; /* Zaokrąglamy rogi */
+
+  .container-login {
+    background-color: #b4dfe5; /* Pastelowy niebieski */
+    color: #333333; /* Ciemnoszary */
+    border-radius: 15px;
+    padding: 30px;
+    margin-top: 20px;
   }
 </style>
-<div class="container">
-  <div class="row">
-    <div class="col-md-4">
-      <div class="container1" style="background-color: #b4dfe5;">
-        <h2 class="text-center">Dodaj znajomego</h2>
-        <div class="container_map">
-          <form method="POST">
-            <div class="form-group">
-              <label for="inputEmail">Nazwa użytkownika</label>
-              <input type="text" class="form-control" id="inputEmail" name="username" placeholder="Wpisz nazwę użytkownika">
-            </div>
-            <button type="submit" class="btn btn-info btn-block">Wyślij zaproszenie</button>
-          </form>
-        </div>
-      </div>
-    </div>
 
-    <div class="col-md-4">
-      <div class="container2" style="background-color: #b4dfe5;">
-        <h2 class="text-center">Otrzymane zaproszenia</h2>
-        <div class="container_map">
-          <ul class="list-group">
-            {% if user.invitations %}
-              {% for invite in user.invitations %}
-                <li class="list-group-item">{{ invite.username }}
-                    <button class="btn btn-success" onclick="acceptInvite('{{ invite.username }}')">Zaakceptuj</button>
-                    <button class="btn btn-danger" onclick="rejectInvite('{{ invite.username }}')">Odrzuć</button>
-                    <form action="/block-user/{{ invite.id }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ invite.username }}?')">Zablokuj</button>
-                    </form>
-                </li>
-              {% endfor %}
-            {% else %}
-              <li class="list-group-item">Brak otrzymanych zaproszeń.</li>
-            {% endif %}
-          </ul>
-        </div>
+<div class="container1">
+  <h1 align="center">Dodaj znajomego</h1>
+  <div class="container-login">
+    <form method="POST">
+      <div class="form-group">
+        <label for="inputEmail">Nazwa użytkownika</label>
+        <input type="text" class="form-control" id="inputEmail" name="username" placeholder="Wpisz nazwę użytkownika">
       </div>
-    </div>
+      <button type="submit" class="btn btn-info btn-block">Wyślij zaproszenie</button>
+    </form>
+  </div>
+</div>
 
-    <div class="col-md-4">
-      <div class="container3" style="background-color: #b4dfe5;">
-        <h2 class="text-center">Znajomi</h2>
-        <div class="container_map">
-          <ul class="list-group">
-            {% if user.friends %}
-              {% for friend in user.friends %}
-                <li class="list-group-item">{{ friend.username }} <a class="btn btn-info" href="/chat/{{ friend.id }}">Chat</a>
-                    <form action="/remove-friend/{{ friend.id }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć {{ friend.username }} z listy znajomych?')">Usuń</button>
-                    </form>
-                    <form action="/block-user/{{ friend.id }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ friend.username }}?')">Zablokuj</button>
-                    </form>
-                </li>
-              {% endfor %}
-            {% else %}
-              <li class="list-group-item">Brak znajomych.</li>
-            {% endif %}
-          </ul>
-        </div>
-      </div>
-    </div>
+<div class="container2">
+  <h1 align="center">Otrzymane zaproszenia</h1>
+  <div class="container-login">
+    <ul class="list-group">
+      {% if user.invitations %}
+        {% for invite in user.invitations %}
+          <li class="list-group-item">{{ invite.username }}
+              <button class="btn btn-success" onclick="acceptInvite('{{ invite.username }}')">Zaakceptuj</button>
+              <button class="btn btn-danger" onclick="rejectInvite('{{ invite.username }}')">Odrzuć</button>
+              <form action="/block-user/{{ invite.id }}" method="post" style="display:inline;">
+                  <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ invite.username }}?')">Zablokuj</button>
+              </form>
+          </li>
+        {% endfor %}
+      {% else %}
+        <li class="list-group-item">Brak otrzymanych zaproszeń.</li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
 
-    <div class="col-md-4">
-      <div class="container2" style="background-color: #b4dfe5;">
-        <h2 class="text-center">Zablokowani użytkownicy</h2>
-        <div class="container_map">
-          <ul class="list-group">
-            {% if user.blocked %}
-              {% for blocked_user in user.blocked %}
-                <li class="list-group-item">{{ blocked_user.username }}
-                    <form action="/unblock-user/{{ blocked_user.id }}" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-info" onclick="return confirm('Czy na pewno chcesz odblokować {{ blocked_user.username }}?')">Odblokuj</button>
-                    </form>
-                </li>
-              {% endfor %}
-            {% else %}
-              <li class="list-group-item">Brak zablokowanych użytkowników.</li>
-            {% endif %}
-          </ul>
-        </div>
-      </div>
-    </div>
+<div class="container3">
+  <h1 align="center">Znajomi</h1>
+  <div class="container-login">
+    <ul class="list-group">
+      {% if user.friends %}
+        {% for friend in user.friends %}
+          <li class="list-group-item">{{ friend.username }} <a class="btn btn-info" href="/chat/{{ friend.id }}">Chat</a>
+              <form action="/remove-friend/{{ friend.id }}" method="post" style="display:inline;">
+                  <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć {{ friend.username }} z listy znajomych?')">Usuń</button>
+              </form>
+              <form action="/block-user/{{ friend.id }}" method="post" style="display:inline;">
+                  <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ friend.username }}?')">Zablokuj</button>
+              </form>
+          </li>
+        {% endfor %}
+      {% else %}
+        <li class="list-group-item">Brak znajomych.</li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+
+<div class="container4">
+  <h1 align="center">Zablokowani użytkownicy</h1>
+  <div class="container-login">
+    <ul class="list-group">
+      {% if user.blocked %}
+        {% for blocked_user in user.blocked %}
+          <li class="list-group-item">{{ blocked_user.username }}
+              <form action="/unblock-user/{{ blocked_user.id }}" method="post" style="display:inline;">
+                  <button type="submit" class="btn btn-info" onclick="return confirm('Czy na pewno chcesz odblokować {{ blocked_user.username }}?')">Odblokuj</button>
+              </form>
+          </li>
+        {% endfor %}
+      {% else %}
+        <li class="list-group-item">Brak zablokowanych użytkowników.</li>
+      {% endif %}
+    </ul>
   </div>
 </div>
 
