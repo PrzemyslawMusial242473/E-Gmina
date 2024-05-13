@@ -55,7 +55,7 @@
                 {% if current_user.is_authenticated %}
                     {% if current_user.role == 'user'%}
                         <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
-                        <a class="nav-item nav-link" id="report-button" href='/report'>Zgłoś śmiecia</a>
+                        <a class="nav-item nav-link" id="report-button" href='/report'>Zgłoś przestępstwo</a>
                         <a class="nav-item nav-link" id="platnosc-button" href='/payment'>Płatność</a>
                     {% endif %}
                     {% if current_user.role != 'user' %}
