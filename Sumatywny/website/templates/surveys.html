@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Dostępne Ankiety{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>Dostępne Ankiety</h2>
+    <ul class="list-group">
+        {% for survey in surveys %}
+            <li class="list-group-item">
+                <a href="{{ url_for('views.fill_survey', survey_id=survey.id) }}">{{ survey.title }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

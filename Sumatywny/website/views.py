@@ -1,7 +1,7 @@
 import requests
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import Event, MapMarker, User, Message,Report
+from .models import Event, MapMarker, User, Message,Report, Survey, Answer, Question
 from datetime import datetime
 from . import db
 import json
@@ -528,3 +528,45 @@ def success():
 @views.route('/cancel')
 def cancel():
     return render_template('cancel.html')
+
+@views.route('/surveys', methods=['GET'])
+@login_required
+def surveys():
+    surveys = Survey.query.filter_by(status='active').all()
+    return render_template('surveys.html', surveys=surveys,user=current_user)
+
+@views.route('/survey/<int:survey_id>', methods=['GET', 'POST'])
+@login_required
+def fill_survey(survey_id):
+    survey = Survey.query.get_or_404(survey_id)
+    if request.method == 'POST':
+        for question in survey.questions:
+            answer_text = request.form.get(f'question_{question.id}')
+            answer = Answer(text=answer_text, question_id=question.id, user_id=current_user.id)
+            db.session.add(answer)
+        db.session.commit()
+        survey.status = "completed"
+        db.session.add(survey)
+        db.session.commit()
+        flash('Dziękujemy za wypełnienie ankiety!', 'success')
+        return redirect(url_for('views.surveys'))
+    return render_template('survey.html', survey=survey, user=current_user)
+
+@views.route('/create-survey', methods=['GET', 'POST'])
+@login_required
+def create_survey():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        survey = Survey(title=title)
+        questions = request.form.getlist('questions[]')
+        db.session.add(survey)
+        db.session.commit()
+        for question_text in questions:
+            if question_text.strip():  
+                question = Question(text=question_text, survey_id=survey.id)
+                db.session.add(question)
+
+        db.session.commit()  
+        flash('Ankieta została utworzona!', 'success')
+        return redirect(url_for('views.create_survey'))
+    return render_template('create_survey.html',user=current_user)

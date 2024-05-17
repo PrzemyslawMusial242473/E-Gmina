@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Stwórz nową ankietę{% endblock %}
+{% block content %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333333;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333333;
+        }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script>
+        function addQuestionField() {
+            const questionList = document.getElementById('question-list');
+            const newQuestion = document.createElement('div');
+            newQuestion.classList.add('question');
+            const questionCount = document.querySelectorAll('.question').length + 1;
+            newQuestion.innerHTML = `
+                <label for="question_${questionCount}">Pytanie ${questionCount}:</label>
+                <input type="text" id="question_${questionCount}" name="questions[]" required>
+                <button type="button" onclick="removeQuestionField(this)">Remove</button>
+            `;
+            questionList.appendChild(newQuestion);
+        }
+
+        function removeQuestionField(button) {
+            const questionList = document.getElementById('question-list');
+            questionList.removeChild(button.parentElement);
+        }
+    </script>
+</head>
+<body>
+    <h1>Stwórz nową ankiete</h1>
+    <form method="POST">
+        <div>
+            <label for="title">Nazwa ankiety</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+        <div id="question-list">
+            <div class="question">
+                <label for="question_1">Pytanie 1:</label>
+                <input type="text" id="question_1" name="questions[]" required>
+            </div>
+        </div>
+        <button type="button" onclick="addQuestionField()">Dodaj Pytanie</button>
+        <button type="submit">Stwórz ankiete</button>
+    </form>
+</body>
+{% endblock %}
