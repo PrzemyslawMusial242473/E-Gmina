@@ -33,6 +33,23 @@ y_blocked = db.Table(
     db.Column('blocked_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
 )
 
+class Survey(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    status = db.Column(db.String(50), default='active')
+    questions = db.relationship('Question', backref='survey', lazy=True)
+
+class Question(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(500), nullable=False)
+    survey_id = db.Column(db.Integer, db.ForeignKey('survey.id'), nullable=False)
+    answers = db.relationship('Answer', backref='question', lazy=True)
+
+class Answer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(500), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -57,6 +74,7 @@ class User(db.Model, UserMixin):
     role = db.Column(db.String(50), default='user')
     Events = db.relationship('Event')
     Reports = db.relationship('Report')
+    answers = db.relationship('Answer', backref='user', lazy=True)
     friends = db.relationship(
         'User',
         secondary=friends,

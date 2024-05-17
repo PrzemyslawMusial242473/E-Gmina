@@ -57,12 +57,14 @@
                         <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
                         <a class="nav-item nav-link" id="report-button" href='/report'>Zgłoś przestępstwo</a>
                         <a class="nav-item nav-link" id="platnosc-button" href='/payment'>Płatność</a>
+                        <a class="nav-item nav-link" id="ankiety-button" href='/surveys'>Ankiety</a>
                     {% endif %}
                     {% if current_user.role != 'user' %}
                         <a class="nav-item nav-link" id="events" href="/events">Wydarzenia</a>
                     {% endif %}
                     {% if current_user.role == 'admin' %}
                     <a class="nav-item nav-link" id="maps" href="/maps">Mapa</a>
+                    <a class="nav-item nav-link" id="admin_users" href="/create-survey">Stwórz ankiete</a>
                     <a class="nav-item nav-link" id="admin_events" href="/admin-events">Weryfikuj wydarzenia</a>
                     <a class="nav-item nav-link" id="admin_users" href="/admin-users">Weryfikuj konta</a>
                     <a class="nav-item nav-link" id="admin_users" href="/admin-reports">Weryfikuj zgłoszenia</a>
