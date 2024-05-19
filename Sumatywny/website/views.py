@@ -1,7 +1,7 @@
 import requests
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import Event, MapMarker, User, Message,Report, Survey, Answer, Question
+from .models import Event, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste
 from datetime import datetime
 from . import db
 import json
@@ -570,3 +570,13 @@ def create_survey():
         flash('Ankieta została utworzona!', 'success')
         return redirect(url_for('views.create_survey'))
     return render_template('create_survey.html',user=current_user)
+
+@views.route('/segregate', methods=['GET', 'POST'])
+@login_required
+def segregate():
+    result = None
+    if request.method == 'POST':
+        description = request.form.get('waste_description')
+        result = segregate_waste(description)
+    
+    return render_template('segregate.html', result=result, user=current_user,categories=CATEGORIES)

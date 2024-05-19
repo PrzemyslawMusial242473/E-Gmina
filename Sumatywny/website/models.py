@@ -143,3 +143,110 @@ class Report(db.Model):
     place = db.Column(db.String(150))
     status = db.Column(db.String(50), default='pending')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    
+CATEGORIES = {
+    "METALE I TWORZYWA SZTUCZNE": {
+            "plastikowe butelki po napojach",
+            "nakrętki",
+            "plastikowe opakowania po produktach spożywczych",
+            "opakowania wielomateriałowe",
+            "opakowania po środkach czystości",
+            "opakowania po kosmetykach",
+            "plastikowe torby", 
+            "worki", 
+            "reklamówki",  
+            "folie",
+            "aluminiowe puszki po napojach i sokach",
+            "puszki po konserwach",
+            "folię aluminiową",
+            "metale kolorowe",
+            "kapsel", 
+            "zakrętki od słoików"
+        
+    },
+    "PAPIER": {   
+            "opakowania z papieru",
+            "karton",
+            "tekturę",
+            "katalogi", 
+            "ulotki",
+            "prospekty",
+            "gazety i czasopisma",
+            "papier szkolny i biurowy",
+            "zadrukowane kartki",
+            "zeszyty",
+            "książki",
+            "papier pakowy",
+            "torby i worki papierowe"      
+    },
+    "SZKŁO": {
+            "butelki i słoiki po napojach i żywności",
+            "szklane opakowania po kosmetykach"
+    
+    },
+    "ODPADY BIODEGRADOWALNE": {
+            "odpadki warzywne i owocowe",
+            "gałęzie drzew i krzewów",
+            "skoszoną trawę",
+            "liście",
+            "kwiaty",
+            "trociny i korę drzew",
+            "niezaimpregnowane drewno",
+            "resztki jedzenia"
+        
+    },
+    "POZOSTAŁE":{
+        "plastikowe zabawki",
+        "opakowania po lekach i zużyte artykułów medyczne",
+        "ręczniki papierowe",
+        "zużyte chusteczki higieniczne",
+        "opakowania po olejach silnikowych",
+        "puszki i pojemniki po farbach i lakierach",
+        "papier zatłuszczy lub mocno zabrudzony",
+        "papierowe worki po nawozach, cemencie i innych materiałach budowlanych",
+        "tapet",
+        "pieluchy jednorazowe i inne materiałów higieniczne",
+        "jednorazowe opakowania z papieru",
+        "naczynia jednorazowe",
+        "ubrania",
+        "ceramika",
+        "doniczki",
+        "porcelana",
+        "fajans",
+        "kryształy",
+        "szkło okularowe",
+        "szkło żaroodporne",
+        "znicz z zawartością wosku",
+        "opakowania po rozpuszczalnikach", 
+        "opakowania po olejach silnikowe",
+        "lustro",
+        "szyby okienne i/lub zbrojone",
+        "kości zwierząt",
+        "oleje jadalne",
+        "odchody zwierząt",
+        "popiół z węgla kamiennego",
+        "drewno impregnowane",
+        "płyty wiórowe i pilśniowe MDF",
+        "ziemia",
+        "kamienie"   
+    },
+    "SPECJALNE":{
+        "części samochodowe",
+        "zużyte baterie",
+        "zużyte akumulatory",
+        "zużyty sprzęt elektroniczny i/lub AGD",
+        "żarówki",
+        "świetlówki",
+        "reflektory",
+        "monitory",
+        "lampy telewizyjne",
+        "termometry",
+        "strzykawki",
+        "inne niebezpieczne odpady komunalne"    
+    }
+}
+def segregate_waste(description):
+    for category, items in CATEGORIES.items():
+        if description in items:
+            return f"{description} należy wyrzucać do: {category}"
+    return f"Nie posiadamy '{description}' w bazie śmieci"
