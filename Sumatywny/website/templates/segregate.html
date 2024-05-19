@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Segregacja Odpadów{% endblock %}
+{% block content %}
+<body>
+    <div class="container">
+        <h1>Segregacja Odpadów</h1>
+        <form action="{{ url_for('views.segregate') }}" method="post">
+            <label for="waste_description">Opis odpadu:</label>
+            <input type="text" id="waste_description" name="waste_description" list="waste_list" required>
+            <datalist id="waste_list">
+                {% for category, items in categories.items() %}
+                    {% for item in items %}
+                        <option value="{{ item }}">{{ item }}</option>
+                    {% endfor %}
+                {% endfor %}
+            </datalist>
+            <button type="submit">Segreguj</button>
+        </form>
+        {% if result %}
+            <p>{{ result }}</p>
+        {% endif %}
+    </div>
+</body>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    .container {
+        width: 50%;
+        margin: 0 auto;
+        text-align: center;
+    }
+    input[type="text"], datalist {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+    }
+    button {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #45a049;
+    }
+</style>
+{% endblock %}
