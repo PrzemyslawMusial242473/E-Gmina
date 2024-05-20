@@ -580,3 +580,9 @@ def segregate():
         result = segregate_waste(description)
     
     return render_template('segregate.html', result=result, user=current_user,categories=CATEGORIES)
+
+
+@views.route('/user_info')
+@login_required
+def user_info():
+    return render_template('user_info.html', user=current_user)
