@@ -11,6 +11,12 @@ import stripe
 
 views = Blueprint('views', __name__)
 
+polish_month_names = {
+    1: "Styczeń", 2: "Luty", 3: "Marzec", 4: "Kwiecień", 5: "Maj", 6: "Czerwiec",
+    7: "Lipiec", 8: "Sierpień", 9: "Wrzesień", 10: "Październik", 11: "Listopad", 12: "Grudzień"
+}
+
+
 def get_month_events(year, month):
     start_date = datetime.date(year, month, 1)
     end_date = datetime.date(year, month, calendar.monthrange(year, month)[1])
@@ -29,8 +35,6 @@ def generate_calendar(year, month, month_events):
         weeks.append(current_week)
     return weeks
 
-
-import calendar
 
 @views.route('/', methods=['GET', 'POST'])
 def home():
@@ -58,7 +62,7 @@ def home():
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
 
     # Pobierz nazwę aktualnego miesiąca po polsku
-    current_month_name = calendar.month_name[month]
+    current_month_name = polish_month_names[month]
 
     return render_template("home.html", calendar=weeks, current_month=current_month_name, user=current_user,
                            accepted_events=accepted_events, markers=markers)
