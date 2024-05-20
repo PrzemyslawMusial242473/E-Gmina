@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Wypełnij Ankietę{% endblock %}
+{% block content %}
+<div class="container">
+    <h2>{{ survey.title }}</h2>
+    <form method="POST">
+        {% for question in survey.questions %}
+        <div class="form-group">
+            <label>{{ question.text }}</label>
+            <input type="text" name="question_{{ question.id }}" class="form-control" required>
+        </div>
+    {% else %}
+        <p>Brak pytań w tej ankiecie.</p>
+    {% endfor %}
+        <button type="submit" class="btn btn-primary">Prześlij</button>
+    </form>
+</div>
+{% endblock %}
