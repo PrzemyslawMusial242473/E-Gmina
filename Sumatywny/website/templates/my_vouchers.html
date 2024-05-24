@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Wszystkie odblokowane bony{% endblock %}
+{% block content %}
+<style>
+body {
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    width: 50%;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background-color: #f9f9f9;
+}
+
+h1 {
+    text-align: center;
+}
+
+.stores {
+    display: flex;
+    flex-direction: column;
+}
+
+.store {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+h2 {
+    margin: 0;
+}
+
+p {
+    margin: 5px 0;
+}
+
+button {
+    margin-top: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.flashes {
+    list-style: none;
+    padding: 0;
+}
+
+.flashes li {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+</style>
+<body>
+    <h1>Moje Bony</h1>
+    <ul>
+        {% for voucher in vouchers %}
+        <li>
+            Sklep: {{ voucher.store_name }} - Kod: {{ voucher.code }} - Data wydania: {{ voucher.creation_time }}
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('views.exchange_points') }}">Wymień Punkty</a>
+</body>
+{% endblock %}
