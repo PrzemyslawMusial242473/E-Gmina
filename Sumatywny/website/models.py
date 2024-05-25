@@ -1,7 +1,7 @@
 from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
-import datetime
+import datetime,os
 
 friends = db.Table(
     'friends',
@@ -73,6 +73,7 @@ class User(db.Model, UserMixin):
     status = db.Column(db.String(50), default='pending')
     role = db.Column(db.String(50), default='user')
     loyalty_points = db.Column(db.Integer, default=0)
+    document_image = db.Column(db.String(150), nullable=True)
     Events = db.relationship('Event')
     Reports = db.relationship('Report')
     answers = db.relationship('Answer', backref='user', lazy=True)
@@ -269,3 +270,9 @@ stores = {
 org_stores = {
     'store1': {'name': 'Pizzera "Gruby Szymek" 2 pizze w cenie 1', 'cost': 10},
 }
+
+class Config:
+    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/document_images')
+    
+UPLOAD_FOLDER = 'Sumatywny/website/templates/static/document_images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
