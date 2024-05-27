@@ -2,6 +2,30 @@
 {% block title %}Weryfikacja Użytkowników{% endblock %}
 {% block content %}
 <style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f8f9fa;
+  }
+  .container {
+    background-color: #f8f9fa; /* Jasny szary */
+    color: #333333; /* Ciemnoszary */
+    text-align: center;
+    padding: 20px;
+    border-radius: 15px;
+    width: 95%;
+    margin: 2% auto; /* Zmieniono margin-top na margin, aby centrować */
+  }
+  .container_create_survey, .container_create_survey2 {
+    position: relative;
+    background-color: #b4dfe5; /* Pastelowy niebieski */
+    color: #333333; /* Ciemnoszary */
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    padding: 30px;
+    margin-top: 20px;
+  }
   .container1, .container2, .container3 {
     background-color: #b4dfe5; /* Jasny szary */
     border-radius: 15px;
@@ -9,85 +33,89 @@
     overflow: hidden; /* Zapobiega wydostawaniu się elementów potomnych poza kontener */
     font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
   }
-  .container_map {
-    background-color: #b4dfe5; /* Pastelowy niebieski */
-    color: #333333; /* Ciemnoszary */
-    justify-content: center;
-    align-items: center;
-    border-radius: 15px;
-    padding: 30px;
-    margin-top:20px;
-    font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
-  }
   .profile-image {
     max-width: 100px;
     max-height: 100px;
     border-radius: 50%;
   }
+  .btn-group {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+  }
+  .btn-group form {
+    margin: 0 5px;
+  }
+  .list-group-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 </style>
 <div class="container">
-  <div class="container1">
-    <h1 class="text-center">Weryfikacja Użytkowników</h1>
-  </div>
-
-  <div class="card">
-    <div class="card-header container2">
-      <h2 class="mb-0">Weryfikacja Organizacji</h2>
+  <h1 class="text-center">Weryfikacja Użytkowników</h1>
+  <div class="container_create_survey">
+    <div class="card">
+      <div class="card-header container2">
+        <h2 class="mb-0">Weryfikacja Organizacji</h2>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for user in pending_users %}
+          {% if user.role == 'organisation' %}
+            <li class="list-group-item container3">
+              <strong>Nazwa:</strong> {{ user.name }}<br>
+              <strong>Adres:</strong> {{ user.address }}<br>
+              <strong>Email:</strong> {{ user.email }}<br>
+              <strong>NIP:</strong> {{ user.uid }}<br>
+              {% if user.document_image %}
+                <img src="{{ url_for('static', filename=user.document_image) }}" alt="Profile Image" class="profile-image">
+              {% endif %}
+              <div class="btn-group mt-2" role="group">
+                <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
+                  <button type="submit" class="btn btn-success">Zatwierdź</button>
+                </form>
+                <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
+                  <button type="submit" class="btn btn-danger">Odrzuć</button>
+                </form>
+              </div>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
     </div>
-    <ul class="list-group list-group-flush">
-      {% for user in pending_users %}
-        {% if user.role == 'organisation' %}
-          <li class="list-group-item container3">
-            <strong>Nazwa:</strong> {{ user.name }}<br>
-            <strong>Adres:</strong> {{ user.address }}<br>
-            <strong>Email:</strong> {{ user.email }}<br>
-            <strong>NIP:</strong> {{ user.uid }}<br>
-            {% if user.document_image %}
-              <img src="{{ url_for('static', filename=user.document_image) }}" alt="Profile Image" class="profile-image">
-            {% endif %}
-            <div class="btn-group mt-2" role="group">
-              <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
-                <button type="submit" class="btn btn-success">Zatwierdź</button>
-              </form>
-              <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
-                <button type="submit" class="btn btn-danger">Odrzuć</button>
-              </form>
-            </div>
-          </li>
-        {% endif %}
-      {% endfor %}
-    </ul>
   </div>
-
-  <div class="card mt-4">
-    <div class="card-header container2">
-      <h2 class="mb-0">Weryfikacja Użytkowników</h2>
+  <div class="container_create_survey2">
+    <div class="card mt-4">
+      <div class="card-header container2">
+        <h2 class="mb-0">Weryfikacja Użytkowników</h2>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for user in pending_users %}
+          {% if user.role != 'organisation' %}
+            <li class="list-group-item container3">
+              <strong>Imię:</strong> {{ user.name }}<br>
+              <strong>Nazwisko:</strong> {{ user.surname }}<br>
+              <strong>Nazwa użytkownika:</strong> {{ user.username }}<br>
+              <strong>Adres:</strong> {{ user.address }}<br>
+              <strong>Email:</strong> {{ user.email }}<br>
+              <strong>Pesel:</strong> {{ user.uid }}<br>
+              {% if user.document_image %}
+                <img src="{{ url_for('static', filename='document_images/' ~ user.document_image) }}" class="document-image" width="300" height="200">
+              {% endif %}
+              <div class="btn-group mt-2" role="group">
+                <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
+                  <button type="submit" class="btn btn-success">Zatwierdź</button>
+                </form>
+                <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
+                  <button type="submit" class="btn btn-danger">Odrzuć</button>
+                </form>
+              </div>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
     </div>
-    <ul class="list-group list-group-flush">
-      {% for user in pending_users %}
-        {% if user.role != 'organisation' %}
-          <li class="list-group-item container3">
-            <strong>Imię:</strong> {{ user.name }}<br>
-            <strong>Nazwisko:</strong> {{ user.surname }}<br>
-            <strong>Nazwa użytkownika:</strong> {{ user.username }}<br>
-            <strong>Adres:</strong> {{ user.address }}<br>
-            <strong>Email:</strong> {{ user.email }}<br>
-            <strong>Pesel:</strong> {{ user.uid }}<br>
-            {% if user.document_image %}
-            <img src="{{ url_for('static', filename='document_images/' ~ user.document_image) }}" class="document-image"  width="300" height="200">
-            {% endif %}
-            <div class="btn-group mt-2" role="group">
-              <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
-                <button type="submit" class="btn btn-success">Zatwierdź</button>
-              </form>
-              <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
-                <button type="submit" class="btn btn-danger">Odrzuć</button>
-              </form>
-            </div>
-          </li>
-        {% endif %}
-      {% endfor %}
-    </ul>
   </div>
 </div>
 {% endblock %}
