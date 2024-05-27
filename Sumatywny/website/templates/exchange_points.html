@@ -6,14 +6,24 @@ body {
     font-family: Arial, sans-serif;
 }
 
-.container {
-    width: 50%;
-    margin: 0 auto;
+.container{
+    background-color: #f8f9fa; /* Jasny szary */
+    color: #333333; /* Ciemnoszary */
+    text-align: center;
     padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    background-color: #f9f9f9;
+    border-radius: 15px;
+    width: 95%;
+    margin-top: 2%;
+}
+.container_exchange_points{
+    position: relative;
+    background-color: #b4dfe5; /* Pastelowy niebieski */
+    color: #333333; /* Ciemnoszary */
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    padding: 30px;
+    margin-top:20px;
 }
 
 h1 {
@@ -75,20 +85,40 @@ button:hover {
     background-color: #f8d7da;
     color: #721c24;
 }
+
+/* New styles */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+.exchange-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.exchange-item form {
+    margin: 0;
+}
 </style>
-<body>
+
+<div class="container">
     <h1>Wymiana Punktów</h1>
-    <ul>
-        {% for store_key, store in stores.items() %}
-        <li>
-            {{ store.name }} - {{ store.cost }} punktów
-            <form action="{{ url_for('views.exchange_points') }}" method="POST" style="display: inline;">
-                <input type="hidden" name="store" value="{{ store_key }}">
-                <button type="submit">Wymień</button>
-            </form>
-        </li>
-        {% endfor %}
-    </ul>
-    <a href="{{ url_for('views.my_vouchers') }}">Moje Bony</a>
-</body>
+    <div class="container_exchange_points">
+        <ul>
+            {% for store_key, store in stores.items() %}
+            <li class="exchange-item">
+                <span>{{ store.name }} - {{ store.cost }} punktów</span>
+                <form action="{{ url_for('views.exchange_points') }}" method="POST">
+                    <input type="hidden" name="store" value="{{ store_key }}">
+                    <button type="submit">Wymień</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('views.my_vouchers') }}">Moje Bony</a>
+    </div>
+</div>
 {% endblock %}
