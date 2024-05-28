@@ -1,7 +1,7 @@
 from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
-import datetime
+import datetime,os
 
 friends = db.Table(
     'friends',
@@ -72,9 +72,12 @@ class User(db.Model, UserMixin):
     uid = db.Column(db.Integer, unique=True)
     status = db.Column(db.String(50), default='pending')
     role = db.Column(db.String(50), default='user')
+    loyalty_points = db.Column(db.Integer, default=0)
+    document_image = db.Column(db.String(150), nullable=True)
     Events = db.relationship('Event')
     Reports = db.relationship('Report')
     answers = db.relationship('Answer', backref='user', lazy=True)
+    vouchers = db.relationship('Voucher', backref='user', lazy=True)
     friends = db.relationship(
         'User',
         secondary=friends,
@@ -250,3 +253,26 @@ def segregate_waste(description):
         if description in items:
             return f"{description} należy wyrzucać do: {category}"
     return f"Nie posiadamy '{description}' w bazie śmieci"
+
+class Voucher(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    store_name = db.Column(db.String(100))
+    code = db.Column(db.String(100))
+    creation_time = db.Column(db.DateTime, default=db.func.current_timestamp())
+    
+stores = {
+    'store1': {'name': 'Sklep spożywczy "U Moniki" -20%', 'cost': 10},
+    'store2': {'name': 'Sklep odzieżowy "Dla Mamy&Córki" -30%', 'cost': 15},
+    'store3': {'name': 'Księgarnia "Za Rogiem" -40%', 'cost': 20}
+}
+
+org_stores = {
+    'store1': {'name': 'Pizzera "Gruby Szymek" 2 pizze w cenie 1', 'cost': 10},
+}
+
+class Config:
+    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/document_images')
+    
+UPLOAD_FOLDER = 'Sumatywny/website/templates/static/document_images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}

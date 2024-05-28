@@ -59,9 +59,11 @@
                         <a class="nav-item nav-link" id="platnosc-button" href='/payment'>Płatność</a>
                         <a class="nav-item nav-link" id="ankiety-button" href='/surveys'>Ankiety</a>
                         <a class="nav-item nav-link" id="odpady-button" href='/segregate'>Segreguj </a>
+                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymień punkty </a>
                     {% endif %}
                     {% if current_user.role != 'user' %}
                         <a class="nav-item nav-link" id="events" href="/events">Wydarzenia</a>
+                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymień punkty </a>
                     {% endif %}
                     {% if current_user.role == 'admin' %}
                     <a class="nav-item nav-link" id="maps" href="/maps">Mapa</a>

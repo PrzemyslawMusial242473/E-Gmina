@@ -1,13 +1,10 @@
-import requests
+
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import Event, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste
+from .models import Event, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste,Voucher,stores,org_stores
 from datetime import datetime
 from . import db
-import json
-import calendar
-import datetime
-import stripe
+import json,calendar,datetime,stripe,random,string,requests,uuid
 
 views = Blueprint('views', __name__)
 
@@ -330,20 +327,25 @@ def admin_events():
         event_id = request.form.get('event_id')
         action = request.form.get('action')  
         
+        event = Event.query.get(event_id)
+        if not event:
+            flash('Nie znaleziono wydarzenia.', category='danger')
+            return redirect(url_for('views.admin_events'))
+        
         if action == 'accept':
-            event = Event.query.get(event_id)
             event.status = 'accepted'
             db.session.add(event)
             db.session.commit()
             flash('Wydarzenie zostało zaakceptowane.', category='success')
         elif action == 'reject':
-            event = Event.query.get(event_id)
             event.status = 'rejected'
+            db.session.add(event)
+            db.session.commit()
             flash('Wydarzenie zostało odrzucone.', category='warning')
         
         return redirect(url_for('views.admin_events'))
 
-    return render_template('admin_events.html',user=current_user, pending_events=pending_events)
+    return render_template('admin_events.html', user=current_user, pending_events=pending_events)
 
 @views.route('/update_event_status/<int:event_id>/<string:action>', methods=['POST'])
 @login_required
@@ -359,6 +361,8 @@ def update_event_status(event_id, action):
 
     if action == 'accept':
         event.status = 'accepted'
+        user = User.query.filter_by(id=event.user_id).first()
+        add_loyalty_points(user, 10)
         db.session.commit()
         flash('Wydarzenie zostało zaakceptowane.', category='success')
     elif action == 'reject':
@@ -452,6 +456,8 @@ def update_report_status(report_id, action):
 
     if action == 'accept':
         report.status = 'accepted'
+        user = User.query.filter_by(id=report.user_id).first()
+        add_loyalty_points(user, 10)
         db.session.commit()
         flash('Zgłoszenie zostało zaakceptowane.', category='success')
     elif action == 'reject':
@@ -474,20 +480,25 @@ def admin_reports():
         report_id = request.form.get('report_id')
         action = request.form.get('action')  
         
+        report = Report.query.get(report_id)
+        if not report:
+            flash('Nie znaleziono zgłoszenia.', category='danger')
+            return redirect(url_for('views.admin_reports'))
+        
         if action == 'accept':
-            event = Event.query.get(report_id)
-            event.status = 'accepted'
-            db.session.add(event)
+            report.status = 'accepted'
+            db.session.add(report)
             db.session.commit()
             flash('Zgłoszenie zostało zaakceptowane.', category='success')
         elif action == 'reject':
-            event = Event.query.get(report_id)
-            event.status = 'rejected'
-            flash('Zgłoszenie zostało odmówione.', category='warning')
+            report.status = 'rejected'
+            db.session.add(report)
+            db.session.commit()
+            flash('Zgłoszenie zostało odrzucone.', category='warning')
         
         return redirect(url_for('views.admin_reports'))
 
-    return render_template('admin_reports.html',user=current_user, pending_reports=pending_reports)
+    return render_template('admin_reports.html', user=current_user, pending_reports=pending_reports)
 
 
 stripe.api_key = 'sk_test_51P9F8mAHsD0ooQchiY1nEJu6Q5jpeRG1lvI8JqL0eHXuLbjDdgsZR9ai5TDU6h7qWcBk0EvKWTaWY02K4AIRoB9m00oxqHLQ4m'
@@ -550,6 +561,7 @@ def fill_survey(survey_id):
             db.session.add(answer)
         db.session.commit()
         survey.status = "completed"
+        add_loyalty_points(current_user, 5)
         db.session.add(survey)
         db.session.commit()
         flash('Dziękujemy za wypełnienie ankiety!', 'success')
@@ -590,3 +602,42 @@ def segregate():
 @login_required
 def user_info():
     return render_template('user_info.html', user=current_user)
+
+def add_loyalty_points(user, points):
+    user.loyalty_points += points
+    db.session.add(user)
+    db.session.commit()
+    
+@views.route('/exchange', methods=['GET','POST'])
+@login_required
+def exchange_points():
+    if current_user.role == "organisation" :
+        available_stores = org_stores
+    else:
+        available_stores = stores
+
+    if request.method == 'POST':
+        store_key = request.form.get('store')
+        store = available_stores.get(store_key)
+        if store and current_user.loyalty_points >= store['cost']:
+            voucher_code = str(uuid.uuid4()).replace('-', '').upper()[:12]
+            new_voucher = Voucher(user_id=current_user.id, store_name=store['name'], code=voucher_code)
+            current_user.loyalty_points -= store['cost']
+            db.session.add(new_voucher)
+            db.session.commit()
+            flash(f'Wymieniono punkty na bon do {store["name"]}! Kod: {voucher_code}', 'success')
+        else:
+            flash('Nie masz wystarczającej liczby punktów lub nieprawidłowy sklep.', 'danger')
+        return redirect(url_for('views.exchange_points'))
+
+    return render_template('exchange_points.html', user=current_user, stores=available_stores)
+
+@views.route('/my-vouchers', methods=['GET'])
+@login_required
+def my_vouchers():
+    vouchers = current_user.vouchers
+    return render_template('my_vouchers.html', user=current_user, vouchers=vouchers)
+
+def generate_voucher_code(length=10):
+    letters_and_digits = string.ascii_letters + string.digits
+    return ''.join(random.choice(letters_and_digits) for i in range(length))

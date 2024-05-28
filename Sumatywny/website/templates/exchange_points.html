@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Wymień punkty{% endblock %}
+{% block content %}
+<style>
+body {
+    font-family: Arial, sans-serif;
+}
+
+.container{
+    background-color: #f8f9fa; /* Jasny szary */
+    color: #333333; /* Ciemnoszary */
+    text-align: center;
+    padding: 20px;
+    border-radius: 15px;
+    width: 95%;
+    margin-top: 2%;
+}
+.container_exchange_points{
+    position: relative;
+    background-color: #b4dfe5; /* Pastelowy niebieski */
+    color: #333333; /* Ciemnoszary */
+    justify-content: center;
+    align-items: center;
+    border-radius: 15px;
+    padding: 30px;
+    margin-top:20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.stores {
+    display: flex;
+    flex-direction: column;
+}
+
+.store {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+h2 {
+    margin: 0;
+}
+
+p {
+    margin: 5px 0;
+}
+
+button {
+    margin-top: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.flashes {
+    list-style: none;
+    padding: 0;
+}
+
+.flashes li {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* New styles */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+.exchange-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.exchange-item form {
+    margin: 0;
+}
+</style>
+
+<div class="container">
+    <h1>Wymiana Punktów</h1>
+    <div class="container_exchange_points">
+        <ul>
+            {% for store_key, store in stores.items() %}
+            <li class="exchange-item">
+                <span>{{ store.name }} - {{ store.cost }} punktów</span>
+                <form action="{{ url_for('views.exchange_points') }}" method="POST">
+                    <input type="hidden" name="store" value="{{ store_key }}">
+                    <button type="submit">Wymień</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('views.my_vouchers') }}">Moje Bony</a>
+    </div>
+</div>
+{% endblock %}

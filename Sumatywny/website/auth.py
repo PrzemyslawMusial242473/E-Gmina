@@ -1,9 +1,10 @@
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for
-from .models import User
+from flask import Blueprint, render_template, request, flash, redirect, url_for,current_app
+from .models import User,ALLOWED_EXTENSIONS,UPLOAD_FOLDER
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
-import hashlib
+import hashlib,os
+from werkzeug.utils import secure_filename
 
 
 auth = Blueprint('auth', __name__)
@@ -69,10 +70,12 @@ def sign_up_user():
         pesel = request.form.get('pesel')
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
+        document_image = request.files.get('document_image')
 
         user = User.query.filter_by(email=email).first()
         check_pesel = User.query.filter_by(uid=pesel).first()
         check_username = User.query.filter_by(username=username).first()
+
         if user:
             flash('Konto już istnieje.', category='error')
         elif len(email) < 3:
@@ -95,14 +98,22 @@ def sign_up_user():
             flash('Hasła nie są takie same.', category='error')
         elif len(password1) < 7:
             flash('Hasło musi się składać z 7 znaków.', category='error')
-        else:
-            new_user = User(email=email, username=username, name=name, surname=surname,address=address,uid=pesel,password=hash_password(
-                password1))
+        elif document_image and allowed_file(document_image.filename):
+            if not os.path.exists(UPLOAD_FOLDER):
+                os.makedirs(UPLOAD_FOLDER)
+            
+            filename = secure_filename(document_image.filename)
+            document_image_path = os.path.join(UPLOAD_FOLDER, filename)
+            document_image.save(document_image_path)
+            new_user = User(email=email, username=username, name=name, surname=surname, address=address,
+                            uid=pesel, password=hash_password(password1), document_image=filename)
             db.session.add(new_user)
             db.session.commit()
             flash('Konto musi przejść jeszcze etap zatwierdzenia!', category='success')
             return redirect(url_for('views.home'))
-
+        else:
+            flash('Nieprawidłowy plik obrazu.', category='error')
+    
     return render_template("sign_up_user.html", user=current_user)
 
 @auth.route('/sign-up/org', methods=['GET', 'POST'])
@@ -142,3 +153,6 @@ def sign_up_org():
             return redirect(url_for('views.home'))
 
     return render_template("sign_up_org.html", user=current_user)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

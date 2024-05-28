@@ -5,16 +5,26 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
             background-color: #f8f9fa;
         }
         .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
+            background-color: #f8f9fa; /* Jasny szary */
+            color: #333333; /* Ciemnoszary */
+            text-align: center;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            width: 95%;
+            margin: 2% auto; /* Zmieniono margin-top na margin, aby centrować */
+        }
+        .container_create_survey {
+            position: relative;
+            background-color: #b4dfe5; /* Pastelowy niebieski */
+            color: #333333; /* Ciemnoszary */
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
         }
         h1 {
             text-align: center;
@@ -37,6 +47,8 @@
             background-color: #007bff;
             color: #ffffff;
             padding: 10px 20px;
+            margin-top: 10px;
+            margin-bottom: 10px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -54,7 +66,7 @@
             newQuestion.innerHTML = `
                 <label for="question_${questionCount}">Pytanie ${questionCount}:</label>
                 <input type="text" id="question_${questionCount}" name="questions[]" required>
-                <button type="button" onclick="removeQuestionField(this)">Remove</button>
+                <button type="button" onclick="removeQuestionField(this)">Usuń</button>
             `;
             questionList.appendChild(newQuestion);
         }
@@ -64,12 +76,12 @@
             questionList.removeChild(button.parentElement);
         }
     </script>
-</head>
-<body>
+<div class="container">
     <h1>Stwórz nową ankiete</h1>
+    <div class="container_create_survey">
     <form method="POST">
         <div>
-            <label for="title">Nazwa ankiety</label>
+            <label for="title">Nazwa ankiety:</label>
             <input type="text" id="title" name="title" required>
         </div>
         <div id="question-list">
@@ -81,5 +93,6 @@
         <button type="button" onclick="addQuestionField()">Dodaj Pytanie</button>
         <button type="submit">Stwórz ankiete</button>
     </form>
-</body>
+    </div>
+</div>
 {% endblock %}

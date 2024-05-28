@@ -9,22 +9,29 @@
     overflow: hidden; /* Zapobiega wydostawaniu się elementów potomnych poza kontener */
     font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
   }
-  .container_map {
-    background-color: #b8d9de; /* Pastelowy niebieski */
-    color: #333333; /* Ciemnoszary */
-    justify-content: center;
-    align-items: center;
-    border-radius: 15px;
-    padding: 30px;
-    margin-top:20px;
-    font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
-  }
+   .container {
+            background-color: #f8f9fa; /* Jasny szary */
+            color: #333333; /* Ciemnoszary */
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            width: 95%;
+            margin: 2% auto; /* Zmieniono margin-top na margin, aby centrować */
+        }
+        .container_create_survey {
+            position: relative;
+            background-color: #b4dfe5; /* Pastelowy niebieski */
+            color: #333333; /* Ciemnoszary */
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+        }
 </style>
 <div class="container">
-  <div class="container1">
-    <h1 align="center">Weryfikacja Wydarzeń</h1>
-  </div>
-  <div class="card">
+    <h1>Weryfikacja Wydarzeń</h1>
+<div class="container_create_survey">
     <div class="card-header container2">
       <h2 class="mb-0">Weryfikacja Wydarzeń</h2>
     </div>
@@ -50,4 +57,5 @@
     </ul>
   </div>
 </div>
+
 {% endblock %}
