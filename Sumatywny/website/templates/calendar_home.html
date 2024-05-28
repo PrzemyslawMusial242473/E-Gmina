@@ -5,38 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalendarz</title>
     <style>
-    .calendar-container {
-        background-color: #f8f9fa; /* Jasny szary */
-        color: #333333; /* Ciemnoszary */
-        text-align: center; /* Wyśrodkowanie zawartości */
-        padding: 20px;
-        min-height: auto;
-        border-radius: 15px;
-        overflow: hidden;
-    }
+        .calendar-container {
+            background-color: #f8f9fa;
+            color: #333333;
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            overflow: visible;
+        }
 
-    .header {
-        position: relative;
-        background-color: #b4dfe5; /* Pastelowy niebieski */
-        color: #333333; /* Ciemnoszary */
-        justify-content: center;
-        align-items: center;
-        border-radius: 15px;
-        text-align: center;
-        padding: 20px 0;
-        width: 100%; /* Szerokość 100% */
-        margin: 0; /* Usunięcie marginesów */
-        display: inline-block; /* Wyśrodkowanie */
-    }
+        .header {
+            position: relative;
+            background-color: #b4dfe5;
+            color: #333333;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            text-align: center;
+            padding: 20px 0;
+            width: 100%;
+            margin: 0;
+            display: inline-block;
+        }
 
-    .calendar {
-        /* Usunięcie atrybutu float: left; */
-        /* float: left; */
-        /* margin: 0 auto; */ /* Usunięcie marginesu automatycznego */
-        border-radius: 15px;
-        overflow: hidden;
-        display: inline-block; /* Dodanie inline-block */
-    }
+        .calendar {
+            border-radius: 15px;
+            overflow: hidden;
+            display: inline-block;
+        }
 
         table {
             width: 100%;
@@ -65,9 +61,6 @@
 
         .event-info {
             position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
             background-color: #42464a;
             color: white;
             padding: 10px;
@@ -190,5 +183,49 @@
         <a class="btn" href="{{ url_for('views.home', next_month=next_month, next_year=next_year) }}">Następny miesiąc</a>
     </div>
 </div>
+
+<script>
+    document.querySelectorAll('.has-event').forEach(function(cell) {
+        cell.addEventListener('mouseover', function() {
+            var eventInfo = cell.querySelector('.event-info');
+            var cellRect = cell.getBoundingClientRect();
+            var infoRect = eventInfo.getBoundingClientRect();
+            var spaceAbove = cellRect.top;
+            var spaceBelow = window.innerHeight - cellRect.bottom;
+            var weekNumber = cell.parentNode.rowIndex;
+
+            // Reset styles to calculate accurately
+            eventInfo.style.top = '';
+            eventInfo.style.bottom = '';
+            eventInfo.style.transform = 'translateX(-50%)';
+
+            // Calculate the position based on available space and week number
+            if ((weekNumber == 1 || weekNumber == 2) && spaceBelow > infoRect.height) {
+                // If it's the first or second week and there's enough space below, position below
+                eventInfo.style.top = '100%';
+                eventInfo.style.bottom = 'auto';
+            } else if ((weekNumber == 3) && spaceBelow > infoRect.height) {
+                // If it's the first or second week and there's enough space below, position below
+                eventInfo.style.top = 'auto';
+                eventInfo.style.bottom = '10%';
+            } else if (spaceAbove > infoRect.height && spaceAbove > spaceBelow) {
+                // If there's enough space above and it's more than below, position above
+                eventInfo.style.top = 'auto';
+                eventInfo.style.bottom = '100%';
+            } else {
+                // Otherwise, position below
+                eventInfo.style.top = '100%';
+                eventInfo.style.bottom = 'auto';
+            }
+
+            // Ensure it stays centered horizontally
+            eventInfo.style.left = '50%';
+            eventInfo.style.transform = 'translateX(-50%)';
+        });
+    });
+</script>
+
+
+
 </body>
 </html>
