@@ -1,7 +1,7 @@
 from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
-import datetime
+import datetime,os
 
 friends = db.Table(
     'friends',
@@ -33,6 +33,23 @@ y_blocked = db.Table(
     db.Column('blocked_id', db.Integer, db.ForeignKey('user.id'), primary_key=True)
 )
 
+class Survey(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    status = db.Column(db.String(50), default='active')
+    questions = db.relationship('Question', backref='survey', lazy=True)
+
+class Question(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(500), nullable=False)
+    survey_id = db.Column(db.Integer, db.ForeignKey('survey.id'), nullable=False)
+    answers = db.relationship('Answer', backref='question', lazy=True)
+
+class Answer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(500), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -55,8 +72,12 @@ class User(db.Model, UserMixin):
     uid = db.Column(db.Integer, unique=True)
     status = db.Column(db.String(50), default='pending')
     role = db.Column(db.String(50), default='user')
+    loyalty_points = db.Column(db.Integer, default=0)
+    document_image = db.Column(db.String(150), nullable=True)
     Events = db.relationship('Event')
     Reports = db.relationship('Report')
+    answers = db.relationship('Answer', backref='user', lazy=True)
+    vouchers = db.relationship('Voucher', backref='user', lazy=True)
     friends = db.relationship(
         'User',
         secondary=friends,
@@ -125,3 +146,133 @@ class Report(db.Model):
     place = db.Column(db.String(150))
     status = db.Column(db.String(50), default='pending')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    
+CATEGORIES = {
+    "METALE I TWORZYWA SZTUCZNE": {
+            "plastikowe butelki po napojach",
+            "nakrętki",
+            "plastikowe opakowania po produktach spożywczych",
+            "opakowania wielomateriałowe",
+            "opakowania po środkach czystości",
+            "opakowania po kosmetykach",
+            "plastikowe torby", 
+            "worki", 
+            "reklamówki",  
+            "folie",
+            "aluminiowe puszki po napojach i sokach",
+            "puszki po konserwach",
+            "folię aluminiową",
+            "metale kolorowe",
+            "kapsel", 
+            "zakrętki od słoików"
+        
+    },
+    "PAPIER": {   
+            "opakowania z papieru",
+            "karton",
+            "tekturę",
+            "katalogi", 
+            "ulotki",
+            "prospekty",
+            "gazety i czasopisma",
+            "papier szkolny i biurowy",
+            "zadrukowane kartki",
+            "zeszyty",
+            "książki",
+            "papier pakowy",
+            "torby i worki papierowe"      
+    },
+    "SZKŁO": {
+            "butelki i słoiki po napojach i żywności",
+            "szklane opakowania po kosmetykach"
+    
+    },
+    "ODPADY BIODEGRADOWALNE": {
+            "odpadki warzywne i owocowe",
+            "gałęzie drzew i krzewów",
+            "skoszoną trawę",
+            "liście",
+            "kwiaty",
+            "trociny i korę drzew",
+            "niezaimpregnowane drewno",
+            "resztki jedzenia"
+        
+    },
+    "POZOSTAŁE":{
+        "plastikowe zabawki",
+        "opakowania po lekach i zużyte artykułów medyczne",
+        "ręczniki papierowe",
+        "zużyte chusteczki higieniczne",
+        "opakowania po olejach silnikowych",
+        "puszki i pojemniki po farbach i lakierach",
+        "papier zatłuszczy lub mocno zabrudzony",
+        "papierowe worki po nawozach, cemencie i innych materiałach budowlanych",
+        "tapet",
+        "pieluchy jednorazowe i inne materiałów higieniczne",
+        "jednorazowe opakowania z papieru",
+        "naczynia jednorazowe",
+        "ubrania",
+        "ceramika",
+        "doniczki",
+        "porcelana",
+        "fajans",
+        "kryształy",
+        "szkło okularowe",
+        "szkło żaroodporne",
+        "znicz z zawartością wosku",
+        "opakowania po rozpuszczalnikach", 
+        "opakowania po olejach silnikowe",
+        "lustro",
+        "szyby okienne i/lub zbrojone",
+        "kości zwierząt",
+        "oleje jadalne",
+        "odchody zwierząt",
+        "popiół z węgla kamiennego",
+        "drewno impregnowane",
+        "płyty wiórowe i pilśniowe MDF",
+        "ziemia",
+        "kamienie"   
+    },
+    "SPECJALNE":{
+        "części samochodowe",
+        "zużyte baterie",
+        "zużyte akumulatory",
+        "zużyty sprzęt elektroniczny i/lub AGD",
+        "żarówki",
+        "świetlówki",
+        "reflektory",
+        "monitory",
+        "lampy telewizyjne",
+        "termometry",
+        "strzykawki",
+        "inne niebezpieczne odpady komunalne"    
+    }
+}
+def segregate_waste(description):
+    for category, items in CATEGORIES.items():
+        if description in items:
+            return f"{description} należy wyrzucać do: {category}"
+    return f"Nie posiadamy '{description}' w bazie śmieci"
+
+class Voucher(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    store_name = db.Column(db.String(100))
+    code = db.Column(db.String(100))
+    creation_time = db.Column(db.DateTime, default=db.func.current_timestamp())
+    
+stores = {
+    'store1': {'name': 'Sklep spożywczy "U Moniki" -20%', 'cost': 10},
+    'store2': {'name': 'Sklep odzieżowy "Dla Mamy&Córki" -30%', 'cost': 15},
+    'store3': {'name': 'Księgarnia "Za Rogiem" -40%', 'cost': 20}
+}
+
+org_stores = {
+    'store1': {'name': 'Pizzera "Gruby Szymek" 2 pizze w cenie 1', 'cost': 10},
+}
+
+class Config:
+    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/document_images')
+    
+UPLOAD_FOLDER = 'Sumatywny/website/templates/static/document_images'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}

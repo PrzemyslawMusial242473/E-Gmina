@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Wypełnij Ankietę{% endblock %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+        border-radius: 15px;
+        width: 50%;
+        margin: 0 auto;
+        margin-top: 2%;
+    }
+    h2 {
+        white-space: nowrap; /* Nie dziel tytułu na wiele linii */
+        margin-bottom: 20px; /* Dodaj margines na dole */
+    }
+    .form-group {
+        margin-bottom: 20px; /* Dodaj odstęp między pytania */
+    }
+    input[type="text"] {
+        padding: 10px;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    button {
+        padding: 10px 20px;
+        background-color: #007bff; /* Niebieski */
+        color: #ffffff; /* Biały */
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0056b3; /* Ciemniejszy odcień niebieskiego */
+    }
+</style>
+<div class="container">
+    <h2>{{ survey.title }}</h2>
+    <form method="POST">
+        {% for question in survey.questions %}
+            <div class="form-group">
+                <label>{{ question.text }}</label><br>
+                <input type="text" name="question_{{ question.id }}" required>
+            </div>
+        {% else %}
+            <p>Brak pytań w tej ankiecie.</p>
+        {% endfor %}
+        <button type="submit">Prześlij</button>
+    </form>
+</div>
+{% endblock %}

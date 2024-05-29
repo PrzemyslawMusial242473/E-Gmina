@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rachunki</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <style>
@@ -9,42 +11,56 @@
             color: #333; /* Ciemny kolor tekstu */
             font-family: Arial, sans-serif; /* Rodzina czcionek */
         }
-        .header {
-            background-color: #2c3e50; /* Granatowy kolor tła nagłówka */
+        .navbar {
+            background-color: #2c3e50; /* Granatowy kolor tła paska nawigacji */
             color: #fff; /* Biały kolor tekstu */
             padding: 10px 20px; /* Wypełnienie wokół tekstu */
             text-align: center; /* Wycentrowanie tekstu */
         }
-        .header a {
+        .navbar-brand {
             color: #fff; /* Biały kolor odnośnika */
             text-decoration: none; /* Brak podkreślenia */
-            position: absolute; /* Pozycjonowanie względem najbliższego elementu pozycjonowanego */
-            left: 20px; /* Odległość od lewej krawędzi */
-            top: 10px; /* Odległość od góry */
         }
         .container {
-            background-color: #ecf0f1; /* Jasnoszare tło kontenera */
-            border-radius: 5px; /* Zaokrąglenie rogów kontenera */
-            max-width: 600px; /* Ograniczenie szerokości kontenera */
-            margin: 20px auto; /* Centrowanie i margines */
-            padding: 20px; /* Wewnętrzne wypełnienie */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Cień */
+             background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+        padding-top:1px;
+        border-radius: 15px;
+        width: 80%;
+        margin-top: 7%;
+        }
+        .container-checkout{
+
+         position: relative;
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top:20px;
+
         }
         h3, h5 {
             text-align: center; /* Centrowanie tytułów */
         }
         #checkout-button {
-            background-color: #467a7a; /* Odcień zielonego */
-            color: #ffffff; /* Biały tekst */
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            display: block;
-            width: 100%; /* Pełna szerokość */
-            font-size: 16px; /* Wielkość czcionki */
-            margin-top: 20px; /* Margines górny */
-        }
+    background-color: #467a7a; /* Odcień zielonego */
+    color: #ffffff; /* Biały tekst */
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    width: auto;
+    font-size: 16px; /* Wielkość czcionki */
+    margin-top: 20px; /* Margines górny */
+    text-align: center;
+    margin: 0 auto; /* Ustawienie marginesu poziomego na automatyczny */
+}
+
         #checkout-button:hover {
             background-color: #3a625c; /* Ciemniejszy odcień zielonego */
         }
@@ -56,11 +72,12 @@
     <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
-    <div class="header">
-        <a href="/">E-Gmina</a>
-        Rachunki
-    </div>
+    <nav class="navbar">
+        <a class="navbar-brand" href="/">E-Gmina</a>
+    </nav>
     <div class="container">
+       <h1>Opłać rachunek</h1>
+        <div class="container-checkout">
         <section>
             <div class="product">
                 <div class="description">
@@ -73,5 +90,7 @@
             </form>
         </section>
     </div>
+    </div>
+
 </body>
 </html>

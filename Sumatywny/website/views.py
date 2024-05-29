@@ -1,15 +1,18 @@
-import requests
+
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
-from .models import Event, MapMarker, User, Message,Report
+from .models import Event, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste,Voucher,stores,org_stores
 from datetime import datetime
 from . import db
-import json
-import calendar
-import datetime
-import stripe
+import json,calendar,datetime,stripe,random,string,requests,uuid
 
 views = Blueprint('views', __name__)
+
+polish_month_names = {
+    1: "Styczeń", 2: "Luty", 3: "Marzec", 4: "Kwiecień", 5: "Maj", 6: "Czerwiec",
+    7: "Lipiec", 8: "Sierpień", 9: "Wrzesień", 10: "Październik", 11: "Listopad", 12: "Grudzień"
+}
+
 
 def get_month_events(year, month):
     start_date = datetime.date(year, month, 1)
@@ -33,16 +36,34 @@ def generate_calendar(year, month, month_events):
 @views.route('/', methods=['GET', 'POST'])
 def home():
     today = datetime.date.today()
-    current_month = today.strftime("%B")
     year = today.year
     month = today.month
+
+    # Sprawdź, czy został przesłany formularz z informacją o zmianie miesiąca
+    if request.method == 'GET':
+        if 'prev_month' in request.args:
+            month -= 1
+            if month == 0:
+                month = 12
+                year -= 1
+        elif 'next_month' in request.args:
+            month += 1
+            if month == 13:
+                month = 1
+                year += 1
+
     month_events = get_month_events(year, month)
     accepted_month_events = [event for event in month_events if event.status == 'accepted']
     weeks = generate_calendar(year, month, accepted_month_events)
     accepted_events = Event.query.filter_by(status='accepted').all()
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
-    return render_template("home.html", calendar=weeks, current_month=current_month, user=current_user,
+
+    # Pobierz nazwę aktualnego miesiąca po polsku
+    current_month_name = polish_month_names[month]
+
+    return render_template("home.html", calendar=weeks, current_month=current_month_name, user=current_user,
                            accepted_events=accepted_events, markers=markers)
+
 
 
 @views.route('/delete-event', methods=['POST'])
@@ -306,20 +327,25 @@ def admin_events():
         event_id = request.form.get('event_id')
         action = request.form.get('action')  
         
+        event = Event.query.get(event_id)
+        if not event:
+            flash('Nie znaleziono wydarzenia.', category='danger')
+            return redirect(url_for('views.admin_events'))
+        
         if action == 'accept':
-            event = Event.query.get(event_id)
             event.status = 'accepted'
             db.session.add(event)
             db.session.commit()
             flash('Wydarzenie zostało zaakceptowane.', category='success')
         elif action == 'reject':
-            event = Event.query.get(event_id)
             event.status = 'rejected'
+            db.session.add(event)
+            db.session.commit()
             flash('Wydarzenie zostało odrzucone.', category='warning')
         
         return redirect(url_for('views.admin_events'))
 
-    return render_template('admin_events.html',user=current_user, pending_events=pending_events)
+    return render_template('admin_events.html', user=current_user, pending_events=pending_events)
 
 @views.route('/update_event_status/<int:event_id>/<string:action>', methods=['POST'])
 @login_required
@@ -335,6 +361,8 @@ def update_event_status(event_id, action):
 
     if action == 'accept':
         event.status = 'accepted'
+        user = User.query.filter_by(id=event.user_id).first()
+        add_loyalty_points(user, 10)
         db.session.commit()
         flash('Wydarzenie zostało zaakceptowane.', category='success')
     elif action == 'reject':
@@ -428,6 +456,8 @@ def update_report_status(report_id, action):
 
     if action == 'accept':
         report.status = 'accepted'
+        user = User.query.filter_by(id=report.user_id).first()
+        add_loyalty_points(user, 10)
         db.session.commit()
         flash('Zgłoszenie zostało zaakceptowane.', category='success')
     elif action == 'reject':
@@ -450,20 +480,25 @@ def admin_reports():
         report_id = request.form.get('report_id')
         action = request.form.get('action')  
         
+        report = Report.query.get(report_id)
+        if not report:
+            flash('Nie znaleziono zgłoszenia.', category='danger')
+            return redirect(url_for('views.admin_reports'))
+        
         if action == 'accept':
-            event = Event.query.get(report_id)
-            event.status = 'accepted'
-            db.session.add(event)
+            report.status = 'accepted'
+            db.session.add(report)
             db.session.commit()
             flash('Zgłoszenie zostało zaakceptowane.', category='success')
         elif action == 'reject':
-            event = Event.query.get(report_id)
-            event.status = 'rejected'
-            flash('Zgłoszenie zostało odmówione.', category='warning')
+            report.status = 'rejected'
+            db.session.add(report)
+            db.session.commit()
+            flash('Zgłoszenie zostało odrzucone.', category='warning')
         
         return redirect(url_for('views.admin_reports'))
 
-    return render_template('admin_reports.html',user=current_user, pending_reports=pending_reports)
+    return render_template('admin_reports.html', user=current_user, pending_reports=pending_reports)
 
 
 stripe.api_key = 'sk_test_51P9F8mAHsD0ooQchiY1nEJu6Q5jpeRG1lvI8JqL0eHXuLbjDdgsZR9ai5TDU6h7qWcBk0EvKWTaWY02K4AIRoB9m00oxqHLQ4m'
@@ -508,3 +543,101 @@ def success():
 @views.route('/cancel')
 def cancel():
     return render_template('cancel.html')
+
+@views.route('/surveys', methods=['GET'])
+@login_required
+def surveys():
+    surveys = Survey.query.filter_by(status='active').all()
+    return render_template('surveys.html', surveys=surveys,user=current_user)
+
+@views.route('/survey/<int:survey_id>', methods=['GET', 'POST'])
+@login_required
+def fill_survey(survey_id):
+    survey = Survey.query.get_or_404(survey_id)
+    if request.method == 'POST':
+        for question in survey.questions:
+            answer_text = request.form.get(f'question_{question.id}')
+            answer = Answer(text=answer_text, question_id=question.id, user_id=current_user.id)
+            db.session.add(answer)
+        db.session.commit()
+        survey.status = "completed"
+        add_loyalty_points(current_user, 5)
+        db.session.add(survey)
+        db.session.commit()
+        flash('Dziękujemy za wypełnienie ankiety!', 'success')
+        return redirect(url_for('views.surveys'))
+    return render_template('survey.html', survey=survey, user=current_user)
+
+@views.route('/create-survey', methods=['GET', 'POST'])
+@login_required
+def create_survey():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        survey = Survey(title=title)
+        questions = request.form.getlist('questions[]')
+        db.session.add(survey)
+        db.session.commit()
+        for question_text in questions:
+            if question_text.strip():  
+                question = Question(text=question_text, survey_id=survey.id)
+                db.session.add(question)
+
+        db.session.commit()  
+        flash('Ankieta została utworzona!', 'success')
+        return redirect(url_for('views.create_survey'))
+    return render_template('create_survey.html',user=current_user)
+
+@views.route('/segregate', methods=['GET', 'POST'])
+@login_required
+def segregate():
+    result = None
+    if request.method == 'POST':
+        description = request.form.get('waste_description')
+        result = segregate_waste(description)
+    
+    return render_template('segregate.html', result=result, user=current_user,categories=CATEGORIES)
+
+
+@views.route('/user_info')
+@login_required
+def user_info():
+    return render_template('user_info.html', user=current_user)
+
+def add_loyalty_points(user, points):
+    user.loyalty_points += points
+    db.session.add(user)
+    db.session.commit()
+    
+@views.route('/exchange', methods=['GET','POST'])
+@login_required
+def exchange_points():
+    if current_user.role == "organisation" :
+        available_stores = org_stores
+    else:
+        available_stores = stores
+
+    if request.method == 'POST':
+        store_key = request.form.get('store')
+        store = available_stores.get(store_key)
+        if store and current_user.loyalty_points >= store['cost']:
+            voucher_code = str(uuid.uuid4()).replace('-', '').upper()[:12]
+            new_voucher = Voucher(user_id=current_user.id, store_name=store['name'], code=voucher_code)
+            current_user.loyalty_points -= store['cost']
+            db.session.add(new_voucher)
+            db.session.commit()
+            flash(f'Wymieniono punkty na bon do {store["name"]}! Kod: {voucher_code}', 'success')
+        else:
+            flash('Nie masz wystarczającej liczby punktów lub nieprawidłowy sklep.', 'danger')
+        return redirect(url_for('views.exchange_points'))
+
+    return render_template('exchange_points.html', user=current_user, stores=available_stores)
+
+@views.route('/my-vouchers', methods=['GET'])
+@login_required
+def my_vouchers():
+    vouchers = current_user.vouchers
+    return render_template('my_vouchers.html', user=current_user, vouchers=vouchers)
+
+def generate_voucher_code(length=10):
+    letters_and_digits = string.ascii_letters + string.digits
+    return ''.join(random.choice(letters_and_digits) for i in range(length))

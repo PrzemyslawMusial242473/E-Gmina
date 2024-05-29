@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Dostępne Ankiety{% endblock %}
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+        border-radius: 15px;
+        width: 50%;
+        margin: 0 auto;
+        margin-top: 2%;
+    }
+    h2 {
+        margin-bottom: 20px; /* Dodaj margines na dole nagłówka */
+    }
+    .list-group-item {
+        border: none; /* Usuń obramowanie dla każdego elementu listy */
+        background-color: transparent; /* Przezroczyste tło */
+        padding: 10px 0; /* Dodaj odstępy na górze i na dole */
+    }
+    .list-group-item a {
+        text-decoration: none; /* Usuń podkreślenie linku */
+        color: #007bff; /* Niebieski */
+    }
+    .list-group-item a:hover {
+        color: #0056b3; /* Ciemniejszy odcień niebieskiego */
+    }
+</style>
+<div class="container">
+    <h2>Dostępne Ankiety</h2>
+    <ul class="list-group">
+        {% for survey in surveys %}
+            <li class="list-group-item">
+                <a href="{{ url_for('views.fill_survey', survey_id=survey.id) }}">{{ survey.title }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
