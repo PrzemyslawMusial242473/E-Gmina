@@ -138,17 +138,17 @@
     <h1 style="width: 100%; text-align: center;">Kalendarz</h1>
     <div class="header">
         <h2>{{ current_month }} {{ current_year }}</h2>
-        <div class="calendar">
+        <div class="calendar" style="position: relative; width:550px">
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Poniedziałek</th>
-                        <th>Wtorek</th>
-                        <th>Środa</th>
-                        <th>Czwartek</th>
-                        <th>Piątek</th>
-                        <th>Sobota</th>
-                        <th>Niedziela</th>
+                        <th>PN</th>
+                        <th>WT</th>
+                        <th>ŚR</th>
+                        <th>CZ</th>
+                        <th>PT</th>
+                        <th>SO</th>
+                        <th>ND</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -178,9 +178,9 @@
         </div>
     </div>
     <div class="btn-container">
-        <a class="btn" href="{{ url_for('views.home', prev_month=prev_month, prev_year=prev_year) }}">Poprzedni miesiąc</a>
-        <a class="btn" href="{{ url_for('views.home', current_month=current_month, current_year=current_year) }}">Aktualny miesiąc</a>
-        <a class="btn" href="{{ url_for('views.home', next_month=next_month, next_year=next_year) }}">Następny miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=prev_month, current_year=prev_year) }}">Poprzedni miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=today_month, current_year=today_year) }}">Aktualny miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=next_month, current_year=next_year) }}">Następny miesiąc</a>
     </div>
 </div>
 
@@ -224,8 +224,5 @@
         });
     });
 </script>
-
-
-
 </body>
 </html>

@@ -46,21 +46,35 @@ def generate_calendar(year, month, month_events):
 @views.route('/', methods=['GET', 'POST'])
 def home():
     today = date.today()
-    year = today.year
-    month = today.month
+    today_year = today.year
+    today_month = today.month
 
-    # Sprawdź, czy został przesłany formularz z informacją o zmianie miesiąca
-    if request.method == 'GET':
-        if 'prev_month' in request.args:
-            month -= 1
-            if month == 0:
-                month = 12
-                year -= 1
-        elif 'next_month' in request.args:
-            month += 1
-            if month == 13:
-                month = 1
-                year += 1
+    # Domyślnie ustaw na bieżący miesiąc i rok
+    year = today_year
+    month = today_month
+
+    # Sprawdź parametry GET
+    if 'current_month' in request.args and 'current_year' in request.args:
+        try:
+            month = int(request.args.get('current_month'))
+            year = int(request.args.get('current_year'))
+        except ValueError:
+            # Błędne wartości, użyj domyślnych
+            month = today_month
+            year = today_year
+
+    # Oblicz poprzedni i następny miesiąc i rok
+    prev_month = month - 1
+    next_month = month + 1
+    prev_year = year
+    next_year = year
+
+    if prev_month == 0:
+        prev_month = 12
+        prev_year -= 1
+    if next_month == 13:
+        next_month = 1
+        next_year += 1
 
     month_events = get_month_events(year, month)
     accepted_month_events = [event for event in month_events if event.status == 'accepted']
@@ -71,9 +85,11 @@ def home():
     # Pobierz nazwę aktualnego miesiąca po polsku
     current_month_name = polish_month_names[month]
 
-    return render_template("home.html", calendar=weeks, current_month=current_month_name, user=current_user,
-                           accepted_events=accepted_events, markers=markers)
-
+    return render_template("home.html", calendar=weeks, current_month=current_month_name, current_year=year,
+                           today_month=today_month, today_year=today_year,
+                           prev_month=prev_month, prev_year=prev_year,
+                           next_month=next_month, next_year=next_year,
+                           user=current_user, accepted_events=accepted_events, markers=markers)
 
 
 @views.route('/delete-event', methods=['POST'])
