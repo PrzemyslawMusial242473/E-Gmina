@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Admin - Płatności{% endblock %}
+
+{% block content %}
+<style>
+    .container {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .payments-container {
+        background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+        padding-top: 4px;
+        border-radius: 15px;
+        width: 95%;
+        margin-top: 2%;
+        margin-left: 2%;
+    }
+    .payments-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+    .payments-table th, .payments-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    .payments-table th {
+        background-color: #f4f4f9;
+    }
+    .payments-table tr:hover {
+        background-color: #f1f1f1;
+    }
+    .btn-pay {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .btn-pay:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<div class="container">
+    <div class="payments-container">
+        <h1>Dodaj Płatności</h1>
+        <form action="{{ url_for('views.admin_payments') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Wybierz plik Excel:</label>
+                <input type="file" class="form-control" id="file" name="file" required>
+            </div>
+            <button type="submit" class="btn btn-pay">Wgraj</button>
+        </form>
+        <br>
+        <a href="{{ url_for('views.download_sample') }}" class="btn btn-pay">Pobierz przykładowy plik</a>
+    </div>
+</div>
+{% endblock %}

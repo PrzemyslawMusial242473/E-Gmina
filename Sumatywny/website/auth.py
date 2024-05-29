@@ -5,7 +5,7 @@ from . import db
 from flask_login import login_user, login_required, logout_user, current_user
 import hashlib,os
 from werkzeug.utils import secure_filename
-
+from .views import send_confirmation_email
 
 auth = Blueprint('auth', __name__)
 
@@ -109,6 +109,7 @@ def sign_up_user():
                             uid=pesel, password=hash_password(password1), document_image=filename)
             db.session.add(new_user)
             db.session.commit()
+            send_confirmation_email(new_user)
             flash('Konto musi przejść jeszcze etap zatwierdzenia!', category='success')
             return redirect(url_for('views.home'))
         else:
@@ -149,6 +150,7 @@ def sign_up_org():
                 password1))
             db.session.add(new_user)
             db.session.commit()
+            send_confirmation_email(new_user)
             flash('Konto musi przejść jeszcze etap zatwierdzenia!', category='success')
             return redirect(url_for('views.home'))
 

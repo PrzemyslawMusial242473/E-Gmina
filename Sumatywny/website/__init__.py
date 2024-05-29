@@ -2,17 +2,25 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
+from flask_mail import Mail
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
+mail = Mail()
 
 
 def create_app():
     app = Flask(__name__, static_folder='templates/static')
     app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USERNAME'] = 'egminakonstantynow@gmail.com'
+    app.config['MAIL_PASSWORD'] = 'ayim zjaa yvdo fmjx'
+    app.config['MAIL_DEFAULT_SENDER'] = 'egminakonstantynow@gmail.com'
     db.init_app(app)
-
+    mail.init_app(app)
     from .views import views
     from .auth import auth
 

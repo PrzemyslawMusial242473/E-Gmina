@@ -1,10 +1,15 @@
 
-from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
+from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for,send_from_directory
 from flask_login import login_required, current_user
-from .models import Event, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste,Voucher,stores,org_stores
-from datetime import datetime
+from .models import Event,Payment, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste,Voucher,stores,org_stores
+from datetime import datetime, date
 from . import db
-import json,calendar,datetime,stripe,random,string,requests,uuid
+from . import mail
+from flask_mail import Message as MailMessage
+import json,calendar,stripe,random,string,requests,uuid
+import os
+from werkzeug.utils import secure_filename
+import pandas as pd
 
 views = Blueprint('views', __name__)
 
@@ -13,10 +18,15 @@ polish_month_names = {
     7: "Lipiec", 8: "Sierpień", 9: "Wrzesień", 10: "Październik", 11: "Listopad", 12: "Grudzień"
 }
 
+def send_confirmation_email(user):
+    msg = MailMessage('Stworzono konto w systemie E-Gmina', recipients=[user.email])
+    msg.body = f'''Dziękujemy za założenie konta na E-Gmina
+    '''
+    mail.send(msg)
 
 def get_month_events(year, month):
-    start_date = datetime.date(year, month, 1)
-    end_date = datetime.date(year, month, calendar.monthrange(year, month)[1])
+    start_date = date(year, month, 1)
+    end_date = date(year, month, calendar.monthrange(year, month)[1])
     month_events = Event.query.filter(Event.date.between(start_date, end_date)).all()
     return month_events
 
@@ -35,7 +45,7 @@ def generate_calendar(year, month, month_events):
 
 @views.route('/', methods=['GET', 'POST'])
 def home():
-    today = datetime.date.today()
+    today = date.today()
     year = today.year
     month = today.month
 
@@ -142,7 +152,7 @@ def event():
         
         if data and date and place and name:
             try:
-                date = datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M')
+                date = datetime.strptime(date, '%Y-%m-%dT%H:%M')
             except ValueError:
                 return 'Zły format daty'
             
@@ -407,7 +417,7 @@ def report():
     if request.method == 'POST':
         data = request.form.get('data')
         place = request.form.get('place')
-        date = datetime.datetime.now()
+        date = datetime.now()
             
         new_report = Report(data=data, date=date, place=place, user_id=current_user.id, status='pending')
         db.session.add(new_report) 
@@ -500,49 +510,6 @@ def admin_reports():
 
     return render_template('admin_reports.html', user=current_user, pending_reports=pending_reports)
 
-
-stripe.api_key = 'sk_test_51P9F8mAHsD0ooQchiY1nEJu6Q5jpeRG1lvI8JqL0eHXuLbjDdgsZR9ai5TDU6h7qWcBk0EvKWTaWY02K4AIRoB9m00oxqHLQ4m'
-
-
-@views.route('/payment', methods=['GET'])
-def payment():
-    return render_template('checkout.html')
-
-
-@views.route('/create-checkout-session', methods=['POST'])
-def create_checkout_session():
-    try:
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[
-                {
-                    'price_data': {
-                        'currency': 'pln',
-                        'product_data': {
-                            'name': 'Rachunek za prąd',
-                        },
-                        'unit_amount': 9000,
-                    },
-                    'quantity': 1,
-                },
-            ],
-            mode='payment',
-            success_url='http://localhost:5000/success',
-            cancel_url='http://localhost:5000/cancel',
-        )
-        return redirect(checkout_session.url, code=303)
-    except Exception as e:
-        return str(e)
-
-
-@views.route('/success')
-def success():
-    return render_template('sucess.html')
-
-
-@views.route('/cancel')
-def cancel():
-    return render_template('cancel.html')
 
 @views.route('/surveys', methods=['GET'])
 @login_required
@@ -641,3 +608,127 @@ def my_vouchers():
 def generate_voucher_code(length=10):
     letters_and_digits = string.ascii_letters + string.digits
     return ''.join(random.choice(letters_and_digits) for i in range(length))
+
+stripe.api_key = 'sk_test_51P9F8mAHsD0ooQchiY1nEJu6Q5jpeRG1lvI8JqL0eHXuLbjDdgsZR9ai5TDU6h7qWcBk0EvKWTaWY02K4AIRoB9m00oxqHLQ4m'
+
+UPLOAD_FOLDER = 'uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+@views.route('/admin-payments', methods=['GET', 'POST'])
+@login_required
+def admin_payments():
+    if current_user.role != 'admin':
+        flash('Brak dostępu')
+        return redirect(url_for('views.home'))
+
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and file.filename.endswith('.xlsx'):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join('uploads', filename)
+            file.save(file_path)
+
+            # Read Excel file
+            df = pd.read_excel(file_path)
+            for index, row in df.iterrows():
+                user = User.query.filter_by(email=row['Email']).first()
+                if user:
+                    due_date_str = row['Due Date'].strftime('%Y-%m-%d') if isinstance(row['Due Date'], pd.Timestamp) else row['Due Date']
+                    payment = Payment(
+                        user_uid=user.uid,
+                        description=row['Description'],
+                        amount=row['Amount'],
+                        due_date=datetime.strptime(due_date_str, '%Y-%m-%d')
+                    )
+                    db.session.add(payment)
+            db.session.commit()
+            flash('Płatności zostały dodane')
+            return redirect(url_for('views.admin_payments'))
+    
+    return render_template('admin_payments.html', user=current_user)
+
+@views.route('/upload-payments', methods=['GET', 'POST'])
+@login_required
+def upload_payments():
+    if current_user.role != 'admin':
+        flash('Brak dostępu')
+        return redirect(url_for('views.home'))
+
+    if request.method == 'POST':
+        file = request.files['file']
+        if file and file.filename.endswith('.xlsx'):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join('uploads', filename)
+            file.save(file_path)
+
+            # Read Excel file
+            df = pd.read_excel(file_path)
+            for index, row in df.iterrows():
+                user = User.query.filter_by(email=row['Email']).first()
+                if user:
+                    due_date_str = row['Due Date'].strftime('%Y-%m-%d') if isinstance(row['Due Date'], pd.Timestamp) else row['Due Date']
+                    payment = Payment(
+                        user_uid=user.uid,
+                        description=row['Description'],
+                        amount=row['Amount'],
+                        due_date=datetime.strptime(due_date_str, '%Y-%m-%d')
+                    )
+                    db.session.add(payment)
+            db.session.commit()
+            flash('Płatności zostały dodane')
+            return redirect(url_for('views.home'))
+    
+    return render_template('upload_payments.html', user=current_user)
+
+@views.route('/payments')
+@login_required
+def payments():
+    user_payments = Payment.query.filter_by(user_uid=current_user.uid).all()
+    return render_template('user_payments.html', user=current_user, payments=user_payments)
+
+
+@views.route('/create-checkout-session', methods=['POST'])
+@login_required
+def create_checkout_session():
+    payment_id = request.form['payment_id']
+    payment = Payment.query.get(payment_id)
+    if payment and not payment.paid:
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'pln',
+                    'product_data': {
+                        'name': payment.description,
+                    },
+                    'unit_amount': int(payment.amount * 100),
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=url_for('views.success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=url_for('views.cancel', _external=True),
+        )
+        return redirect(session.url, code=303)
+    flash('Błąd podczas tworzenia sesji płatności')
+    return redirect(url_for('views.payments'))
+
+@views.route('/success')
+@login_required
+def success():
+    return render_template('success.html', user=current_user)
+
+@views.route('/cancel')
+@login_required
+def cancel():
+    return render_template('cancel.html', user=current_user)
+
+
+@views.route('/download-sample')
+@login_required
+def download_sample():
+    if current_user.role != 'admin':
+        flash('Brak dostępu')
+        return redirect(url_for('views.home'))
+    return send_from_directory(directory='.', path='sample.xlsx', as_attachment=True)
