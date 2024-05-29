@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Anulowana płatność{% endblock %}
+{% block title %}Opłacono rachunek{% endblock %}
 
 {% block content %}
 <style>
@@ -8,7 +8,7 @@
     color: #333; /* Ciemny kolor tekstu */
     font-family: 'Arial', sans-serif; /* Rodzina czcionek */
   }
-  .cancel-container {
+  .success-container {
     background-color: #ecf0f1; /* Jasnoszare tło kontenera */
     border-radius: 5px; /* Zaokrąglenie rogów kontenera */
     max-width: 600px; /* Ograniczenie szerokości kontenera */
@@ -45,9 +45,12 @@
   };
 </script>
 
-<div class="cancel-container">
+<div class="success-container">
   <section>
-    <p>Zawsze możesz wrócić do płatności. Jeśli napotkałeś jakiś problem, skontaktuj się z nami! Kontakt: egminakonstantynow@gmail.com</p>
+    <p>
+      Właśnie opłaciłeś rachunek. W razie pytań skontaktuj się z nami
+      <a href="mailto:egminakonstantynow@gmail.com">egminakonstantynow@gmail.com</a>.
+    </p>
     <p class="countdown">Przekierowanie na stronę główną za <span id="time">3 sekundy</span>.</p>
   </section>
 </div>

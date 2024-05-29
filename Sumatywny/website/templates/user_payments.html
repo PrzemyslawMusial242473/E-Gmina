@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Płatności{% endblock %}
+
+{% block content %}
+<style>
+    .container {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .payments-container {
+        background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
+        text-align: center;
+        padding: 20px;
+        padding-top: 4px;
+        border-radius: 15px;
+        width: 95%;
+        margin-top: 2%;
+        margin-left: 2%;
+    }
+    .payments-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+    .payments-table th, .payments-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    .payments-table th {
+        background-color: #f4f4f9;
+    }
+    .payments-table tr:hover {
+        background-color: #f1f1f1;
+    }
+    .btn-pay {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .btn-pay:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<div class="container">
+    <div class="payments-container">
+        <h1>Twoje Płatności</h1>
+        <table class="payments-table">
+            <thead>
+                <tr>
+                    <th>Opis</th>
+                    <th>Kwota</th>
+                    <th>Termin</th>
+                    <th>Status</th>
+                    <th>Akcja</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr>
+                    <td>{{ payment.description }}</td>
+                    <td>{{ payment.amount }}</td>
+                    <td>{{ payment.due_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{% if payment.paid %}Opłacone{% else %}Nieopłacone{% endif %}</td>
+                    <td>
+                        {% if not payment.paid %}
+                        <form action="{{ url_for('views.create_checkout_session') }}" method="POST">
+                            <input type="hidden" name="payment_id" value="{{ payment.id }}">
+                            <button type="submit" class="btn-pay">Zapłać</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

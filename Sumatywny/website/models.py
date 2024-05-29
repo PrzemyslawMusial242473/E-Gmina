@@ -1,8 +1,8 @@
 from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
-import datetime,os
-
+import os
+from datetime import datetime
 friends = db.Table(
     'friends',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
@@ -76,6 +76,7 @@ class User(db.Model, UserMixin):
     document_image = db.Column(db.String(150), nullable=True)
     Events = db.relationship('Event')
     Reports = db.relationship('Report')
+    payments = db.relationship('Payment', backref='user', lazy=True)
     answers = db.relationship('Answer', backref='user', lazy=True)
     vouchers = db.relationship('Voucher', backref='user', lazy=True)
     friends = db.relationship(
@@ -134,7 +135,7 @@ class Message(db.Model):
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     content = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     sender = db.relationship('User', foreign_keys=[sender_id])
     receiver = db.relationship('User', foreign_keys=[receiver_id])
@@ -270,6 +271,21 @@ stores = {
 org_stores = {
     'store1': {'name': 'Pizzera "Gruby Szymek" 2 pizze w cenie 1', 'cost': 10},
 }
+class Payment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_uid = db.Column(db.String(11), db.ForeignKey('user.uid'), nullable=False)  # Relacja z User
+    amount = db.Column(db.Float, nullable=False)
+    description = db.Column(db.String(255), nullable=False)
+    due_date = db.Column(db.Date, nullable=False)
+    paid = db.Column(db.Boolean, default=False)
+
+    def __init__(self, user_uid, amount, description, due_date):
+        self.user_uid = user_uid
+        self.amount = amount
+        self.description = description
+        self.due_date = due_date
+        self.paid = False 
+
 
 class Config:
     UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/document_images')

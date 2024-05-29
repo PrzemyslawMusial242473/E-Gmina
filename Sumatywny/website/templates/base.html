@@ -56,7 +56,7 @@
                     {% if current_user.role == 'user'%}
                         <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
                         <a class="nav-item nav-link" id="report-button" href='/report'>Zgłoś nieprawidłowość</a>
-                        <a class="nav-item nav-link" id="platnosc-button" href='/payment'>Płatność</a>
+                        <a class="nav-item nav-link" id="platnosc-button" href='/payments'>Płatność</a>
                         <a class="nav-item nav-link" id="ankiety-button" href='/surveys'>Ankiety</a>
                         <a class="nav-item nav-link" id="odpady-button" href='/segregate'>Segreguj </a>
                         <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymień punkty </a>
@@ -71,6 +71,7 @@
                     <a class="nav-item nav-link" id="admin_events" href="/admin-events">Weryfikuj wydarzenia</a>
                     <a class="nav-item nav-link" id="admin_users" href="/admin-users">Weryfikuj konta</a>
                     <a class="nav-item nav-link" id="admin_users" href="/admin-reports">Weryfikuj zgłoszenia</a>
+                    <a class="nav-link" id="admin_payment" href="/admin-payments">Wprowadź płatności</a>
                     {% endif %}
                 {% else %}
                     <a class="nav-item nav-link" id="login" href="/login">Zaloguj</a>
