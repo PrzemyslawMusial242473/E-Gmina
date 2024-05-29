@@ -2,11 +2,6 @@
 {% block title %}Mapa{% endblock %}
 {% block content %}
     <style>
-    body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
     .container1,.container2,.container3{
     background-color: #f8f9fa; /* Jasny szary */
         color: #333333; /* Ciemnoszary */
@@ -15,7 +10,7 @@
         padding-top:4px;
         border-radius: 15px;
         width: 95%;
-        margin-top: 2%;
+        margin-top: 1%;
         margin-left: 2%;
     }
     .container_map{
@@ -42,7 +37,7 @@
                     </div>
                 </div>
                 <div class="container2">
-                    <h2>Dodaj Znacznik</h2>
+                    <h1>Dodaj znacznik</h1>
                     <div class="container_map">
                         <form method="POST">
                             <div class="form-group">
@@ -53,14 +48,14 @@
                                 <label for="description">Opis:</label>
                                 <input type="text" class="form-control" id="description" name="description">
                             </div>
-                            <button type="submit" class="btn btn-primary">Dodaj Znacznik</button>
+                            <button type="submit" class="btn btn-primary">Dodaj</button>
                         </form>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="container3">
-                    <h2>Znaczniki</h2>
+                    <h1>Znaczniki</h1>
                     <div class="container_map">
                         {% for marker in markers %}
                         <div class="card">

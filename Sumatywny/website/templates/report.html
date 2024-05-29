@@ -1,12 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Zgłoś przestępstwo{% endblock %}
+{% block title %}Zgłoś naruszenie środowiskowe{% endblock %}
 {% block content %}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
         .container1, .container2 {
             background-color: #f8f9fa; /* Jasny szary */
             color: #333333; /* Ciemnoszary */
@@ -15,7 +10,7 @@
             padding-top: 4px;
             border-radius: 15px;
             width: 95%;
-            margin-top: 2%;
+            margin-top: 1%;
             margin-left: 2%;
         }
         .container_event {
@@ -50,24 +45,22 @@
             <div class="col-md-6">
                 <div class="container1">
                     <div class="container_event">
-                        <h1 align="center">Zgłoś nieprawidłowość ekologiczną</h1>
-                        <body>
-                            <form method="POST">
-                                <label for="place">Gdzie to jest?:</label><br>
-                                <input type="text" id="place" name="place" required><br>
+                        <h1 align="center">Zgłoś naruszenie środowiskowe</h1>
+                        <form method="POST">
+                            <label for="place">Wskaż miejsce naruszenia:</label><br>
+                            <input type="text" id="place" name="place" required><br>
 
-                                <label for="data">Co się dzieje:</label><br>
-                                <input type="text" id="data" name="data" required><br>
-                                <button type="submit">Zgłoś</button>
-                            </form>
-                        </body>
+                            <label for="data">Opis naruszenia:</label><br>
+                            <input type="text" id="data" name="data" required><br>
+                            <button type="submit">Zgłoś naruszenie</button>
+                        </form>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="container2">
                     <div class="container_report">
-                        <h2 align="center">Moje zgłoszenia</h2>
+                        <h1 align="center">Moje zgłoszenia</h1>
                         <ul class="list-group list-group-flush" id="Reports">
                             {% for report in user_reports %}
                                 <li class="list-group-item">

@@ -2,18 +2,14 @@
 {% block title %}Wszystkie odblokowane bony{% endblock %}
 {% block content %}
 <style>
-body {
-    font-family: Arial, sans-serif;
-}
-
-.container {
-    width: 50%;
-    margin: 0 auto;
+.container{
+    background-color: #f8f9fa; /* Jasny szary */
+    color: #333333; /* Ciemnoszary */
+    text-align: center;
     padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    background-color: #f9f9f9;
+    border-radius: 15px;
+    width: 95%;
+    margin-top: 1%;
 }
 
 h1 {
@@ -77,7 +73,8 @@ button:hover {
 }
 </style>
 <body>
-    <h1>Moje Bony</h1>
+<div class="container">
+    <h1>Moje bony</h1>
     <ul>
         {% for voucher in vouchers %}
         <li>
@@ -85,6 +82,7 @@ button:hover {
         </li>
         {% endfor %}
     </ul>
-    <a href="{{ url_for('views.exchange_points') }}">Wymień Punkty</a>
+    <a class="btn btn-info" href="{{ url_for('views.exchange_points') }}">Wróć</a>
+</div>
 </body>
 {% endblock %}

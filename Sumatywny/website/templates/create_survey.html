@@ -2,19 +2,14 @@
 {% block title %}Stwórz nową ankietę{% endblock %}
 {% block content %}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #f8f9fa;
-        }
         .container {
             background-color: #f8f9fa; /* Jasny szary */
             color: #333333; /* Ciemnoszary */
             text-align: center;
-            padding: 20px;
+            padding: 10px;
             border-radius: 15px;
             width: 95%;
-            margin: 2% auto; /* Zmieniono margin-top na margin, aby centrować */
+            margin: 1% auto; /* Zmieniono margin-top na margin, aby centrować */
         }
         .container_create_survey {
             position: relative;
@@ -77,7 +72,7 @@
         }
     </script>
 <div class="container">
-    <h1>Stwórz nową ankiete</h1>
+    <h1>Stwórz nową ankietę</h1>
     <div class="container_create_survey">
     <form method="POST">
         <div>
@@ -90,8 +85,8 @@
                 <input type="text" id="question_1" name="questions[]" required>
             </div>
         </div>
-        <button type="button" onclick="addQuestionField()">Dodaj Pytanie</button>
-        <button type="submit">Stwórz ankiete</button>
+        <button type="button" onclick="addQuestionField()">Dodaj pytanie</button>
+        <button type="submit">Stwórz ankietę</button>
     </form>
     </div>
 </div>

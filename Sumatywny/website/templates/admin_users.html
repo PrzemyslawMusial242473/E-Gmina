@@ -1,20 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Weryfikacja Użytkowników{% endblock %}
+{% block title %}Weryfikacja użytkowników{% endblock %}
 {% block content %}
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #f8f9fa;
-  }
   .container {
     background-color: #f8f9fa; /* Jasny szary */
     color: #333333; /* Ciemnoszary */
     text-align: center;
-    padding: 20px;
+    padding: 10px;
     border-radius: 15px;
     width: 95%;
-    margin: 2% auto; /* Zmieniono margin-top na margin, aby centrować */
+    margin: 1% auto; /* Zmieniono margin-top na margin, aby centrować */
   }
   .container_create_survey, .container_create_survey2 {
     position: relative;
@@ -54,11 +49,11 @@
   }
 </style>
 <div class="container">
-  <h1 class="text-center">Weryfikacja Użytkowników</h1>
+  <h1 class="text-center">Weryfikacja użytkowników</h1>
   <div class="container_create_survey">
     <div class="card">
       <div class="card-header container2">
-        <h2 class="mb-0">Weryfikacja Organizacji</h2>
+        <h2 class="mb-0">Weryfikacja organizacji</h2>
       </div>
       <ul class="list-group list-group-flush">
         {% for user in pending_users %}
@@ -88,7 +83,7 @@
   <div class="container_create_survey2">
     <div class="card mt-4">
       <div class="card-header container2">
-        <h2 class="mb-0">Weryfikacja Użytkowników</h2>
+        <h2 class="mb-0">Weryfikacja użytkowników</h2>
       </div>
       <ul class="list-group list-group-flush">
         {% for user in pending_users %}
