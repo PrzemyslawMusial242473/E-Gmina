@@ -20,20 +20,13 @@
         background-color: transparent; /* Przezroczyste tło */
         padding: 10px 0; /* Dodaj odstępy na górze i na dole */
     }
-    .list-group-item a {
-        text-decoration: none; /* Usuń podkreślenie linku */
-        color: #007bff; /* Niebieski */
-    }
-    .list-group-item a:hover {
-        color: #0056b3; /* Ciemniejszy odcień niebieskiego */
-    }
 </style>
 <div class="container">
     <h1>Dostępne ankiety</h1>
     <ul class="list-group">
         {% for survey in surveys %}
             <li class="list-group-item">
-                <a href="{{ url_for('views.fill_survey', survey_id=survey.id) }}">{{ survey.title }}</a>
+                <a class="btn btn-info" href="{{ url_for('views.fill_survey', survey_id=survey.id) }}">{{ survey.title }}</a>
             </li>
         {% endfor %}
     </ul>

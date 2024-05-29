@@ -64,11 +64,24 @@
                 <button type="button" onclick="removeQuestionField(this)">Usuń</button>
             `;
             questionList.appendChild(newQuestion);
+            updateQuestionLabels();
         }
 
         function removeQuestionField(button) {
             const questionList = document.getElementById('question-list');
             questionList.removeChild(button.parentElement);
+            updateQuestionLabels();
+        }
+
+        function updateQuestionLabels() {
+            const questions = document.querySelectorAll('.question');
+            questions.forEach((question, index) => {
+                const label = question.querySelector('label');
+                const input = question.querySelector('input');
+                label.setAttribute('for', `question_${index + 1}`);
+                label.textContent = `Pytanie ${index + 1}:`;
+                input.setAttribute('id', `question_${index + 1}`);
+            });
         }
     </script>
 <div class="container">
@@ -83,6 +96,7 @@
             <div class="question">
                 <label for="question_1">Pytanie 1:</label>
                 <input type="text" id="question_1" name="questions[]" required>
+                <button type="button" onclick="removeQuestionField(this)">Usuń</button>
             </div>
         </div>
         <button type="button" onclick="addQuestionField()">Dodaj pytanie</button>
