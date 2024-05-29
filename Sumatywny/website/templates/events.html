@@ -2,11 +2,6 @@
 {% block title %}Wydarzenia{% endblock %}
 {% block content %}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
         .container1, .container2 {
             background-color: #f8f9fa; /* Jasny szary */
             color: #333333; /* Ciemnoszary */
@@ -15,7 +10,7 @@
             padding-top: 4px;
             border-radius: 15px;
             width: 95%;
-            margin-top: 2%;
+            margin-top: 1%;
             margin-left: 2%;
         }
         .container_event {
@@ -74,7 +69,7 @@
             <div class="col-md-6">
                 <div class="container2">
                     <div class="container_event">
-                        <h2 align="center">Moje wydarzenia</h2>
+                        <h1 align="center">Moje wydarzenia</h1>
                         <ul class="list-group list-group-flush" id="Events">
                             {% for event in user_events %}
                                 <li class="list-group-item">

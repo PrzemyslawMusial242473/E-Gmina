@@ -2,11 +2,6 @@
 {% block title %}Dostępne Ankiety{% endblock %}
 {% block content %}
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
     .container {
         background-color: #f8f9fa; /* Jasny szary */
         color: #333333; /* Ciemnoszary */
@@ -15,7 +10,7 @@
         border-radius: 15px;
         width: 50%;
         margin: 0 auto;
-        margin-top: 2%;
+        margin-top: 1%;
     }
     h2 {
         margin-bottom: 20px; /* Dodaj margines na dole nagłówka */
@@ -34,7 +29,7 @@
     }
 </style>
 <div class="container">
-    <h2>Dostępne Ankiety</h2>
+    <h1>Dostępne ankiety</h1>
     <ul class="list-group">
         {% for survey in surveys %}
             <li class="list-group-item">

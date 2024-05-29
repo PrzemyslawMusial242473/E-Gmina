@@ -2,18 +2,14 @@
 {% block title %}Wymień punkty{% endblock %}
 {% block content %}
 <style>
-body {
-    font-family: Arial, sans-serif;
-}
-
 .container{
     background-color: #f8f9fa; /* Jasny szary */
     color: #333333; /* Ciemnoszary */
     text-align: center;
-    padding: 20px;
+    padding: 10px;
     border-radius: 15px;
     width: 95%;
-    margin-top: 2%;
+    margin-top: 1%;
 }
 .container_exchange_points{
     position: relative;
@@ -105,7 +101,7 @@ ul {
 </style>
 
 <div class="container">
-    <h1>Wymiana Punktów</h1>
+    <h1>Wymiana punktów</h1>
     <div class="container_exchange_points">
         <ul>
             {% for store_key, store in stores.items() %}
@@ -118,7 +114,7 @@ ul {
             </li>
             {% endfor %}
         </ul>
-        <a href="{{ url_for('views.my_vouchers') }}">Moje Bony</a>
+        <a class="btn btn-info" href="{{ url_for('views.my_vouchers') }}">Moje bony</a>
     </div>
 </div>
 {% endblock %}
