@@ -41,8 +41,6 @@
   display: inline-block; /* Wyśrodkowanie */
            }
     </style>
-    <!-- Dodaj wszystkie skrypty JavaScript tutaj -->
-    <!-- Przykład: -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M&callback=initMap" async defer></script>
 <script>
     function initMap() {
@@ -51,22 +49,21 @@
             zoom: 15
         });
 
-        // Pętla tworząca markery dla wszystkich znaczników z bazy danych
         {% for marker in markers %}
         var marker = new google.maps.Marker({
             position: { lat: parseFloat('{{ marker.lat }}'), lng: parseFloat('{{ marker.lng }}') },
             map: map,
             title: '{{ marker.address }}',
-            address: '{{ marker.address }}',  // Przechowujemy adres w właściwości markerów
-            description: '{{ marker.description }}'  // Przechowujemy opis w właściwości markerów
+            address: '{{ marker.address }}',
+            description: '{{ marker.description }}'
         });
 
-        var infoWindow = new google.maps.InfoWindow(); // Tworzymy infoWindow dla danego markera
+        var infoWindow = new google.maps.InfoWindow();
 
         marker.addListener('click', function() {
             var infoWindowContent = '<div><h5>' + this.address + '</h5><p>' + this.description + '</p></div>';
-            infoWindow.setContent(infoWindowContent); // Ustawiamy treść infoWindow dla danego markera
-            infoWindow.open(map, this); // Otwieramy infoWindow dla danego markera
+            infoWindow.setContent(infoWindowContent);
+            infoWindow.open(map, this);
         });
         {% endfor %}
     }
@@ -74,11 +71,10 @@
 </head>
 <body>
 <div class="container1">
-    <h1 style="width: 100%; text-align: center;">Mapa punktów odbioru odpadów</h1>
+    <h1 style="width: 100%; text-align: center;">Mapa najważniejszych miejsc</h1>
     <div class="container-map">
     <div id="map"></div>
         </div>
 </div>
-    <!-- Dodaj treść HTML strony tutaj -->
 </body>
 </html>

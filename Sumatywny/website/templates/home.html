@@ -5,10 +5,10 @@
 /* Pozycjonowanie obrazka */
 .banner {
     width: 100%; /* Rozciągnięcie na szerokość strony */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
     background-image: url('{{ url_for('static', filename='konstantynow.jpg') }}'); /* Ścieżka do twojego pliku PNG */
     background-size: cover; /* Dopasowanie rozmiaru obrazka */
     background-position: center; /* Wycentrowanie obrazka */
-    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
 }
 .col-md-12 {
     background-color: #f8f9fa; /* Jasny szary */
@@ -19,10 +19,8 @@
 }
 
 .list-group-item.event-item {
-    position: absolute; /* Dodanie absolutnego pozycjonowania */
-    width: 100%; /* Szerokość 100% dla elementu listy */
-    top: 0;
-    left: 0;
+    position: relative; /* Zmiana na pozycjonowanie względne */
+    margin: 20px auto; /* Marginesy góra i dół, automatyczna szerokość */
     background-color: #b4dfe5; /* Pastelowy niebieski */
     color: #333333; /* Ciemnoszary */
     justify-content: center;
@@ -33,10 +31,13 @@
     transition: opacity 0.5s ease-in-out; /* Dodanie animacji przejścia */
     opacity: 0; /* Początkowa przezroczystość */
     z-index: 0; /* Początkowy z-index */
+    width: 80%; /* Szerokość kontenera z wydarzeniami */
+    max-width: 600px; /* Maksymalna szerokość kontenera */
+    padding: 20px; /* Dodatkowy wypełnienie */
 }
 
 .mapa {
-    background-color: #b4dfe5; /* Pastelowy niebieski */
+    background-color: rgba(70, 122, 122, 0); /* Jasnoszare tło kontenera z przezroczystością */
     border-radius: 15px;
     flex: 1; /* Mapa zajmuje pozostałe dostępne miejsce */
     height: 250px;
@@ -65,7 +66,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 2; /* Ustawienie wyższego z-indexu dla strzałek */
+    z-index: -1; /* Zmiana z-index na niższy */
+}
+
+.left-arrow {
+    left: 10px; /* Dodatkowy margines po lewej stronie */
+}
+
+.right-arrow {
+    right: 10px; /* Dodatkowy margines po prawej stronie */
 }
 
 .left-arrow svg,

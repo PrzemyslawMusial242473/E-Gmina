@@ -93,10 +93,6 @@
 <!-- Mapy -->
 <div class="map-container">
     <div class="map">
-        <h2 class="map-title">Mapa urzędów i bibliotek</h2>
-        <div id="map1" class="map-canvas"></div>
-    </div>
-    <div class="map">
         <h2 class="map-title">Mapa aptek do których można przekazać przeterminowane leki</h2>
         <div id="map2" class="map-canvas"></div>
     </div>
@@ -317,40 +313,18 @@
 <script>
     function initMaps() {
         var locations = [
-            {lat: 51.747585, lng: 19.325453},
             {lat: 51.74835457357969, lng: 19.32591727512815},
             {lat: 51.728516069053796, lng: 19.394346447308664}
         ];
 
-        // Inicjalizacja trzech map
-        var map1 = new google.maps.Map(document.getElementById('map1'), {
+        var map2 = new google.maps.Map(document.getElementById('map2'), {
             center: locations[0],
             zoom: 14
         });
 
-        var map2 = new google.maps.Map(document.getElementById('map2'), {
+        var map3 = new google.maps.Map(document.getElementById('map3'), {
             center: locations[1],
             zoom: 14
-        });
-
-        var map3 = new google.maps.Map(document.getElementById('map3'), {
-            center: locations[2],
-            zoom: 14
-        });
-
-        // Dodanie markerów na mapach
-        // Mapa 1
-        var addresses1 = [
-            {lat: 51.7485978, lng: 19.3257496, name: 'Konstantynów Łódzki ul. Zgierska 1 – Urząd Miejski w Konstantynowie Łódzkim oraz Urząd Stanu Cywilnego'},
-            {lat: 51.7482602, lng: 19.3245797, name: 'Konstantynów Łódzki Plac Tadeusza Kościuszki 10 – Miejska Biblioteka Publiczna'},
-        ];
-
-        addresses1.forEach(function(address) {
-            var marker = new google.maps.Marker({
-                position: address,
-                map: map1
-            });
-            addInfoWindow(marker, map1, address.name);
         });
 
         // Mapa 2
