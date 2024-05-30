@@ -74,12 +74,11 @@
                         <a class="nav-link" id="admin_payment" href="/admin-payments">Wprowadź płatności</a>
                         <a class="nav-item nav-link" id="admin_users" href="/admin-users">Weryfikuj konta</a>
                         <a class="nav-item nav-link" id="admin_users" href="/admin-reports">Weryfikuj zgłoszenia</a>
-                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymień punkty </a>
+                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>System lojalnościowy </a>
 
                     {% endif %}
                     {% if current_user.role == 'organisation' %}
                         <a class="nav-item nav-link" id="events" href="/events">Dodaj wydarzenia</a>
-                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymień punkty </a>
                     {% endif %}
                 {% else %}
                     <a class="nav-item nav-link" id="login" href="/login">Zaloguj</a>

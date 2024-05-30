@@ -1,7 +1,7 @@
 
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for,send_from_directory
 from flask_login import login_required, current_user
-from .models import Event,Payment, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste,Voucher,stores,org_stores
+from .models import Event,Payment, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste,Voucher,stores
 from datetime import datetime, date
 from . import db
 from . import mail
@@ -591,29 +591,31 @@ def add_loyalty_points(user, points):
     db.session.add(user)
     db.session.commit()
     
-@views.route('/exchange', methods=['GET','POST'])
+@views.route('/exchange', methods=['GET', 'POST'])
 @login_required
 def exchange_points():
-    if current_user.role == "organisation" :
-        available_stores = org_stores
-    else:
-        available_stores = stores
-
+    available_stores = stores
     if request.method == 'POST':
-        store_key = request.form.get('store')
-        store = available_stores.get(store_key)
-        if store and current_user.loyalty_points >= store['cost']:
-            voucher_code = str(uuid.uuid4()).replace('-', '').upper()[:12]
-            new_voucher = Voucher(user_id=current_user.id, store_name=store['name'], code=voucher_code)
-            current_user.loyalty_points -= store['cost']
-            db.session.add(new_voucher)
-            db.session.commit()
-            flash(f'Wymieniono punkty na bon do {store["name"]}! Kod: {voucher_code}', 'success')
+        if current_user.role == "admin" and 'new_store_name' in request.form:
+            new_store_name = request.form.get('new_store_name')
+            new_store_cost = int(request.form.get('new_store_cost'))
+            stores[f'store{len(stores) + 1}'] = {'name': new_store_name, 'cost': new_store_cost}
+            flash('Nowy sklep został dodany!', 'success')
         else:
-            flash('Nie masz wystarczającej liczby punktów lub nieprawidłowy sklep.', 'danger')
+            store_key = request.form.get('store')
+            store = available_stores.get(store_key)
+            if store and current_user.loyalty_points >= store['cost']:
+                voucher_code = str(uuid.uuid4()).replace('-', '').upper()[:12]
+                new_voucher = Voucher(user_id=current_user.id, store_name=store['name'], code=voucher_code)
+                current_user.loyalty_points -= store['cost']
+                db.session.add(new_voucher)
+                db.session.commit()
+                flash(f'Wymieniono punkty na bon do {store["name"]}! Kod: {voucher_code}', 'success')
+            else:
+                flash('Nie masz wystarczającej liczby punktów lub nieprawidłowy sklep.', 'danger')
         return redirect(url_for('views.exchange_points'))
 
-    return render_template('exchange_points.html', user=current_user, stores=available_stores)
+    return render_template('exchange_points.html', user=current_user, stores=stores)
 
 @views.route('/my-vouchers', methods=['GET'])
 @login_required
