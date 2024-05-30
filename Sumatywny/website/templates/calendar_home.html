@@ -32,8 +32,6 @@
             border-radius: 15px;
             overflow: hidden;
             display: inline-block;
-            width: 100%; /* Nowa reguła: kalendarz zajmuje 100% szerokości */
-            max-width: 550px; /* Maksymalna szerokość kalendarza */
         }
 
         table {
@@ -50,16 +48,11 @@
             cursor: pointer;
             width: calc(100% / 7);
             font-size: 12px;
-            background-color: #53798e; /* Domyślny kolor tła kafelka */
         }
 
         th {
             background-color: #42464a;
             color: white;
-        }
-
-        .has-event {
-            background-color: #66b0b7; /* Nowy kolor tła kafelka z wydarzeniem */
         }
 
         td:hover {
@@ -138,13 +131,6 @@
         .btn:hover {
             background-color: #177d8d;
         }
-
-        @media only screen and (max-width: 600px) {
-            /* Reguły CSS dla ekranów o szerokości do 600px */
-            .calendar {
-                max-width: 100%; /* Kalendarz zajmuje 100% szerokości */
-            }
-        }
     </style>
 </head>
 <body>
@@ -152,7 +138,7 @@
     <h1 style="width: 100%; text-align: center;">Kalendarz</h1>
     <div class="header">
         <h2>{{ current_month }} {{ current_year }}</h2>
-        <div class="calendar" style="position: relative;">
+        <div class="calendar" style="position: relative; width:550px">
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -197,5 +183,46 @@
         <a class="btn" href="{{ url_for('views.home', current_month=next_month, current_year=next_year) }}">Następny miesiąc</a>
     </div>
 </div>
+
+<script>
+    document.querySelectorAll('.has-event').forEach(function(cell) {
+        cell.addEventListener('mouseover', function() {
+            var eventInfo = cell.querySelector('.event-info');
+            var cellRect = cell.getBoundingClientRect();
+            var infoRect = eventInfo.getBoundingClientRect();
+            var spaceAbove = cellRect.top;
+            var spaceBelow = window.innerHeight - cellRect.bottom;
+            var weekNumber = cell.parentNode.rowIndex;
+
+            // Reset styles to calculate accurately
+            eventInfo.style.top = '';
+            eventInfo.style.bottom = '';
+            eventInfo.style.transform = 'translateX(-50%)';
+
+            // Calculate the position based on available space and week number
+            if ((weekNumber == 1 || weekNumber == 2) && spaceBelow > infoRect.height) {
+                // If it's the first or second week and there's enough space below, position below
+                eventInfo.style.top = '100%';
+                eventInfo.style.bottom = 'auto';
+            } else if ((weekNumber == 3) && spaceBelow > infoRect.height) {
+                // If it's the first or second week and there's enough space below, position below
+                eventInfo.style.top = 'auto';
+                eventInfo.style.bottom = '10%';
+            } else if (spaceAbove > infoRect.height && spaceAbove > spaceBelow) {
+                // If there's enough space above and it's more than below, position above
+                eventInfo.style.top = 'auto';
+                eventInfo.style.bottom = '100%';
+            } else {
+                // Otherwise, position below
+                eventInfo.style.top = '100%';
+                eventInfo.style.bottom = 'auto';
+            }
+
+            // Ensure it stays centered horizontally
+            eventInfo.style.left = '50%';
+            eventInfo.style.transform = 'translateX(-50%)';
+        });
+    });
+</script>
 </body>
 </html>

@@ -69,13 +69,14 @@
                     {% if current_user.role == 'admin' %}
                         <a class="nav-item nav-link" id="maps" href="/maps">Dodaj ważne miejsca na mapę</a>
                         <a class="nav-item nav-link" id="admin_users" href="/create-survey">Stwórz ankietę</a>
+                        <a class="nav-item nav-link" id="events" href="/events">Dodaj wydarzenie</a>
+                        <a class="nav-item nav-link" id="admin_events" href="/admin-events">Weryfikuj wydarzenia</a>
                         <a class="nav-link" id="admin_payment" href="/admin-payments">Wprowadź płatności</a>
                         <a class="nav-item nav-link" id="admin_users" href="/admin-users">Weryfikuj konta</a>
                         <a class="nav-item nav-link" id="admin_users" href="/admin-reports">Weryfikuj zgłoszenia</a>
-                        <a class="nav-item nav-link" id="admin_events" href="/admin-events">Weryfikuj wydarzenia</a>
                     {% endif %}
-                    {% if current_user.role != 'user' %}
-                        <a class="nav-item nav-link" id="events" href="/events">Wydarzenia</a>
+                    {% if current_user.role == 'organisation' %}
+                        <a class="nav-item nav-link" id="events" href="/events">Dodaj wydarzenia</a>
                         <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymień punkty </a>
                     {% endif %}
                 {% else %}

@@ -24,7 +24,7 @@
     h1 {
         white-space: nowrap; /* Nie dziel tytułu na wiele linii */
         margin-bottom: 20px; /* Dodaj margines na dole */
-        text-align:center;
+        text-align: center;
     }
     input[type="text"], input[type="email"], input[type="password"], datalist {
         width: 100%;
@@ -41,7 +41,6 @@
     button:hover {
         background-color: #45a049;
     }
-
     /* Styl dla map */
     .map-container {
         margin-top: 20px;
@@ -49,7 +48,6 @@
         justify-content: space-around;
         flex-wrap: wrap; /* Nowa linia dla map na węższych ekranach */
     }
-
     .map {
         width: 30%;
         height: 400px;
@@ -59,16 +57,18 @@
         display: flex;
         flex-direction: column;
     }
-
     .map-title {
         flex: 1; /* Rozciąganie tytułu na całą wysokość */
         text-align: center;
         font-size: 1.2em; /* Dopasowanie rozmiaru czcionki */
         margin: 0; /* Usunięcie domyślnego marginesu */
     }
-
     .map-canvas {
         flex: 9; /* Rozciąganie mapy na większą część */
+    }
+    /* Zwiększenie rozmiaru czcionki w informacyjnym okienku na mapie */
+    .gm-style-iw div {
+        font-size: 16px !important; /* Zwiększenie rozmiaru czcionki */
     }
 </style>
 <div class="container">

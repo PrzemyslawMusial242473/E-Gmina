@@ -96,7 +96,7 @@
             var infoWindow = new google.maps.InfoWindow();
 
             marker.addListener('click', function() {
-                var infoWindowContent = '<div class="info-window"><h5>' + this.address + '</h5><p>' + this.description + '</p></div>';
+                var infoWindowContent = '<div class="info-window"><h5>' + this.description + '</h5><p>' + this.address + '</p></div>';
                 infoWindow.setContent(infoWindowContent);
                 infoWindow.open(map, this);
             });
