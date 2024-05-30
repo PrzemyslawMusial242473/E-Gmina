@@ -111,7 +111,7 @@
 }
 </style>
 <div class="banner"></div>
-<div class="row">
+<div class="row" style="margin-right: 0;margin-left: 0;">
     <div class="col-md-12">
         <h1>Wydarzenia</h1>
         <div class="events-wrapper" style="position: relative; height: 300px;"> <!-- Dodanie stylu position relative do wrappera -->
@@ -215,9 +215,19 @@
                 position: results[0].geometry.location
             });
         } else {
-            console.error('Geocode was not successful for the following reason: ' + status);
+            console.error('Geocode nie działa z określonego powodu: ' + status);
         }
     });
+
+    google.maps.event.addListener(map{{ event.id }}, 'dragstart', resetAutoSwitch);
+    google.maps.event.addListener(map{{ event.id }}, 'dragend', resetAutoSwitch);
+    google.maps.event.addListener(map{{ event.id }}, 'zoom_changed', resetAutoSwitch);
+    google.maps.event.addListener(map{{ event.id }}, 'maptypeid_changed', resetAutoSwitch);
+    google.maps.event.addListener(map{{ event.id }}, 'tilesloaded', resetAutoSwitch);
+    google.maps.event.addListener(map{{ event.id }}, 'bounds_changed', resetAutoSwitch);
+    google.maps.event.addListener(map{{ event.id }}, 'center_changed', resetAutoSwitch);
+    google.maps.event.addListener(map{{ event.id }}, 'resize', resetAutoSwitch);
+    google.maps.event.addListener(map{{ event.id }}, 'idle', resetAutoSwitch);
     {% endfor %}
 </script>
 {% endblock %}
