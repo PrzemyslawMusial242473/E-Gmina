@@ -5,76 +5,111 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maps</title>
     <style>
-
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
         }
+
         #map {
             height: 300px;
             width: 80%;
             margin-left: 10%;
             border-radius: 15px;
             margin-top: 20px;
-        }  .container1{
-             background-color: #f8f9fa; /* Jasny szary */
-        color: #333333; /* Ciemnoszary */
-        text-align: center;
-        padding: 20px;
-  min-height: auto;
-  border-radius: 15px;
-  overflow: hidden;
-            height:100%;
         }
-           .container-map{
-                position: relative;
-        background-color: #b4dfe5; /* Pastelowy niebieski */
-        color: #333333; /* Ciemnoszary */
-        justify-content: center;
-        align-items: center;
-        border-radius: 15px;
-  text-align: center;
-  padding: 20px 0;
-  width: 100%; /* Szerokość 100% */
-  margin: 0; /* Usunięcie marginesów */
-  display: inline-block; /* Wyśrodkowanie */
-           }
+
+        .container1 {
+            background-color: #f8f9fa; /* Jasny szary */
+            color: #333333; /* Ciemnoszary */
+            text-align: center;
+            padding: 20px;
+            min-height: auto;
+            border-radius: 15px;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .container-map {
+            position: relative;
+            background-color: #b4dfe5; /* Pastelowy niebieski */
+            color: #333333; /* Ciemnoszary */
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            text-align: center;
+            padding: 20px 0;
+            width: 100%; /* Szerokość 100% */
+            margin: 0; /* Usunięcie marginesów */
+            display: inline-block; /* Wyśrodkowanie */
+        }
+
+        /* Stylizacja infoWindow */
+        .info-window {
+            max-width: 400px; /* Maksymalna szerokość */
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            position: relative;
+        }
+
+        .info-window::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: calc(50% - 10px);
+            border-style: solid;
+            border-width: 0 10px 10px 10px;
+            border-color: transparent transparent #ffffff transparent;
+        }
+
+        .info-window h5 {
+            margin-top: 0;
+            margin-bottom: 5px; /* Zmniejszenie marginesu */
+            font-size: 18px; /* Zmniejszenie rozmiaru czcionki */
+        }
+
+        .info-window p {
+            margin-bottom: 0;
+            font-size: 16px; /* Zmniejszenie rozmiaru czcionki */
+        }
     </style>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M&callback=initMap" async defer></script>
-<script>
-    function initMap() {
-        var map = new google.maps.Map(document.getElementById('map'), {
-            center: { lat: 51.747585, lng: 19.325453 },
-            zoom: 15
-        });
+    <script>
+        function initMap() {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 51.747585, lng: 19.325453 },
+                zoom: 15
+            });
 
-        {% for marker in markers %}
-        var marker = new google.maps.Marker({
-            position: { lat: parseFloat('{{ marker.lat }}'), lng: parseFloat('{{ marker.lng }}') },
-            map: map,
-            title: '{{ marker.address }}',
-            address: '{{ marker.address }}',
-            description: '{{ marker.description }}'
-        });
+            {% for marker in markers %}
+            var marker = new google.maps.Marker({
+                position: { lat: parseFloat('{{ marker.lat }}'), lng: parseFloat('{{ marker.lng }}') },
+                map: map,
+                title: '{{ marker.address }}',
+                address: '{{ marker.address }}',
+                description: '{{ marker.description }}'
+            });
 
-        var infoWindow = new google.maps.InfoWindow();
+            var infoWindow = new google.maps.InfoWindow();
 
-        marker.addListener('click', function() {
-            var infoWindowContent = '<div><h5>' + this.address + '</h5><p>' + this.description + '</p></div>';
-            infoWindow.setContent(infoWindowContent);
-            infoWindow.open(map, this);
-        });
-        {% endfor %}
-    }
-</script>
+            marker.addListener('click', function() {
+                var infoWindowContent = '<div class="info-window"><h5>' + this.address + '</h5><p>' + this.description + '</p></div>';
+                infoWindow.setContent(infoWindowContent);
+                infoWindow.open(map, this);
+            });
+            {% endfor %}
+        }
+    </script>
 </head>
 <body>
 <div class="container1">
     <h1 style="width: 100%; text-align: center;">Mapa najważniejszych miejsc</h1>
     <div class="container-map">
-    <div id="map"></div>
-        </div>
+        <div id="map"></div>
+    </div>
 </div>
 </body>
 </html>

@@ -22,6 +22,7 @@
         }
         .navbar-brand, .navbar-nav .nav-link {
             color: #fff !important; /* Biały kolor tekstu dla marki i linków nawigacyjnych */
+            margin-right: 20px;
         }
         .navbar-brand:hover, .navbar-nav .nav-link:hover {
             color: #dcdde1 !important; /* Biały kolor tekstu dla marki i linków nawigacyjnych po najechaniu myszką */
@@ -58,24 +59,24 @@
             <div class="navbar-nav mr-auto"> <!-- Używamy klasy mr-auto, aby przesunąć opcje "Home", "Calendar" i "Map" w lewo -->
                 {% if current_user.is_authenticated %}
                     {% if current_user.role == 'user'%}
-                        <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
+                        <a class="nav-item nav-link" id="odpady-button" href='/segregate'>Segreguj </a>
                         <a class="nav-item nav-link" id="report-button" href='/report'>Naruszenie środowiskowe</a>
                         <a class="nav-item nav-link" id="platnosc-button" href='/payments'>Płatność</a>
                         <a class="nav-item nav-link" id="ankiety-button" href='/surveys'>Ankiety</a>
-                        <a class="nav-item nav-link" id="odpady-button" href='/segregate'>Segreguj </a>
+                        <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
                         <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymień punkty </a>
+                    {% endif %}
+                    {% if current_user.role == 'admin' %}
+                        <a class="nav-item nav-link" id="maps" href="/maps">Dodaj ważne miejsca na mapę</a>
+                        <a class="nav-item nav-link" id="admin_users" href="/create-survey">Stwórz ankietę</a>
+                        <a class="nav-link" id="admin_payment" href="/admin-payments">Wprowadź płatności</a>
+                        <a class="nav-item nav-link" id="admin_users" href="/admin-users">Weryfikuj konta</a>
+                        <a class="nav-item nav-link" id="admin_users" href="/admin-reports">Weryfikuj zgłoszenia</a>
+                        <a class="nav-item nav-link" id="admin_events" href="/admin-events">Weryfikuj wydarzenia</a>
                     {% endif %}
                     {% if current_user.role != 'user' %}
                         <a class="nav-item nav-link" id="events" href="/events">Wydarzenia</a>
                         <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymień punkty </a>
-                    {% endif %}
-                    {% if current_user.role == 'admin' %}
-                        <a class="nav-item nav-link" id="maps" href="/maps">Mapa</a>
-                        <a class="nav-item nav-link" id="admin_users" href="/create-survey">Stwórz ankietę</a>
-                        <a class="nav-item nav-link" id="admin_events" href="/admin-events">Weryfikuj wydarzenia</a>
-                        <a class="nav-item nav-link" id="admin_users" href="/admin-users">Weryfikuj konta</a>
-                        <a class="nav-item nav-link" id="admin_users" href="/admin-reports">Weryfikuj zgłoszenia</a>
-                        <a class="nav-link" id="admin_payment" href="/admin-payments">Wprowadź płatności</a>
                     {% endif %}
                 {% else %}
                     <a class="nav-item nav-link" id="login" href="/login">Zaloguj</a>
