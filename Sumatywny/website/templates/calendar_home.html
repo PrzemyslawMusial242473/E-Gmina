@@ -192,13 +192,27 @@
         </div>
     </div>
     <div class="btn-container">
-        <a class="btn" href="{{ url_for('views.home', current_month=prev_month, current_year=prev_year) }}">Poprzedni miesiąc</a>
-        <a class="btn" href="{{ url_for('views.home', current_month=today_month, current_year=today_year) }}">Aktualny miesiąc</a>
-        <a class="btn" href="{{ url_for('views.home', current_month=next_month, current_year=next_year) }}">Następny miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=prev_month, current_year=prev_year) }}" onclick="saveScrollPosition()">Poprzedni miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=today_month, current_year=today_year) }}" onclick="saveScrollPosition()">Aktualny miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=next_month, current_year=next_year) }}" onclick="saveScrollPosition()">Następny miesiąc</a>
     </div>
 </div>
 
 <script>
+    // Zapisz pozycję scrolla przed zmianą miesiąca
+    function saveScrollPosition() {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    }
+
+    // Przywróć pozycję scrolla po załadowaniu strony
+    document.addEventListener('DOMContentLoaded', function() {
+        var scrollPosition = localStorage.getItem('scrollPosition');
+        if (scrollPosition !== null) {
+            window.scrollTo(0, scrollPosition);
+            localStorage.removeItem('scrollPosition');
+        }
+    });
+
     document.querySelectorAll('.has-event').forEach(function(cell) {
         cell.addEventListener('mouseover', function() {
             var eventInfo = cell.querySelector('.event-info');
