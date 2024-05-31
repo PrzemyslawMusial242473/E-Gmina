@@ -4,6 +4,7 @@
 <style>
   .container {
     display: flex;
+    flex-wrap: wrap; /* Pozwala elementom przejść do następnego wiersza przy zmniejszeniu okna */
     align-items: center;
     background-color: rgba(255, 255, 255, 0); /* Jasny szary */
     color: #000000; /* Ciemnoszary */
@@ -11,16 +12,16 @@
     border-radius: 15px;
     width: 80%;
     margin-top: 7%;
-    position: relative; /* Dodajemy pozycję względną, aby przenieść obrazek */
+    position: relative; /* Pozycja względna, aby przenieść obrazek */
   }
   .image-outside-container {
-    position: absolute; /* Ustawiamy absolutną pozycję dla obrazka */
-    left: -120px; /* Ustawiamy odległość od lewej strony */
+    position: absolute; /* Absolutna pozycja dla obrazka */
+    left: -120px; /* Odległość od lewej strony */
   }
   .image-container {
     flex: 1;
     text-align: center;
-    margin-right: 20px; /* Dodany odstęp między zdjęciem a formularzem logowania */
+    margin-right: 20px; /* Odstęp między zdjęciem a formularzem logowania */
   }
   .image-container img {
     max-width: 100%;
@@ -49,6 +50,31 @@
   .custom-file-upload input[type="file"] {
     display: none;
   }
+
+  @media (max-width: 1200px) {
+    .image-outside-container {
+      position: relative; /* Względna pozycja dla mniejszych ekranów */
+      left: 0; /* Resetowanie odległości od lewej strony */
+      margin-bottom: 20px; /* Odstęp poniżej obrazka */
+      text-align: center;
+    }
+    .container {
+      flex-direction: column; /* Elementy w kolumnie */
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      width: 100%; /* Pełna szerokość dla bardzo małych ekranów */
+      padding: 10px;
+    }
+    .container_signup_user {
+      padding: 20px; /* Mniejsze padding dla małych ekranów */
+    }
+    .image-container img {
+      max-width: 80%; /* Zmniejszenie obrazka dla mniejszych ekranów */
+    }
+  }
 </style>
 
 <div class="container">
@@ -56,7 +82,7 @@
     <img src="{{ url_for('static', filename='info.png') }}" alt="Zdjęcie">
   </div>
   <div class="image-container">
-
+    <!-- Placeholder for additional content if needed -->
   </div>
   <div class="container_signup_user">
     <h1>Zarejestruj się</h1>
