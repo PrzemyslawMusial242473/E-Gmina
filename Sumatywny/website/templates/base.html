@@ -59,12 +59,12 @@
             <div class="navbar-nav mr-auto"> <!-- Używamy klasy mr-auto, aby przesunąć opcje "Home", "Calendar" i "Map" w lewo -->
                 {% if current_user.is_authenticated %}
                     {% if current_user.role == 'user'%}
-                        <a class="nav-item nav-link" id="odpady-button" href='/segregate'>Segreguj </a>
-                        <a class="nav-item nav-link" id="report-button" href='/report'>Naruszenie środowiskowe</a>
+                        <a class="nav-item nav-link" id="odpady-button" href='/segregate'>Segregacja </a>
+                        <a class="nav-item nav-link" id="report-button" href='/report'>Naruszenia środowiskowe</a>
                         <a class="nav-item nav-link" id="platnosc-button" href='/payments'>Płatność</a>
                         <a class="nav-item nav-link" id="ankiety-button" href='/surveys'>Ankiety</a>
                         <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
-                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymień punkty </a>
+                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymiana punktów </a>
                     {% endif %}
                     {% if current_user.role == 'admin' %}
                         <a class="nav-item nav-link" id="maps" href="/maps">Dodaj ważne miejsca na mapę</a>
