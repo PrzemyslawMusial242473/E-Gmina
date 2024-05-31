@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Dostępne Ankiety{% endblock %}
+{% block title %}Dostępne ankiety{% endblock %}
 {% block content %}
 <style>
     .container {
@@ -23,12 +23,16 @@
 </style>
 <div class="container">
     <h1>Dostępne ankiety</h1>
-    <ul class="list-group">
-        {% for survey in surveys %}
-            <li class="list-group-item">
-                <a class="btn btn-info" href="{{ url_for('views.fill_survey', survey_id=survey.id) }}">{{ survey.title }}</a>
-            </li>
-        {% endfor %}
-    </ul>
+    {% if surveys %}
+        <ul class="list-group">
+            {% for survey in surveys %}
+                <li class="list-group-item">
+                    <a class="btn btn-info" href="{{ url_for('views.fill_survey', survey_id=survey.id) }}">{{ survey.title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Brak dostępnych ankiet.</p>
+    {% endif %}
 </div>
 {% endblock %}

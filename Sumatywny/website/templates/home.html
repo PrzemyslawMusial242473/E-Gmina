@@ -94,23 +94,6 @@
     margin-top: 80px; /* Dodatkowy margines od góry */
 }
 
-/* Nowa klasa dla przycisku "Znajomi" */
-.friends-button {
-    background-color: #467a7a; /* Odcień #467a7a */
-    color: #ffffff; /* Biały tekst na tle #467a7a */
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 16px;
-    margin-top: 20px; /* Dodatkowy margines */
-    display: inline-block;
-}
-
-.friends-button:hover {
-    background-color: #3a625c; /* Ciemniejszy odcień */
-}
-
 /* Nowe style dla responsywności */
 @media only screen and (max-width: 768px) {
     .row {
@@ -123,25 +106,44 @@
         margin-bottom: 20px; /* Dodatkowy margines na mniejszych ekranach */
     }
 }
+
+.no-events-wrapper {
+    height: 50px; /* Zmniejszona wysokość gdy brak wydarzeń */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(180,223,229,0.5);
+    border-radius: 15px;
+    color: #000000;
+}
+
+.events-wrapper {
+    position: relative;
+    height: 300px; /* Domyślna wysokość */
+}
 </style>
 <div class="banner"></div>
 <div class="row" style="margin-right: 0;margin-left: 0;">
     <div class="col-md-12">
         <h1>Wydarzenia</h1>
-        <div class="events-wrapper" style="position: relative; height: 300px;"> <!-- Dodanie stylu position relative do wrappera -->
+        <div class="{% if not accepted_events %}no-events-wrapper{% else %}events-wrapper{% endif %}" style="position: relative;">
             <ul class="list-group list-group-flush" id="Events">
-                {% for event in accepted_events %}
-                <li class="list-group-item event-item">
-                    <div class="event-details">
-                        <strong class="event-name">{{ event.name }}</strong><br>
-                        <div class="event-description">
-                            {{ event.data }}<br>
-                            {{ event.date }}<br>
+                {% if accepted_events %}
+                    {% for event in accepted_events %}
+                    <li class="list-group-item event-item">
+                        <div class="event-details">
+                            <strong class="event-name">{{ event.name }}</strong><br>
+                            <div class="event-description">
+                                {{ event.data }}<br>
+                                {{ event.date }}<br>
+                            </div>
                         </div>
-                    </div>
-                    <div class="mapa" id="map-{{ event.id }}"></div>
-                </li>
-                {% endfor %}
+                        <div class="mapa" id="map-{{ event.id }}"></div>
+                    </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="list-group-item event-item">Brak wydarzeń.</li>
+                {% endif %}
             </ul>
             <div class="left-arrow" style="position: absolute; top: 47%; transform: translateY(-50%); left: 0; cursor: pointer;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">

@@ -62,21 +62,25 @@
                     <div class="container_report">
                         <h1 align="center">Moje zgłoszenia</h1>
                         <ul class="list-group list-group-flush" id="Reports">
-                            {% for report in user_reports %}
-                                <li class="list-group-item">
-                                    <strong>Opis:</strong> {{ report.data }}<br>
-                                    <strong>Data:</strong> {{ report.date }}<br>
-                                    <strong>Miejsce:</strong> {{ report.place }}<br>
-                                    <div id="map-{{ report.id }}" style="height: 200px;"></div>
-                                    {% if report.status == 'rejected' %}
-                                        <p>Twoje zgłoszenie zostało odrzucone.</p>
-                                    {% elif report.status == 'accepted' %}
-                                        <p>Twoje zgłoszenie zostało zatwierdzone.</p>
-                                    {%else%}
-                                        <p>Twoje zgłoszenie czeka na rozpatrzenie.</p>
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
+                            {% if user_reports %}
+                                {% for report in user_reports %}
+                                    <li class="list-group-item">
+                                        <strong>Opis:</strong> {{ report.data }}<br>
+                                        <strong>Data:</strong> {{ report.date }}<br>
+                                        <strong>Miejsce:</strong> {{ report.place }}<br>
+                                        <div id="map-{{ report.id }}" style="height: 200px;"></div>
+                                        {% if report.status == 'rejected' %}
+                                            <p>Twoje zgłoszenie zostało odrzucone.</p>
+                                        {% elif report.status == 'accepted' %}
+                                            <p>Twoje zgłoszenie zostało zatwierdzone.</p>
+                                        {% else %}
+                                            <p>Twoje zgłoszenie czeka na rozpatrzenie.</p>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="list-group-item">Nie dodano żadnego zgłoszenia.</li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
