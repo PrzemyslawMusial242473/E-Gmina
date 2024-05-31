@@ -3,8 +3,8 @@
 {% block content %}
     <style>
     .container1,.container2,.container3{
-    background-color: #f8f9fa; /* Jasny szary */
-        color: #333333; /* Ciemnoszary */
+    background-color: rgb(180,223,229,0);
+        color: #000000; /* Ciemnoszary */
         text-align: center;
         padding: 20px;
         padding-top:4px;
@@ -15,8 +15,8 @@
     }
     .container_map{
          position: relative;
-        background-color: #b4dfe5; /* Pastelowy niebieski */
-        color: #333333; /* Ciemnoszary */
+        background-color: rgb(180,223,229,0.3);
+        color: #000000; /* Ciemnoszary */
         justify-content: center;
         align-items: center;
         border-radius: 15px;
@@ -25,6 +25,15 @@
     }
     #map{
         border-radius: 15px;
+    }
+    .btn-t {
+        background-color: #328685;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
     }
     </style>
     <div class="container">
@@ -48,7 +57,7 @@
                                 <label for="description">Opis:</label>
                                 <input type="text" class="form-control" id="description" name="description">
                             </div>
-                            <button type="submit" class="btn btn-primary">Dodaj</button>
+                            <button type="submit" class="btn-t btn-primary">Dodaj</button>
                         </form>
                     </div>
                 </div>

@@ -6,7 +6,7 @@
     display: flex;
     align-items: center;
     background-color: rgba(255, 255, 255, 0); /* Jasny szary */
-    color: #333333; /* Ciemnoszary */
+    color: #000000; /* Ciemnoszary */
     padding: 20px;
     border-radius: 15px;
     width: 80%;
@@ -30,11 +30,20 @@
   .container-login {
     flex: 1;
     background-color: rgba(180, 233, 229, 0.3);; /* Pastelowy niebieski */
-    color: #333333; /* Ciemnoszary */
+    color: #000000; /* Ciemnoszary */
     border-radius: 15px;
     padding: 30px;
     margin-top: 20px;
     align-items: flex-start; /* Wyrównanie do góry */
+  }
+  .btn-log {
+      background-color: #328685;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
   }
 </style>
 
@@ -57,7 +66,7 @@
         <input type="password" class="form-control" id="password" name="password" placeholder="Wpisz hasło">
       </div>
       <br>
-      <button type="submit" class="btn btn-primary">Login</button>
+      <button type="submit" class="btn-log">Login</button>
     </form>
   </div>
 </div>

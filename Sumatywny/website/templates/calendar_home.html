@@ -6,7 +6,7 @@
     <title>Kalendarz</title>
     <style>
         .calendar-container {
-            background-color: #f8f9fa;
+            background-color: rgb(180,223,229,0);
             color: #333333;
             text-align: center;
             padding: 20px;
@@ -16,7 +16,7 @@
 
         .header {
             position: relative;
-            background-color: #b4dfe5;
+            background-color: rgb(180,223,229,0.3);
             color: #333333;
             justify-content: center;
             align-items: center;
@@ -32,7 +32,7 @@
             border-radius: 15px;
             overflow: hidden;
             display: inline-block;
-            width: 100%; /* Nowa reguła: kalendarz zajmuje 100% szerokości */
+            width: 100%; /* Kalendarz zajmuje 100% szerokości */
             max-width: 550px; /* Maksymalna szerokość kalendarza */
         }
 
@@ -141,6 +141,9 @@
 
         @media only screen and (max-width: 600px) {
             /* Reguły CSS dla ekranów o szerokości do 600px */
+            .calendar-container {
+                padding: 10px; /* Mniejszy odstęp dla mniejszych ekranów */
+            }
             .calendar {
                 max-width: 100%; /* Kalendarz zajmuje 100% szerokości */
             }
@@ -152,7 +155,7 @@
     <h1 style="width: 100%; text-align: center;">Kalendarz</h1>
     <div class="header">
         <h2>{{ current_month }} {{ current_year }}</h2>
-        <div class="calendar" style="position: relative; width:550px">
+        <div class="calendar" style="position: relative;">
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -192,65 +195,10 @@
         </div>
     </div>
     <div class="btn-container">
-        <a class="btn" href="{{ url_for('views.home', current_month=prev_month, current_year=prev_year) }}" onclick="saveScrollPosition()">Poprzedni miesiąc</a>
-        <a class="btn" href="{{ url_for('views.home', current_month=today_month, current_year=today_year) }}" onclick="saveScrollPosition()">Aktualny miesiąc</a>
-        <a class="btn" href="{{ url_for('views.home', current_month=next_month, current_year=next_year) }}" onclick="saveScrollPosition()">Następny miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=prev_month, current_year=prev_year) }}">Poprzedni miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=today_month, current_year=today_year) }}">Aktualny miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=next_month, current_year=next_year) }}">Następny miesiąc</a>
     </div>
 </div>
-
-<script>
-    // Zapisz pozycję scrolla przed zmianą miesiąca
-    function saveScrollPosition() {
-        localStorage.setItem('scrollPosition', window.scrollY);
-    }
-
-    // Przywróć pozycję scrolla po załadowaniu strony
-    document.addEventListener('DOMContentLoaded', function() {
-        var scrollPosition = localStorage.getItem('scrollPosition');
-        if (scrollPosition !== null) {
-            window.scrollTo(0, scrollPosition);
-            localStorage.removeItem('scrollPosition');
-        }
-    });
-
-    document.querySelectorAll('.has-event').forEach(function(cell) {
-        cell.addEventListener('mouseover', function() {
-            var eventInfo = cell.querySelector('.event-info');
-            var cellRect = cell.getBoundingClientRect();
-            var infoRect = eventInfo.getBoundingClientRect();
-            var spaceAbove = cellRect.top;
-            var spaceBelow = window.innerHeight - cellRect.bottom;
-            var weekNumber = cell.parentNode.rowIndex;
-
-            // Reset styles to calculate accurately
-            eventInfo.style.top = '';
-            eventInfo.style.bottom = '';
-            eventInfo.style.transform = 'translateX(-50%)';
-
-            // Calculate the position based on available space and week number
-            if ((weekNumber == 1 || weekNumber == 2) && spaceBelow > infoRect.height) {
-                // If it's the first or second week and there's enough space below, position below
-                eventInfo.style.top = '100%';
-                eventInfo.style.bottom = 'auto';
-            } else if ((weekNumber == 3) && spaceBelow > infoRect.height) {
-                // If it's the first or second week and there's enough space below, position below
-                eventInfo.style.top = 'auto';
-                eventInfo.style.bottom = '10%';
-            } else if (spaceAbove > infoRect.height && spaceAbove > spaceBelow) {
-                // If there's enough space above and it's more than below, position above
-                eventInfo.style.top = 'auto';
-                eventInfo.style.bottom = '100%';
-            } else {
-                // Otherwise, position below
-                eventInfo.style.top = '100%';
-                eventInfo.style.bottom = 'auto';
-            }
-
-            // Ensure it stays centered horizontally
-            eventInfo.style.left = '50%';
-            eventInfo.style.transform = 'translateX(-50%)';
-        });
-    });
-</script>
 </body>
 </html>
