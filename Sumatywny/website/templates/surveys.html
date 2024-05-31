@@ -2,15 +2,23 @@
 {% block title %}Dostępne Ankiety{% endblock %}
 {% block content %}
 <style>
-    .container {
-        background-color: rgb(250,250,250,1);
+    .banner {
+        width: 100%; /* Rozciągnięcie na szerokość strony */
+        background-image: url('{{ url_for('static', filename='ankiety.png') }}'); /* Ścieżka do twojego pliku PNG */
+        background-size: cover; /* Dopasowanie rozmiaru obrazka */
+        background-position: center; /* Wycentrowanie obrazka */
+        height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+        border-radius: 15px; /* Dodanie zaokrąglonych rogów */
+    }
+    #container {
+        background-color: rgb(250, 250, 250, 1);
         color: #000000; /* Ciemnoszary */
         text-align: center;
         padding: 20px;
         border-radius: 15px;
-        width: 50%;
-        margin: 0 auto;
+        width: 100%;
         margin-top: 1%;
+        min-height: 200px;
     }
     h2 {
         margin-bottom: 20px; /* Dodaj margines na dole nagłówka */
@@ -19,16 +27,66 @@
         border: none; /* Usuń obramowanie dla każdego elementu listy */
         background-color: transparent; /* Przezroczyste tło */
         padding: 10px 0; /* Dodaj odstępy na górze i na dole */
+        position: relative;
+        display: flex;
+        justify-content: center; /* Wyśrodkuj zawartość */
+    }
+    .list-group-item:not(:last-child)::after {
+        content: '';
+        display: block;
+        border-bottom: 1px dashed #ccc; /* Przerywana linia */
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+    }
+    .btn-info {
+        display: inline-block;
+        width: 100%; /* Domyślnie szerokość 100%, będzie dostosowane przez JS */
+        max-width: 100%; /* Zapobiega przekraczaniu dostępnej szerokości */
+    }
+    .box {
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 1%;
+        min-height: 80px;
     }
 </style>
-<div class="container">
+
+<div class="banner"></div>
+
+<div id="container">
     <h1>Dostępne ankiety</h1>
-    <ul class="list-group">
-        {% for survey in surveys %}
-            <li class="list-group-item">
-                <a class="btn btn-info" href="{{ url_for('views.fill_survey', survey_id=survey.id) }}">{{ survey.title }}</a>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="box">
+        <ul class="list-group">
+            {% for survey in surveys %}
+                <li class="list-group-item">
+                    <a class="btn btn-info" href="{{ url_for('views.fill_survey', survey_id=survey.id) }}">{{ survey.title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let buttons = document.querySelectorAll('.btn-info');
+        let maxWidth = 0;
+
+        // Find the maximum width of the buttons
+        buttons.forEach(function(button) {
+            let width = button.offsetWidth;
+            if (width > maxWidth) {
+                maxWidth = width;
+            }
+        });
+
+        // Set all buttons to the maximum width and center them
+        buttons.forEach(function(button) {
+            button.style.width = maxWidth + 'px';
+        });
+    });
+</script>
 {% endblock %}
