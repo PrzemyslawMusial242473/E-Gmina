@@ -195,10 +195,64 @@
         </div>
     </div>
     <div class="btn-container">
-        <a class="btn" href="{{ url_for('views.home', current_month=prev_month, current_year=prev_year) }}">Poprzedni miesiąc</a>
-        <a class="btn" href="{{ url_for('views.home', current_month=today_month, current_year=today_year) }}">Aktualny miesiąc</a>
-        <a class="btn" href="{{ url_for('views.home', current_month=next_month, current_year=next_year) }}">Następny miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=prev_month, current_year=prev_year) }}" onclick="saveScrollPosition()">Poprzedni miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=today_month, current_year=today_year) }}" onclick="saveScrollPosition()">Aktualny miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=next_month, current_year=next_year) }}" onclick="saveScrollPosition()">Następny miesiąc</a>
     </div>
 </div>
+<script>
+    // Zapisz pozycję scrolla przed zmianą miesiąca
+    function saveScrollPosition() {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    }
+
+    // Przywróć pozycję scrolla po załadowaniu strony
+    document.addEventListener('DOMContentLoaded', function() {
+        var scrollPosition = localStorage.getItem('scrollPosition');
+        if (scrollPosition !== null) {
+            window.scrollTo(0, scrollPosition);
+            localStorage.removeItem('scrollPosition');
+        }
+    });
+
+    document.querySelectorAll('.has-event').forEach(function(cell) {
+        cell.addEventListener('mouseover', function() {
+            var eventInfo = cell.querySelector('.event-info');
+            var cellRect = cell.getBoundingClientRect();
+            var infoRect = eventInfo.getBoundingClientRect();
+            var spaceAbove = cellRect.top;
+            var spaceBelow = window.innerHeight - cellRect.bottom;
+            var weekNumber = cell.parentNode.rowIndex;
+
+            // Reset styles to calculate accurately
+            eventInfo.style.top = '';
+            eventInfo.style.bottom = '';
+            eventInfo.style.transform = 'translateX(-50%)';
+
+            // Calculate the position based on available space and week number
+            if ((weekNumber == 1 || weekNumber == 2) && spaceBelow > infoRect.height) {
+                // If it's the first or second week and there's enough space below, position below
+                eventInfo.style.top = '100%';
+                eventInfo.style.bottom = 'auto';
+            } else if ((weekNumber == 3) && spaceBelow > infoRect.height) {
+                // If it's the first or second week and there's enough space below, position below
+                eventInfo.style.top = 'auto';
+                eventInfo.style.bottom = '10%';
+            } else if (spaceAbove > infoRect.height && spaceAbove > spaceBelow) {
+                // If there's enough space above and it's more than below, position above
+                eventInfo.style.top = 'auto';
+                eventInfo.style.bottom = '100%';
+            } else {
+                // Otherwise, position below
+                eventInfo.style.top = '100%';
+                eventInfo.style.bottom = 'auto';
+            }
+
+            // Ensure it stays centered horizontally
+            eventInfo.style.left = '50%';
+            eventInfo.style.transform = 'translateX(-50%)';
+        });
+    });
+</script>
 </body>
 </html>
