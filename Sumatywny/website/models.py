@@ -146,6 +146,7 @@ class Report(db.Model):
     date = db.Column(db.DateTime(timezone=True), default=func.now())
     place = db.Column(db.String(150))
     status = db.Column(db.String(50), default='pending')
+    hidden = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     
 CATEGORIES = {

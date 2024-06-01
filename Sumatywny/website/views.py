@@ -480,7 +480,33 @@ def report():
         else:
             flash('Wszystkie pola muszą być wypełnione', category='error')
 
-    return render_template('report.html', user=current_user, user_reports=user_reports)
+    all_hidden = all(report.hidden for report in user_reports)
+    return render_template('report.html', user=current_user, user_reports=user_reports, all_hidden=all_hidden)
+
+
+@views.route("/report/delete/<int:report_id>", methods=['POST'])
+@login_required
+def delete_report(report_id):
+    report_to_delete = Report.query.get_or_404(report_id)
+    if report_to_delete.user_id == current_user.id:
+        db.session.delete(report_to_delete)
+        db.session.commit()
+        flash('Zgłoszenie zostało usunięte.', category='success')
+    else:
+        flash('Nie masz uprawnień do usunięcia tego zgłoszenia.', category='error')
+    return redirect(url_for('views.report'))
+
+@views.route("/report/hide/<int:report_id>", methods=['POST'])
+@login_required
+def hide_report(report_id):
+    report_to_hide = Report.query.get_or_404(report_id)
+    if report_to_hide.user_id == current_user.id:
+        report_to_hide.hidden = True
+        db.session.commit()
+        flash('Zgłoszenie zostało ukryte.', category='success')
+    else:
+        flash('Nie masz uprawnień do ukrycia tego zgłoszenia.', category='error')
+    return redirect(url_for('views.report'))
 
 
 @views.route('/update_user_status/<int:user_id>/<string:action>', methods=['POST'])
