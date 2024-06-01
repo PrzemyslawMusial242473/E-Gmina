@@ -443,6 +443,7 @@ def admin_users():
 
     return render_template('admin_users.html', user=current_user, pending_users=pending_users)
 
+
 @views.route("/report", methods=['GET', 'POST'])
 @login_required
 def report():
@@ -451,16 +452,34 @@ def report():
         data = request.form.get('data')
         place = request.form.get('place')
         date = datetime.now()
-            
-        new_report = Report(data=data, date=date, place=place, user_id=current_user.id, status='pending')
-        db.session.add(new_report) 
-        db.session.commit()  
-        flash('Wydarzenie zawnioskowano!', category='success')
-            
-            
-        return redirect(url_for('views.report'))  
-    
-    return render_template('report.html', user=current_user,user_reports=user_reports)
+
+        if data and place:
+            # Sprawdzamy poprawność adresu za pomocą API Google Maps
+            api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'
+            geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={place}&key={api_key}'
+            response = requests.get(geocoding_url)
+            response_data = response.json()
+
+            if response_data['status'] == 'OK' and response_data['results']:
+                # Adres jest poprawny, zapisujemy zgłoszenie
+                new_report = Report(
+                    data=data,
+                    date=date,
+                    place=place,
+                    user_id=current_user.id,
+                    status='pending'
+                )
+                db.session.add(new_report)
+                db.session.commit()
+                flash('Raport zawnioskowano!', category='success')
+                return redirect(url_for('views.report'))
+            else:
+                flash('Nie znaleziono koordynatów dla podanego adresu', category='error')
+        else:
+            flash('Wszystkie pola muszą być wypełnione', category='error')
+
+    return render_template('report.html', user=current_user, user_reports=user_reports)
+
 
 @views.route('/update_user_status/<int:user_id>/<string:action>', methods=['POST'])
 @login_required
