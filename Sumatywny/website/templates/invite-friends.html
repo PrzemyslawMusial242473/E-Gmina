@@ -70,7 +70,7 @@
     <h1 align="center">Otrzymane zaproszenia</h1>
     <div class="container-login">
       <ul class="list-group">
-        {% if user.invitations %}
+        {% if user in current_user.invitations %}
           {% for invite in user.invitations %}
             <li class="list-group-item">{{ invite.username }}
               <button class="btn btn-success" onclick="acceptInvite('{{ invite.username }}')">Zaakceptuj</button>
@@ -92,7 +92,7 @@
   <h1 align="center">Znajomi</h1>
   <div class="container-login">
     <ul class="list-group">
-      {% if user.friends %}
+      {% if user in current_user.friends %}
         {% for friend in user.friends %}
           <li class="list-group-item">{{ friend.username }} <a class="btn btn-info" href="/chat/{{ friend.id }}">Chat</a>
             <form action="/remove-friend/{{ friend.id }}" method="post" style="display:inline;">
@@ -114,7 +114,7 @@
   <h1 align="center">Zablokowani użytkownicy</h1>
   <div class="container-login">
     <ul class="list-group">
-      {% if user.blocked %}
+      {% if user in current_user.blocked %}
         {% for blocked_user in user.blocked %}
           <li class="list-group-item">{{ blocked_user.username }}
             <form action="/unblock-user/{{ blocked_user.id }}" method="post" style="display:inline;">

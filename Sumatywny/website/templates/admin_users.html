@@ -68,6 +68,7 @@
   <div class="container_create_survey">
 
       <ul class="list-group list-group-flush">
+      {% if pending_users and user.role == 'organisation' %}
         {% for user in pending_users %}
           {% if user.role == 'organisation' %}
             <li class="list-group-item container3">
@@ -89,12 +90,15 @@
             </li>
           {% endif %}
         {% endfor %}
+      {% else %}
+        <p>Brak pozycji do wyświetlenia.</p>
+      {% endif %}
       </ul>
   </div>
 <h3 class="mb-0">Weryfikacja użytkowników</h3>
   <div class="container_create_survey2">
-
       <ul class="list-group list-group-flush">
+      {% if pending_users and user.role != 'organisation' %}
         {% for user in pending_users %}
           {% if user.role != 'organisation' %}
             <li class="list-group-item container3">
@@ -118,6 +122,9 @@
             </li>
           {% endif %}
         {% endfor %}
+        {% else %}
+            <p>Brak pozycji do wyświetlenia.</p>
+        {% endif %}
       </ul>
   </div>
 </div>

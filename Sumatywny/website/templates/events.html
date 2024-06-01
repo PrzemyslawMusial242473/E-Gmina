@@ -81,6 +81,7 @@
                  <h1 align="center">Moje wydarzenia</h1>
                     <div class="container_event">
                         <ul class="list-group list-group-flush" id="Events">
+                            {% if user_events %}
                             {% for event in user_events %}
                                 <li class="list-group-item">
                                     {% if event.status == 'rejected' %}
@@ -96,6 +97,9 @@
                                     {% endif %}
                                 </li>
                             {% endfor %}
+                        {% else %}
+                            <p>Brak wydarzeń do wyświetlenia.</p>
+                        {% endif %}
                         </ul>
                     </div>
                 </div>
