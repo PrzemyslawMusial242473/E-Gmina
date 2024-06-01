@@ -59,23 +59,29 @@
             <div class="navbar-nav mr-auto"> <!-- Używamy klasy mr-auto, aby przesunąć opcje "Home", "Calendar" i "Map" w lewo -->
                 {% if current_user.is_authenticated %}
                     {% if current_user.role == 'user'%}
+                        <a class="nav-item nav-link" id="platnosc-button" href='/payments'>Płatność</a>
+                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymiana punktów </a>
                         <a class="nav-item nav-link" id="odpady-button" href='/segregate'>Segregacja </a>
                         <a class="nav-item nav-link" id="report-button" href='/report'>Naruszenia środowiskowe</a>
-                        <a class="nav-item nav-link" id="platnosc-button" href='/payments'>Płatność</a>
                         <a class="nav-item nav-link" id="ankiety-button" href='/surveys'>Ankiety</a>
                         <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
-                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymiana punktów </a>
                     {% endif %}
                     {% if current_user.role == 'admin' %}
+                        <div class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="verificationDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Weryfikacja
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="verificationDropdown">
+                                <a class="dropdown-item" id="admin_events" href="/admin-events">Weryfikuj wydarzenia</a>
+                                <a class="dropdown-item" id="admin_users" href="/admin-users">Weryfikuj konta</a>
+                                <a class="dropdown-item" id="admin_reports" href="/admin-reports">Weryfikuj zgłoszenia</a>
+                            </div>
+                        </div>
+                        <a class="nav-item nav-link" id="admin_payment" href="/admin-payments">Wprowadź płatności</a>
+                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>System lojalnościowy </a>
+                        <a class="nav-item nav-link" id="events" href="/events">Dodaj wydarzenia</a>
                         <a class="nav-item nav-link" id="maps" href="/maps">Ważne miejsca</a>
                         <a class="nav-item nav-link" id="admin_users" href="/create-survey">Ankiety</a>
-                        <a class="nav-item nav-link" id="events" href="/events">Dodaj wydarzenia</a>
-                        <a class="nav-item nav-link" id="admin_events" href="/admin-events">Weryfikuj wydarzenia</a>
-                        <a class="nav-item nav-link" id="admin_payment" href="/admin-payments">Wprowadź płatności</a>
-                        <a class="nav-item nav-link" id="admin_users" href="/admin-users">Weryfikuj konta</a>
-                        <a class="nav-item nav-link" id="admin_users" href="/admin-reports">Weryfikuj zgłoszenia</a>
-                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>System lojalnościowy </a>
-
                     {% endif %}
                     {% if current_user.role == 'organisation' %}
                         <a class="nav-item nav-link" id="events" href="/events">Dodaj wydarzenia</a>
