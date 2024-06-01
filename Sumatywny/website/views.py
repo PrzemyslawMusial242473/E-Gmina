@@ -10,6 +10,7 @@ import json,calendar,stripe,random,string,requests,uuid
 import os
 from werkzeug.utils import secure_filename
 import pandas as pd
+from openpyxl import load_workbook
 
 views = Blueprint('views', __name__)
 
@@ -41,7 +42,6 @@ def generate_calendar(year, month, month_events):
             current_week.append((day, events_for_day))
         weeks.append(current_week)
     return weeks
-
 
 @views.route('/', methods=['GET', 'POST'])
 def home():
@@ -79,7 +79,8 @@ def home():
     month_events = get_month_events(year, month)
     accepted_month_events = [event for event in month_events if event.status == 'accepted']
     weeks = generate_calendar(year, month, accepted_month_events)
-    accepted_events = Event.query.filter_by(status='accepted').all()
+    # Pobierz tylko przyszłe zaakceptowane wydarzenia i sortuj je chronologicznie
+    accepted_events = Event.query.filter(Event.date >= datetime.now(), Event.status == 'accepted').order_by(Event.date.asc()).all()
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
 
     # Pobierz nazwę aktualnego miesiąca po polsku
@@ -90,6 +91,7 @@ def home():
                            prev_month=prev_month, prev_year=prev_year,
                            next_month=next_month, next_year=next_year,
                            user=current_user, accepted_events=accepted_events, markers=markers)
+
 
 
 @views.route('/delete-event', methods=['POST'])
@@ -159,7 +161,7 @@ def delete_marker(marker_id):
 @views.route('/events', methods=['GET', 'POST'])
 @login_required
 def event():
-    user_events = current_user.Events
+    user_events = Event.query.filter(Event.user_id == current_user.id, Event.date >= datetime.now()).order_by(Event.date.asc()).all()
     if request.method == 'POST':
         data = request.form.get('data')
         date = request.form.get('date')
@@ -443,6 +445,7 @@ def admin_users():
 
     return render_template('admin_users.html', user=current_user, pending_users=pending_users)
 
+
 @views.route("/report", methods=['GET', 'POST'])
 @login_required
 def report():
@@ -451,16 +454,34 @@ def report():
         data = request.form.get('data')
         place = request.form.get('place')
         date = datetime.now()
-            
-        new_report = Report(data=data, date=date, place=place, user_id=current_user.id, status='pending')
-        db.session.add(new_report) 
-        db.session.commit()  
-        flash('Wydarzenie zawnioskowano!', category='success')
-            
-            
-        return redirect(url_for('views.report'))  
-    
-    return render_template('report.html', user=current_user,user_reports=user_reports)
+
+        if data and place:
+            # Sprawdzamy poprawność adresu za pomocą API Google Maps
+            api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'
+            geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={place}&key={api_key}'
+            response = requests.get(geocoding_url)
+            response_data = response.json()
+
+            if response_data['status'] == 'OK' and response_data['results']:
+                # Adres jest poprawny, zapisujemy zgłoszenie
+                new_report = Report(
+                    data=data,
+                    date=date,
+                    place=place,
+                    user_id=current_user.id,
+                    status='pending'
+                )
+                db.session.add(new_report)
+                db.session.commit()
+                flash('Raport zawnioskowano!', category='success')
+                return redirect(url_for('views.report'))
+            else:
+                flash('Nie znaleziono koordynatów dla podanego adresu', category='error')
+        else:
+            flash('Wszystkie pola muszą być wypełnione', category='error')
+
+    return render_template('report.html', user=current_user, user_reports=user_reports)
+
 
 @views.route('/update_user_status/<int:user_id>/<string:action>', methods=['POST'])
 @login_required
@@ -649,71 +670,122 @@ stripe.api_key = 'sk_test_51P9F8mAHsD0ooQchiY1nEJu6Q5jpeRG1lvI8JqL0eHXuLbjDdgsZR
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
 @views.route('/admin-payments', methods=['GET', 'POST'])
 @login_required
 def admin_payments():
     if current_user.role != 'admin':
-        flash('Brak dostępu')
+        flash('Brak dostępu', 'error')
         return redirect(url_for('views.home'))
 
     if request.method == 'POST':
         file = request.files['file']
-        if file and file.filename.endswith('.xlsx'):
-            filename = secure_filename(file.filename)
+        if file:
+            filename = file.filename
+            file_extension = os.path.splitext(filename)[1].lower()
+            if file_extension != '.xlsx':
+                flash("Akceptowane formaty plików to tylko XLSX", 'error')
+                return redirect(url_for('views.admin_payments'))
+
+            filename = secure_filename(filename)
             file_path = os.path.join('uploads', filename)
             file.save(file_path)
 
-            # Read Excel file
-            df = pd.read_excel(file_path)
-            for index, row in df.iterrows():
-                user = User.query.filter_by(email=row['Email']).first()
+            try:
+                wb = load_workbook(file_path)
+                ws = wb.active
+            except Exception as e:
+                flash(f"Wystąpił błąd podczas wczytywania pliku: {e}", 'error')
+                return redirect(url_for('views.admin_payments'))
+
+            # Pobierz nagłówki
+            actual_columns = [cell.value for cell in ws[1]]
+            expected_columns = ['Email', 'Description', 'Amount', 'Due Date']
+
+            # Sprawdzenie kolumn
+            if not all(column in actual_columns for column in expected_columns):
+                flash(f"Nazwy kolumn są niepoprawne, prosimy pobrać plik przykładowy. Znalezione kolumny: {', '.join(actual_columns)}. Wymagane kolumny: {', '.join(expected_columns)}.", 'error')
+                return redirect(url_for('views.admin_payments'))
+
+            # Przetwarzanie danych
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                data = dict(zip(actual_columns, row))
+                user = User.query.filter_by(email=data['Email']).first()
                 if user:
-                    due_date_str = row['Due Date'].strftime('%Y-%m-%d') if isinstance(row['Due Date'], pd.Timestamp) else row['Due Date']
-                    payment = Payment(
-                        user_uid=user.uid,
-                        description=row['Description'],
-                        amount=row['Amount'],
-                        due_date=datetime.strptime(due_date_str, '%Y-%m-%d')
-                    )
-                    db.session.add(payment)
+                    try:
+                        due_date_str = data['Due Date'].strftime('%Y-%m-%d') if isinstance(data['Due Date'], datetime) else data['Due Date']
+                        payment = Payment(
+                            user_uid=user.uid,
+                            description=data['Description'],
+                            amount=data['Amount'],
+                            due_date=datetime.strptime(due_date_str, '%Y-%m-%d')
+                        )
+                        db.session.add(payment)
+                    except Exception as e:
+                        flash(f"Błąd podczas przetwarzania wiersza: {e}", 'error')
+                        return redirect(url_for('views.admin_payments'))
             db.session.commit()
-            flash('Płatności zostały dodane')
+            flash('Płatności zostały dodane', 'success')
             return redirect(url_for('views.admin_payments'))
-    
+
     return render_template('admin_payments.html', user=current_user)
 
 @views.route('/upload-payments', methods=['GET', 'POST'])
 @login_required
 def upload_payments():
     if current_user.role != 'admin':
-        flash('Brak dostępu')
+        flash('Brak dostępu', 'error')
         return redirect(url_for('views.home'))
 
     if request.method == 'POST':
         file = request.files['file']
-        if file and file.filename.endswith('.xlsx'):
-            filename = secure_filename(file.filename)
+        if file:
+            filename = file.filename
+            file_extension = os.path.splitext(filename)[1].lower()
+            if file_extension != '.xlsx':
+                flash("Akceptowane formaty plików to tylko XLSX", 'error')
+                return redirect(url_for('views.upload_payments'))
+
+            filename = secure_filename(filename)
             file_path = os.path.join('uploads', filename)
             file.save(file_path)
 
-            # Read Excel file
-            df = pd.read_excel(file_path)
-            for index, row in df.iterrows():
-                user = User.query.filter_by(email=row['Email']).first()
+            try:
+                wb = load_workbook(file_path)
+                ws = wb.active
+            except Exception as e:
+                flash(f"Wystąpił błąd podczas wczytywania pliku: {e}", 'error')
+                return redirect(url_for('views.upload_payments'))
+
+            # Pobierz nagłówki
+            actual_columns = [cell.value for cell in ws[1]]
+            expected_columns = ['Email', 'Description', 'Amount', 'Due Date']
+
+            # Sprawdzenie kolumn
+            if not all(column in actual_columns for column in expected_columns):
+                flash(f"Nazwy kolumn są niepoprawne, prosimy pobrać plik przykładowy. Znalezione kolumny: {', '.join(actual_columns)}. Wymagane kolumny: {', '.join(expected_columns)}.", 'error')
+                return redirect(url_for('views.upload_payments'))
+
+            # Przetwarzanie danych
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                data = dict(zip(actual_columns, row))
+                user = User.query.filter_by(email=data['Email']).first()
                 if user:
-                    due_date_str = row['Due Date'].strftime('%Y-%m-%d') if isinstance(row['Due Date'], pd.Timestamp) else row['Due Date']
-                    payment = Payment(
-                        user_uid=user.uid,
-                        description=row['Description'],
-                        amount=row['Amount'],
-                        due_date=datetime.strptime(due_date_str, '%Y-%m-%d')
-                    )
-                    db.session.add(payment)
+                    try:
+                        due_date_str = data['Due Date'].strftime('%Y-%m-%d') if isinstance(data['Due Date'], datetime) else data['Due Date']
+                        payment = Payment(
+                            user_uid=user.uid,
+                            description=data['Description'],
+                            amount=data['Amount'],
+                            due_date=datetime.strptime(due_date_str, '%Y-%m-%d')
+                        )
+                        db.session.add(payment)
+                    except Exception as e:
+                        flash(f"Błąd podczas przetwarzania wiersza: {e}", 'error')
+                        return redirect(url_for('views.upload_payments'))
             db.session.commit()
-            flash('Płatności zostały dodane')
+            flash('Płatności zostały dodane', 'success')
             return redirect(url_for('views.home'))
-    
+
     return render_template('upload_payments.html', user=current_user)
 
 @views.route('/payments')
