@@ -2,37 +2,32 @@
 {% block title %}Segregacja Odpadów{% endblock %}
 {% block content %}
 <style>
-    body {
-        font-family: Arial, sans-serif;
-    }
-    .container {
-        width: 70%;
-        margin: 0 auto;
-        text-align: center;
+    .segregation-container, .schedule-container {
         background-color: #f8f9fa; /* Jasny szary */
         color: #333333; /* Ciemnoszary */
         padding: 20px;
         border-radius: 15px;
-        margin-top: 7%;
+        margin-bottom: 20px;
+        margin-top: 1%;
     }
-    form {
+    .form-container {
         background-color: #b4dfe5; /* Pastelowy niebieski */
         color: #333333; /* Ciemnoszary */
-        justify-content: center;
-        align-items: center;
-        border-radius: 15px;
         padding: 30px;
-        margin-top: 20px;
+        border-radius: 15px;
     }
-    h1 {
-        white-space: nowrap; /* Nie dziel tytułu na wiele linii */
-        margin-bottom: 20px; /* Dodaj margines na dole */
-        text-align:center;
+    h1, h2 {
+        text-align: center;
+        margin-bottom: 20px;
     }
     input[type="text"], input[type="email"], input[type="password"], datalist {
         width: 100%;
         padding: 10px;
         margin: 10px 0;
+    }
+    .button-container {
+        text-align: center;
+        margin-top: 20px;
     }
     button {
         padding: 10px 20px;
@@ -44,38 +39,63 @@
     button:hover {
         background-color: #45a049;
     }
-
-    /* Styl dla map */
     .map-container {
-        margin-top: 20px;
         display: flex;
-        justify-content: space-around;
-        flex-wrap: wrap; /* Nowa linia dla map na węższych ekranach */
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
     }
-
-    .map {
-        width: 30%;
-        height: 400px;
+    .map-box {
+        width: 49%;
+        background-color: #f8f9fa; /* Pastelowy niebieski */
         border-radius: 15px;
-        overflow: hidden;
-        margin-bottom: 20px; /* Dodatkowy margines między mapami */
-        display: flex;
-        flex-direction: column;
-    }
+        padding: 20px;
 
+    }
+    .map-box2 {
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        padding: 30px;
+        border-radius: 15px;
+        margin-top: 1%;
+    }
+    .map-title-container {
+        background-color: #b4dfe5; /* Jasny szary */
+        border-radius: 15px 15px 0 0;
+        padding: 10px;
+    }
     .map-title {
-        flex: 1; /* Rozciąganie tytułu na całą wysokość */
         text-align: center;
-        font-size: 1.2em; /* Dopasowanie rozmiaru czcionki */
-        margin: 0; /* Usunięcie domyślnego marginesu */
+        font-size: 1.2em;
+        margin: 0;
     }
-
     .map-canvas {
-        flex: 9; /* Rozciąganie mapy na większą część */
+        height: 300px; /* Wysokość mapy */
+        border-radius: 0 0 15px 15px;
     }
+    .bold-message {
+        font-weight: bold;
+        text-align: center;
+        margin-top: 20px;
+    }
+    .banner {
+    width: 100%; /* Rozciągnięcie na szerokość strony */
+    background-image: url('{{ url_for('static', filename='segreguj.png') }}'); /* Ścieżka do twojego pliku PNG */
+    background-size: cover; /* Dopasowanie rozmiaru obrazka */
+    background-position: center; /* Wycentrowanie obrazka */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
+}
+    .button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
 </style>
-<div class="container">
+<div class="banner"></div>
+<div class="segregation-container">
     <h1>Segregacja</h1>
+    <div class="form-container">
     <form action="{{ url_for('views.segregate') }}" method="post">
         <label for="waste_description">Opis odpadu:</label>
         <input type="text" id="waste_description" name="waste_description" list="waste_list" required>
@@ -86,30 +106,33 @@
                 {% endfor %}
             {% endfor %}
         </datalist>
-        <button type="submit">Segreguj</button>
+        <div class="button-container">
+    <button type="submit">Segreguj</button>
+</div>
     </form>
     {% if result %}
-        <p>{{ result }}</p>
-    {% endif %}
+            <p class="bold-message">{{ result }}</p>
+        {% endif %}
+</div>
 </div>
 
 <!-- Mapy -->
 <div class="map-container">
-    <div class="map">
-        <h2 class="map-title">Mapa urzędów i bibliotek</h2>
-        <div id="map1" class="map-canvas"></div>
-    </div>
-    <div class="map">
+    <div class="map-box">
         <h2 class="map-title">Mapa aptek do których można przekazać przeterminowane leki</h2>
-        <div id="map2" class="map-canvas"></div>
+        <div class="map-box2">
+        <div class="map-canvas" id="map2"></div>
+        </div>
     </div>
-    <div class="map">
-        <h2 class="map-title">Mapa punktów selektywnego zbierania odpadów komunalnych</h2>
-        <div id="map3" class="map-canvas"></div>
+    <div class="map-box">
+            <h2 class="map-title">Mapa punktów selektywnego zbierania odpadów komunalnych</h2>
+        <div class="map-box2">
+        <div class="map-canvas" id="map3"></div>
+        </div>
     </div>
 </div>
 <!-- Rozpocznij dodawanie harmonogramu tutaj -->
-<div class="container">
+<div class="schedule-container">
     <h2>Harmonogram wywozu śmieci w Konstantynowie Łódzkim</h2>
     <table class="table">
         <thead>
@@ -320,40 +343,18 @@
 <script>
     function initMaps() {
         var locations = [
-            {lat: 51.747585, lng: 19.325453},
             {lat: 51.74835457357969, lng: 19.32591727512815},
             {lat: 51.728516069053796, lng: 19.394346447308664}
         ];
 
-        // Inicjalizacja trzech map
-        var map1 = new google.maps.Map(document.getElementById('map1'), {
+        var map2 = new google.maps.Map(document.getElementById('map2'), {
             center: locations[0],
             zoom: 14
         });
 
-        var map2 = new google.maps.Map(document.getElementById('map2'), {
+        var map3 = new google.maps.Map(document.getElementById('map3'), {
             center: locations[1],
             zoom: 14
-        });
-
-        var map3 = new google.maps.Map(document.getElementById('map3'), {
-            center: locations[2],
-            zoom: 14
-        });
-
-        // Dodanie markerów na mapach
-        // Mapa 1
-        var addresses1 = [
-            {lat: 51.7485978, lng: 19.3257496, name: 'Konstantynów Łódzki ul. Zgierska 1 – Urząd Miejski w Konstantynowie Łódzkim oraz Urząd Stanu Cywilnego'},
-            {lat: 51.7482602, lng: 19.3245797, name: 'Konstantynów Łódzki Plac Tadeusza Kościuszki 10 – Miejska Biblioteka Publiczna'},
-        ];
-
-        addresses1.forEach(function(address) {
-            var marker = new google.maps.Marker({
-                position: address,
-                map: map1
-            });
-            addInfoWindow(marker, map1, address.name);
         });
 
         // Mapa 2

@@ -6,7 +6,7 @@
     <title>Kalendarz</title>
     <style>
         .calendar-container {
-            background-color: #f8f9fa;
+            background-color: rgb(250,250,250,1);
             color: #333333;
             text-align: center;
             padding: 20px;
@@ -16,7 +16,7 @@
 
         .header {
             position: relative;
-            background-color: #b4dfe5;
+            background-color: #b4dfe5;;
             color: #333333;
             justify-content: center;
             align-items: center;
@@ -32,6 +32,8 @@
             border-radius: 15px;
             overflow: hidden;
             display: inline-block;
+            width: 100%; /* Kalendarz zajmuje 100% szerokości */
+            max-width: 550px; /* Maksymalna szerokość kalendarza */
         }
 
         table {
@@ -48,11 +50,16 @@
             cursor: pointer;
             width: calc(100% / 7);
             font-size: 12px;
+            background-color: #53798e; /* Domyślny kolor tła kafelka */
         }
 
         th {
             background-color: #42464a;
             color: white;
+        }
+
+        .has-event {
+            background-color: #66b0b7; /* Nowy kolor tła kafelka z wydarzeniem */
         }
 
         td:hover {
@@ -131,24 +138,34 @@
         .btn:hover {
             background-color: #177d8d;
         }
+
+        @media only screen and (max-width: 600px) {
+            /* Reguły CSS dla ekranów o szerokości do 600px */
+            .calendar-container {
+                padding: 10px; /* Mniejszy odstęp dla mniejszych ekranów */
+            }
+            .calendar {
+                max-width: 100%; /* Kalendarz zajmuje 100% szerokości */
+            }
+        }
     </style>
 </head>
 <body>
 <div class="calendar-container">
-    <h1 style="width: 100%; text-align: center;">Kalendarz</h1>
+    <h1 style="width: 100%; text-align: center;">Kalendarium</h1>
     <div class="header">
         <h2>{{ current_month }} {{ current_year }}</h2>
-        <div class="calendar">
+        <div class="calendar" style="position: relative;">
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Poniedziałek</th>
-                        <th>Wtorek</th>
-                        <th>Środa</th>
-                        <th>Czwartek</th>
-                        <th>Piątek</th>
-                        <th>Sobota</th>
-                        <th>Niedziela</th>
+                        <th>PN</th>
+                        <th>WT</th>
+                        <th>ŚR</th>
+                        <th>CZ</th>
+                        <th>PT</th>
+                        <th>SO</th>
+                        <th>ND</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -178,13 +195,26 @@
         </div>
     </div>
     <div class="btn-container">
-        <a class="btn" href="{{ url_for('views.home', prev_month=prev_month, prev_year=prev_year) }}">Poprzedni miesiąc</a>
-        <a class="btn" href="{{ url_for('views.home', current_month=current_month, current_year=current_year) }}">Aktualny miesiąc</a>
-        <a class="btn" href="{{ url_for('views.home', next_month=next_month, next_year=next_year) }}">Następny miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=prev_month, current_year=prev_year) }}" onclick="saveScrollPosition()">Poprzedni miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=today_month, current_year=today_year) }}" onclick="saveScrollPosition()">Aktualny miesiąc</a>
+        <a class="btn" href="{{ url_for('views.home', current_month=next_month, current_year=next_year) }}" onclick="saveScrollPosition()">Następny miesiąc</a>
     </div>
 </div>
-
 <script>
+    // Zapisz pozycję scrolla przed zmianą miesiąca
+    function saveScrollPosition() {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    }
+
+    // Przywróć pozycję scrolla po załadowaniu strony
+    document.addEventListener('DOMContentLoaded', function() {
+        var scrollPosition = localStorage.getItem('scrollPosition');
+        if (scrollPosition !== null) {
+            window.scrollTo(0, scrollPosition);
+            localStorage.removeItem('scrollPosition');
+        }
+    });
+
     document.querySelectorAll('.has-event').forEach(function(cell) {
         cell.addEventListener('mouseover', function() {
             var eventInfo = cell.querySelector('.event-info');
@@ -224,8 +254,5 @@
         });
     });
 </script>
-
-
-
 </body>
 </html>

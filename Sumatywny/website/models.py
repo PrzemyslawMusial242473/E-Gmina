@@ -267,10 +267,6 @@ stores = {
     'store2': {'name': 'Sklep odzieżowy "Dla Mamy&Córki" -30%', 'cost': 15},
     'store3': {'name': 'Księgarnia "Za Rogiem" -40%', 'cost': 20}
 }
-
-org_stores = {
-    'store1': {'name': 'Pizzera "Gruby Szymek" 2 pizze w cenie 1', 'cost': 10},
-}
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_uid = db.Column(db.String(11), db.ForeignKey('user.uid'), nullable=False)  # Relacja z User
@@ -290,5 +286,5 @@ class Payment(db.Model):
 class Config:
     UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/document_images')
     
-UPLOAD_FOLDER = 'Sumatywny/website/templates/static/document_images'
+UPLOAD_FOLDER = 'website/templates/static/document_images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}

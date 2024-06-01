@@ -3,21 +3,24 @@
 
 {% block content %}
 <style>
-    .container {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
+    .banner {
+    width: 100%; /* Rozciągnięcie na szerokość strony */
+    background-image: url('{{ url_for('static', filename='platnosci.png') }}'); /* Ścieżka do twojego pliku PNG */
+    background-size: cover; /* Dopasowanie rozmiaru obrazka */
+    background-position: center; /* Wycentrowanie obrazka */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
+}
+
     .payments-container {
-        background-color: #f8f9fa; /* Jasny szary */
-        color: #333333; /* Ciemnoszary */
+        background-color: #f8f9fa;;
+        color: #000000; /* Ciemnoszary */
         text-align: center;
-        padding: 20px;
-        padding-top: 4px;
         border-radius: 15px;
-        width: 95%;
-        margin-top: 2%;
-        margin-left: 2%;
+        width: 100%;
+        margin-top: 1%;
+        min-height: 200px;
+        padding: 20px;
     }
     .payments-table {
         width: 100%;
@@ -36,7 +39,7 @@
         background-color: #f1f1f1;
     }
     .btn-pay {
-        background-color: #007bff;
+        background-color: #328685;
         color: white;
         padding: 10px 20px;
         border: none;
@@ -45,13 +48,23 @@
         font-size: 16px;
     }
     .btn-pay:hover {
-        background-color: #0056b3;
+        background-color: #328685;
+    }
+    .box {
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 1%;
     }
 </style>
+<div class="banner"></div>
 
-<div class="container">
+
     <div class="payments-container">
-        <h1>Twoje Płatności</h1>
+        <h1>Twoje płatności</h1>
+    <div class="box">
+    {% if payments %}
         <table class="payments-table">
             <thead>
                 <tr>
@@ -81,6 +94,9 @@
                 {% endfor %}
             </tbody>
         </table>
+    {% else %}
+        <p>Nie masz żadnych płatności do wyświetlenia.</p>
+    {% endif %}
     </div>
-</div>
+    </div>
 {% endblock %}

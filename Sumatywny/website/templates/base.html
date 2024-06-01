@@ -3,21 +3,26 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" type="image/png" href="static/logo.png">
+    <link rel="icon" type="image/png" href="static/logo.png">
     <title>{% block title %}Home{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
     <style>
         body {
-            background-color: #f0f0f0; /* Szare tło */
-            color: #333; /* Ciemny kolor tekstu */
+            background-image: url('{{ url_for('static', filename='tlo.png') }}'); /* Ustawienie tła z pliku tlo.png */
+            background-size: cover; /* Dopasowanie tła do rozmiaru strony */
+            background-repeat: no-repeat; /* Brak powtarzania tła */
+            background-attachment: fixed; /* Tło pozostaje w miejscu przy przewijaniu */
+            background-position: center; /* Wyśrodkowanie tła */
+            color: #000000; /* Ciemny kolor tekstu */
         }
-            .navbar {
+        .navbar {
             background-color: #2c3e50 !important; /* Granatowy kolor paska nawigacji */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Cień */
         }
         .navbar-brand, .navbar-nav .nav-link {
             color: #fff !important; /* Biały kolor tekstu dla marki i linków nawigacyjnych */
+            margin-right: 20px;
         }
         .navbar-brand:hover, .navbar-nav .nav-link:hover {
             color: #dcdde1 !important; /* Biały kolor tekstu dla marki i linków nawigacyjnych po najechaniu myszką */
@@ -30,7 +35,7 @@
             background-size: cover; /* Dopasowanie obrazu do rozmiaru okna przeglądarki */
         }
         .container {
-            background-color: #ecf0f1; /* Jasnoszare tło kontenera */
+            background-color: rgba(236, 240, 241, 0); /* Jasnoszare tło kontenera z przezroczystością */
             border-radius: 5px; /* Zaokrąglenie rogów kontenera */
             max-width: 100%; /* Zwiększenie maksymalnej szerokości kontenera */
             margin: 20px auto; /* Ustawienie marginesu poziomego na 20px z lewej i prawej strony */
@@ -44,8 +49,8 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <a class="navbar-brand" id="home" href="/">
-   <img src="{{ url_for('static', filename='logo.png') }}" alt="E-Gmina" style="height: 40px;">
-</a> <!-- Dodanie napisu E-gmina -->
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="E-Gmina" style="height: 40px;">
+        </a> <!-- Dodanie napisu E-gmina -->
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -54,24 +59,26 @@
             <div class="navbar-nav mr-auto"> <!-- Używamy klasy mr-auto, aby przesunąć opcje "Home", "Calendar" i "Map" w lewo -->
                 {% if current_user.is_authenticated %}
                     {% if current_user.role == 'user'%}
-                        <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
-                        <a class="nav-item nav-link" id="report-button" href='/report'>Zgłoś nieprawidłowość</a>
+                        <a class="nav-item nav-link" id="odpady-button" href='/segregate'>Segregacja </a>
+                        <a class="nav-item nav-link" id="report-button" href='/report'>Naruszenia środowiskowe</a>
                         <a class="nav-item nav-link" id="platnosc-button" href='/payments'>Płatność</a>
                         <a class="nav-item nav-link" id="ankiety-button" href='/surveys'>Ankiety</a>
-                        <a class="nav-item nav-link" id="odpady-button" href='/segregate'>Segreguj </a>
-                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymień punkty </a>
-                    {% endif %}
-                    {% if current_user.role != 'user' %}
-                        <a class="nav-item nav-link" id="events" href="/events">Wydarzenia</a>
-                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymień punkty </a>
+                        <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
+                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymiana punktów </a>
                     {% endif %}
                     {% if current_user.role == 'admin' %}
-                    <a class="nav-item nav-link" id="maps" href="/maps">Mapa</a>
-                    <a class="nav-item nav-link" id="admin_users" href="/create-survey">Stwórz ankiete</a>
-                    <a class="nav-item nav-link" id="admin_events" href="/admin-events">Weryfikuj wydarzenia</a>
-                    <a class="nav-item nav-link" id="admin_users" href="/admin-users">Weryfikuj konta</a>
-                    <a class="nav-item nav-link" id="admin_users" href="/admin-reports">Weryfikuj zgłoszenia</a>
-                    <a class="nav-link" id="admin_payment" href="/admin-payments">Wprowadź płatności</a>
+                        <a class="nav-item nav-link" id="maps" href="/maps">Ważne miejsca</a>
+                        <a class="nav-item nav-link" id="admin_users" href="/create-survey">Ankiety</a>
+                        <a class="nav-item nav-link" id="events" href="/events">Dodaj wydarzenia</a>
+                        <a class="nav-item nav-link" id="admin_events" href="/admin-events">Weryfikuj wydarzenia</a>
+                        <a class="nav-link" id="admin_payment" href="/admin-payments">Wprowadź płatności</a>
+                        <a class="nav-item nav-link" id="admin_users" href="/admin-users">Weryfikuj konta</a>
+                        <a class="nav-item nav-link" id="admin_users" href="/admin-reports">Weryfikuj zgłoszenia</a>
+                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>System lojalnościowy </a>
+
+                    {% endif %}
+                    {% if current_user.role == 'organisation' %}
+                        <a class="nav-item nav-link" id="events" href="/events">Dodaj wydarzenia</a>
                     {% endif %}
                 {% else %}
                     <a class="nav-item nav-link" id="login" href="/login">Zaloguj</a>
@@ -88,28 +95,26 @@
             </div>
         </div>
     </nav>
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-        messages %} {% for category, message in messages %} {% if category ==
-        'error' %}
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %} {% for category, message in messages %} {% if category == 'error' %}
         <div class="alert alert-danger alter-dismissable fade show" role="alert">
-          {{ message }}
-          <button type="button" class="close" data-dismiss="alert">
-            <span aria-hidden="true">&times;</span>
-          </button>
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
         {% else %}
         <div class="alert alert-success alter-dismissable fade show" role="alert">
-          {{ message }}
-          <button type="button" class="close" data-dismiss="alert">
-            <span aria-hidden="true">&times;</span>
-          </button>
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
         {% endif %} {% endfor %} {% endif %} {% endwith %}
 
     <div class="container">{% block content %} {% endblock %}</div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7W3UibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
     {% block javascript %}

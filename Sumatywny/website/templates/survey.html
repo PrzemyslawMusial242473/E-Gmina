@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Wypełnij Ankietę{% endblock %}
+{% block title %}Wypełnij ankietę{% endblock %}
 {% block content %}
 <style>
     body {
@@ -7,13 +7,13 @@
         margin: 0;
         padding: 0;
     }
-    .container {
-        background-color: #f8f9fa; /* Jasny szary */
-        color: #333333; /* Ciemnoszary */
+    #container {
+        background-color: rgb(250,250,250,1);
+        color: #000000; /* Ciemnoszary */
         text-align: center;
         padding: 20px;
         border-radius: 15px;
-        width: 50%;
+        width: 100%;
         margin: 0 auto;
         margin-top: 2%;
     }
@@ -32,18 +32,37 @@
     }
     button {
         padding: 10px 20px;
-        background-color: #007bff; /* Niebieski */
+        background-color: #328685; /* Niebieski */
         color: #ffffff; /* Biały */
         border: none;
         border-radius: 5px;
         cursor: pointer;
     }
     button:hover {
-        background-color: #0056b3; /* Ciemniejszy odcień niebieskiego */
+        background-color: #328685; /* Ciemniejszy odcień niebieskiego */
+    }
+    .banner {
+        width: 100%; /* Rozciągnięcie na szerokość strony */
+        background-image: url('{{ url_for('static', filename='ankiety.png') }}'); /* Ścieżka do twojego pliku PNG */
+        background-size: cover; /* Dopasowanie rozmiaru obrazka */
+        background-position: center; /* Wycentrowanie obrazka */
+        height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+        border-radius: 15px; /* Dodanie zaokrąglonych rogów */
+    }
+    .box {
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 1%;
+        min-height: 80px;
     }
 </style>
-<div class="container">
+
+<div class="banner"></div>
+<div id="container">
     <h2>{{ survey.title }}</h2>
+<div class="box">
     <form method="POST">
         {% for question in survey.questions %}
             <div class="form-group">
@@ -55,5 +74,6 @@
         {% endfor %}
         <button type="submit">Prześlij</button>
     </form>
+</div>
 </div>
 {% endblock %}

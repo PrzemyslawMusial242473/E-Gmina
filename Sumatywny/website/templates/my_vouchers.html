@@ -2,18 +2,22 @@
 {% block title %}Wszystkie odblokowane bony{% endblock %}
 {% block content %}
 <style>
-body {
-    font-family: Arial, sans-serif;
+.banner {
+    width: 100%; /* Rozciągnięcie na szerokość strony */
+    background-image: url('{{ url_for('static', filename='bony.png') }}'); /* Ścieżka do twojego pliku PNG */
+    background-size: cover; /* Dopasowanie rozmiaru obrazka */
+    background-position: center; /* Wycentrowanie obrazka */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
 }
-
-.container {
-    width: 50%;
-    margin: 0 auto;
+#container{
+    background-color: rgb(250,250,250,1);
+    color: #333333; /* Ciemnoszary */
+    text-align: center;
     padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    background-color: #f9f9f9;
+    border-radius: 15px;
+    width: 100%;
+    margin-top: 1%;
 }
 
 h1 {
@@ -41,9 +45,12 @@ p {
     margin: 5px 0;
 }
 
+.btn{
+    margin-top:20px;
+}
 button {
-    margin-top: 10px;
-    background-color: #007BFF;
+    margin-top: 20px;
+    background-color: #328685;
     color: white;
     border: none;
     border-radius: 5px;
@@ -52,7 +59,7 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #328685;
 }
 
 .flashes {
@@ -75,16 +82,42 @@ button:hover {
     background-color: #f8d7da;
     color: #721c24;
 }
+.box {
+    background-color: #b4dfe5; /* Pastelowy niebieski */
+    color: #333333; /* Ciemnoszary */
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 1%;
+    min-height: 80px;
+}
+
+.voucher-item {
+    padding: 10px 0;
+    border-bottom: 1px dashed #000; /* Przerywana linia */
+}
+
+.voucher-item:last-child {
+    border-bottom: none; /* Usunięcie dolnej granicy dla ostatniego elementu */
+}
 </style>
-<body>
-    <h1>Moje Bony</h1>
-    <ul>
+
+<div class="banner"></div>
+
+<div id="container">
+    <h1>Moje bony</h1>
+    <div class="box">
+    {% if vouchers %}
         {% for voucher in vouchers %}
-        <li>
+        <div class="voucher-item">
             Sklep: {{ voucher.store_name }} - Kod: {{ voucher.code }} - Data wydania: {{ voucher.creation_time }}
-        </li>
+        </div>
         {% endfor %}
-    </ul>
-    <a href="{{ url_for('views.exchange_points') }}">Wymień Punkty</a>
-</body>
+    {% else %}
+        <p>Nie masz żadnych bonów.</p>
+    {% endif %}
+        <br>
+        <a class="btn btn-info" href="{{ url_for('views.exchange_points') }}">Wróć</a>
+    </div>
+</div>
+
 {% endblock %}

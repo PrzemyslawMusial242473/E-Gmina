@@ -1,7 +1,7 @@
 
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for,send_from_directory
 from flask_login import login_required, current_user
-from .models import Event,Payment, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste,Voucher,stores,org_stores
+from .models import Event,Payment, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste,Voucher,stores
 from datetime import datetime, date
 from . import db
 from . import mail
@@ -46,21 +46,35 @@ def generate_calendar(year, month, month_events):
 @views.route('/', methods=['GET', 'POST'])
 def home():
     today = date.today()
-    year = today.year
-    month = today.month
+    today_year = today.year
+    today_month = today.month
 
-    # Sprawdź, czy został przesłany formularz z informacją o zmianie miesiąca
-    if request.method == 'GET':
-        if 'prev_month' in request.args:
-            month -= 1
-            if month == 0:
-                month = 12
-                year -= 1
-        elif 'next_month' in request.args:
-            month += 1
-            if month == 13:
-                month = 1
-                year += 1
+    # Domyślnie ustaw na bieżący miesiąc i rok
+    year = today_year
+    month = today_month
+
+    # Sprawdź parametry GET
+    if 'current_month' in request.args and 'current_year' in request.args:
+        try:
+            month = int(request.args.get('current_month'))
+            year = int(request.args.get('current_year'))
+        except ValueError:
+            # Błędne wartości, użyj domyślnych
+            month = today_month
+            year = today_year
+
+    # Oblicz poprzedni i następny miesiąc i rok
+    prev_month = month - 1
+    next_month = month + 1
+    prev_year = year
+    next_year = year
+
+    if prev_month == 0:
+        prev_month = 12
+        prev_year -= 1
+    if next_month == 13:
+        next_month = 1
+        next_year += 1
 
     month_events = get_month_events(year, month)
     accepted_month_events = [event for event in month_events if event.status == 'accepted']
@@ -71,9 +85,11 @@ def home():
     # Pobierz nazwę aktualnego miesiąca po polsku
     current_month_name = polish_month_names[month]
 
-    return render_template("home.html", calendar=weeks, current_month=current_month_name, user=current_user,
-                           accepted_events=accepted_events, markers=markers)
-
+    return render_template("home.html", calendar=weeks, current_month=current_month_name, current_year=year,
+                           today_month=today_month, today_year=today_year,
+                           prev_month=prev_month, prev_year=prev_year,
+                           next_month=next_month, next_year=next_year,
+                           user=current_user, accepted_events=accepted_events, markers=markers)
 
 
 @views.route('/delete-event', methods=['POST'])
@@ -149,22 +165,39 @@ def event():
         date = request.form.get('date')
         place = request.form.get('place')
         name = request.form.get('name')
-        
+
         if data and date and place and name:
             try:
                 date = datetime.strptime(date, '%Y-%m-%dT%H:%M')
             except ValueError:
-                return 'Zły format daty'
-            
-            new_event = Event(data=data, date=date, place=place, name=name, user_id=current_user.id, status='pending')
-            db.session.add(new_event) 
-            db.session.commit()  
-            flash('Wydarzenie zawnioskowano!', category='success')
-            
-            
-            return redirect(url_for('views.event'))  
-    
-    return render_template('events.html', user=current_user,user_events=user_events)
+                flash('Zły format daty', category='error')
+                return redirect(url_for('views.event'))
+
+            # Sprawdzamy poprawność adresu za pomocą API Google Maps
+            api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'
+            geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={place}&key={api_key}'
+            response = requests.get(geocoding_url)
+            data = response.json()
+
+            if data['status'] == 'OK':
+                # Zapisujemy wydarzenie do bazy danych tylko, jeśli adres jest poprawny
+                new_event = Event(
+                    data=request.form.get('data'),  # Tylko dane tekstowe z formularza
+                    date=date,
+                    place=place,
+                    name=name,
+                    user_id=current_user.id,
+                    status='pending'
+                )
+                db.session.add(new_event)
+                db.session.commit()
+                flash('Wydarzenie zawnioskowano!', category='success')
+                return redirect(url_for('views.event'))
+            else:
+                flash('Nie znaleziono koordynatów dla podanego adresu', category='error')
+                return redirect(url_for('views.event'))
+
+    return render_template('events.html', user=current_user, user_events=user_events)
 
 
 @views.route('/invite-friends', methods=['GET', 'POST'])
@@ -410,6 +443,7 @@ def admin_users():
 
     return render_template('admin_users.html', user=current_user, pending_users=pending_users)
 
+
 @views.route("/report", methods=['GET', 'POST'])
 @login_required
 def report():
@@ -418,16 +452,34 @@ def report():
         data = request.form.get('data')
         place = request.form.get('place')
         date = datetime.now()
-            
-        new_report = Report(data=data, date=date, place=place, user_id=current_user.id, status='pending')
-        db.session.add(new_report) 
-        db.session.commit()  
-        flash('Wydarzenie zawnioskowano!', category='success')
-            
-            
-        return redirect(url_for('views.report'))  
-    
-    return render_template('report.html', user=current_user,user_reports=user_reports)
+
+        if data and place:
+            # Sprawdzamy poprawność adresu za pomocą API Google Maps
+            api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'
+            geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={place}&key={api_key}'
+            response = requests.get(geocoding_url)
+            response_data = response.json()
+
+            if response_data['status'] == 'OK' and response_data['results']:
+                # Adres jest poprawny, zapisujemy zgłoszenie
+                new_report = Report(
+                    data=data,
+                    date=date,
+                    place=place,
+                    user_id=current_user.id,
+                    status='pending'
+                )
+                db.session.add(new_report)
+                db.session.commit()
+                flash('Raport zawnioskowano!', category='success')
+                return redirect(url_for('views.report'))
+            else:
+                flash('Nie znaleziono koordynatów dla podanego adresu', category='error')
+        else:
+            flash('Wszystkie pola muszą być wypełnione', category='error')
+
+    return render_template('report.html', user=current_user, user_reports=user_reports)
+
 
 @views.route('/update_user_status/<int:user_id>/<string:action>', methods=['POST'])
 @login_required
@@ -575,29 +627,31 @@ def add_loyalty_points(user, points):
     db.session.add(user)
     db.session.commit()
     
-@views.route('/exchange', methods=['GET','POST'])
+@views.route('/exchange', methods=['GET', 'POST'])
 @login_required
 def exchange_points():
-    if current_user.role == "organisation" :
-        available_stores = org_stores
-    else:
-        available_stores = stores
-
+    available_stores = stores
     if request.method == 'POST':
-        store_key = request.form.get('store')
-        store = available_stores.get(store_key)
-        if store and current_user.loyalty_points >= store['cost']:
-            voucher_code = str(uuid.uuid4()).replace('-', '').upper()[:12]
-            new_voucher = Voucher(user_id=current_user.id, store_name=store['name'], code=voucher_code)
-            current_user.loyalty_points -= store['cost']
-            db.session.add(new_voucher)
-            db.session.commit()
-            flash(f'Wymieniono punkty na bon do {store["name"]}! Kod: {voucher_code}', 'success')
+        if current_user.role == "admin" and 'new_store_name' in request.form:
+            new_store_name = request.form.get('new_store_name')
+            new_store_cost = int(request.form.get('new_store_cost'))
+            stores[f'store{len(stores) + 1}'] = {'name': new_store_name, 'cost': new_store_cost}
+            flash('Nowy sklep został dodany!', 'success')
         else:
-            flash('Nie masz wystarczającej liczby punktów lub nieprawidłowy sklep.', 'danger')
+            store_key = request.form.get('store')
+            store = available_stores.get(store_key)
+            if store and current_user.loyalty_points >= store['cost']:
+                voucher_code = str(uuid.uuid4()).replace('-', '').upper()[:12]
+                new_voucher = Voucher(user_id=current_user.id, store_name=store['name'], code=voucher_code)
+                current_user.loyalty_points -= store['cost']
+                db.session.add(new_voucher)
+                db.session.commit()
+                flash(f'Wymieniono punkty na bon do {store["name"]}! Kod: {voucher_code}', 'success')
+            else:
+                flash('Nie masz wystarczającej liczby punktów lub nieprawidłowy sklep.', 'danger')
         return redirect(url_for('views.exchange_points'))
 
-    return render_template('exchange_points.html', user=current_user, stores=available_stores)
+    return render_template('exchange_points.html', user=current_user, stores=stores)
 
 @views.route('/my-vouchers', methods=['GET'])
 @login_required

@@ -2,77 +2,105 @@
 {% block title %}Znajomi{% endblock %}
 {% block content %}
 <style>
-  /* Nowy styl CSS */
-  .container1, .container2, .container3, .container4 {
-    background-color: #f8f9fa; /* Jasny szary */
-    color: #333333; /* Ciemnoszary */
-    text-align: center;
-    padding: 20px;
-    padding-top: 1px;
-    border-radius: 15px;
-    width: 100%;
-    margin-top: 7%;
-    margin-bottom: 20px; /* Dodatkowy margines na dole kontenera */
-    margin-left: auto; /* Wyśrodkowanie kontenerów */
-    margin-right: auto; /* Wyśrodkowanie kontenerów */
+  .banner {
+    width: 100%; /* Rozciągnięcie na szerokość strony */
+    background-image: url('{{ url_for('static', filename='znajomi.png') }}'); /* Ścieżka do twojego pliku PNG */
+    background-size: cover; /* Dopasowanie rozmiaru obrazka */
+    background-position: center; /* Wycentrowanie obrazka */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
   }
-
+  .container1, .container2, .container3, .container4 {
+    background-color: rgb(250,250,250,1);
+    color: #000000; /* Ciemnoszary */
+    text-align: center;
+    border-radius: 15px;
+    width: 49.5%;
+    margin-top: 1%;
+        padding: 20px;
+        min-height: 200px;
+  }
+  .flex-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
   .container-login {
+    background-color: #b4dfe5;;
+    color: #000000; /* Ciemnoszary */
+   padding: 20px;
+    border-radius: 15px;
+    margin-top: 1%;
+    min-height: 180px;
+  }
+  .btn-inv {
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .box {
     background-color: #b4dfe5; /* Pastelowy niebieski */
     color: #333333; /* Ciemnoszary */
+    padding: 20px;
     border-radius: 15px;
-    padding: 30px;
-    margin-top: 20px;
+    margin-top: 1%;
+    min-height: 80px;
   }
 </style>
 
-<div class="container1">
-  <h1 align="center">Dodaj znajomego</h1>
-  <div class="container-login">
-    <form method="POST">
-      <div class="form-group">
-        <label for="inputEmail">Nazwa użytkownika</label>
-        <input type="text" class="form-control" id="inputEmail" name="username" placeholder="Wpisz nazwę użytkownika">
-      </div>
-      <button type="submit" class="btn btn-info btn-block">Wyślij zaproszenie</button>
-    </form>
+<div class="banner"></div>
+<div class="flex-container">
+  <div class="container1">
+    <h1 align="center">Dodaj znajomego</h1>
+    <div class="container-login">
+      <form method="POST">
+        <div class="form-group">
+          <label for="inputEmail">Nazwa użytkownika</label>
+          <input type="text" class="form-control" id="inputEmail" name="username" placeholder="Wpisz nazwę użytkownika">
+        </div>
+        <button type="submit" class="btn-inv btn-info btn-block">Wyślij zaproszenie</button>
+      </form>
+    </div>
   </div>
-</div>
 
-<div class="container2">
-  <h1 align="center">Otrzymane zaproszenia</h1>
-  <div class="container-login">
-    <ul class="list-group">
-      {% if user.invitations %}
-        {% for invite in user.invitations %}
-          <li class="list-group-item">{{ invite.username }}
+  <div class="container2">
+    <h1 align="center">Otrzymane zaproszenia</h1>
+    <div class="container-login">
+      <ul class="list-group">
+        {% if user in current_user.invitations %}
+          {% for invite in user.invitations %}
+            <li class="list-group-item">{{ invite.username }}
               <button class="btn btn-success" onclick="acceptInvite('{{ invite.username }}')">Zaakceptuj</button>
               <button class="btn btn-danger" onclick="rejectInvite('{{ invite.username }}')">Odrzuć</button>
               <form action="/block-user/{{ invite.id }}" method="post" style="display:inline;">
-                  <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ invite.username }}?')">Zablokuj</button>
+                <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ invite.username }}?')">Zablokuj</button>
               </form>
-          </li>
-        {% endfor %}
-      {% else %}
-        <li class="list-group-item">Brak otrzymanych zaproszeń.</li>
-      {% endif %}
-    </ul>
+            </li>
+          {% endfor %}
+        {% else %}
+          <li class="list-group-item">Brak otrzymanych zaproszeń.</li>
+        {% endif %}
+      </ul>
+    </div>
   </div>
 </div>
-
+<div class="flex-container">
 <div class="container3">
   <h1 align="center">Znajomi</h1>
   <div class="container-login">
     <ul class="list-group">
-      {% if user.friends %}
+      {% if user in current_user.friends %}
         {% for friend in user.friends %}
           <li class="list-group-item">{{ friend.username }} <a class="btn btn-info" href="/chat/{{ friend.id }}">Chat</a>
-              <form action="/remove-friend/{{ friend.id }}" method="post" style="display:inline;">
-                  <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć {{ friend.username }} z listy znajomych?')">Usuń</button>
-              </form>
-              <form action="/block-user/{{ friend.id }}" method="post" style="display:inline;">
-                  <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ friend.username }}?')">Zablokuj</button>
-              </form>
+            <form action="/remove-friend/{{ friend.id }}" method="post" style="display:inline;">
+              <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć {{ friend.username }} z listy znajomych?')">Usuń</button>
+            </form>
+            <form action="/block-user/{{ friend.id }}" method="post" style="display:inline;">
+              <button type="submit" class="btn btn-warning" onclick="return confirm('Czy na pewno chcesz zablokować {{ friend.username }}?')">Zablokuj</button>
+            </form>
           </li>
         {% endfor %}
       {% else %}
@@ -86,12 +114,12 @@
   <h1 align="center">Zablokowani użytkownicy</h1>
   <div class="container-login">
     <ul class="list-group">
-      {% if user.blocked %}
+      {% if user in current_user.blocked %}
         {% for blocked_user in user.blocked %}
           <li class="list-group-item">{{ blocked_user.username }}
-              <form action="/unblock-user/{{ blocked_user.id }}" method="post" style="display:inline;">
-                  <button type="submit" class="btn btn-info" onclick="return confirm('Czy na pewno chcesz odblokować {{ blocked_user.username }}?')">Odblokuj</button>
-              </form>
+            <form action="/unblock-user/{{ blocked_user.id }}" method="post" style="display:inline;">
+              <button type="submit" class="btn btn-info" onclick="return confirm('Czy na pewno chcesz odblokować {{ blocked_user.username }}?')">Odblokuj</button>
+            </form>
           </li>
         {% endfor %}
       {% else %}
@@ -99,6 +127,7 @@
       {% endif %}
     </ul>
   </div>
+</div>
 </div>
 
 <script>

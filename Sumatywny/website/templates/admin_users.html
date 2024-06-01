@@ -1,66 +1,74 @@
 {% extends "base.html" %}
-{% block title %}Weryfikacja Użytkowników{% endblock %}
+{% block title %}Weryfikacja użytkowników{% endblock %}
 {% block content %}
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #f8f9fa;
-  }
-  .container {
-    background-color: #f8f9fa; /* Jasny szary */
-    color: #333333; /* Ciemnoszary */
+.banner {
+    width: 100%; /* Rozciągnięcie na szerokość strony */
+    background-image: url('{{ url_for('static', filename='znajomi.png') }}'); /* Ścieżka do twojego pliku PNG */
+    background-size: cover; /* Dopasowanie rozmiaru obrazka */
+    background-position: center; /* Wycentrowanie obrazka */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
+}
+#container {
+    background-color: rgb(250,250,250,1);
+    color: #000000; /* Ciemnoszary */
     text-align: center;
     padding: 20px;
     border-radius: 15px;
-    width: 95%;
-    margin: 2% auto; /* Zmieniono margin-top na margin, aby centrować */
-  }
-  .container_create_survey, .container_create_survey2 {
+    width: 100%;
+    margin: 1% auto; /* Zmieniono margin-top na margin, aby centrować */
+}
+.container_create_survey, .container_create_survey2 {
     position: relative;
-    background-color: #b4dfe5; /* Pastelowy niebieski */
-    color: #333333; /* Ciemnoszary */
+    background-color: #b4dfe5;;
+    color: #000000; /* Ciemnoszary */
     justify-content: center;
     align-items: center;
     border-radius: 15px;
-    padding: 30px;
+    padding: 15px;
     margin-top: 20px;
-  }
-  .container1, .container2, .container3 {
-    background-color: #b4dfe5; /* Jasny szary */
+    margin-bottom: 20px;
+}
+.container1, .container2, .container3 {
+    background-color: #b4dfe5;;
     border-radius: 15px;
-    border: 2px solid white; /* Dodajemy białą obwódkę */
     overflow: hidden; /* Zapobiega wydostawaniu się elementów potomnych poza kontener */
     font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
-  }
-  .profile-image {
+}
+.profile-image {
     max-width: 100px;
     max-height: 100px;
     border-radius: 50%;
-  }
-  .btn-group {
+}
+.btn-group {
     display: flex;
     justify-content: center;
     margin-top: 15px;
-  }
-  .btn-group form {
+}
+.btn-group form {
     margin: 0 5px;
-  }
-  .list-group-item {
+}
+.list-group-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-  }
+}
+.dashed-line {
+    border-top: 2px dashed #000000;
+    margin: 20px 0;
+}
 </style>
-<div class="container">
-  <h1 class="text-center">Weryfikacja Użytkowników</h1>
+<div class="banner"></div>
+<div id="container">
+  <h1 class="text-center">Autoryzacja dostępu</h1>
+<div class="dashed-line"></div>
+  <h3 class="mb-0">Weryfikacja organizacji</h3>
   <div class="container_create_survey">
-    <div class="card">
-      <div class="card-header container2">
-        <h2 class="mb-0">Weryfikacja Organizacji</h2>
-      </div>
+
       <ul class="list-group list-group-flush">
+      {% if pending_users and user.role != 'organisation' %}
         {% for user in pending_users %}
           {% if user.role == 'organisation' %}
             <li class="list-group-item container3">
@@ -82,15 +90,15 @@
             </li>
           {% endif %}
         {% endfor %}
+      {% else %}
+        <p>Brak pozycji do wyświetlenia.</p>
+      {% endif %}
       </ul>
-    </div>
   </div>
+<h3 class="mb-0">Weryfikacja użytkowników</h3>
   <div class="container_create_survey2">
-    <div class="card mt-4">
-      <div class="card-header container2">
-        <h2 class="mb-0">Weryfikacja Użytkowników</h2>
-      </div>
       <ul class="list-group list-group-flush">
+      {% if pending_users and user.role == 'organisation' %}
         {% for user in pending_users %}
           {% if user.role != 'organisation' %}
             <li class="list-group-item container3">
@@ -114,8 +122,10 @@
             </li>
           {% endif %}
         {% endfor %}
+        {% else %}
+            <p>Brak pozycji do wyświetlenia.</p>
+        {% endif %}
       </ul>
-    </div>
   </div>
 </div>
 {% endblock %}

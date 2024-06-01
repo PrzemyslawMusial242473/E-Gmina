@@ -1,64 +1,123 @@
 {% extends "base.html" %}
 {% block title %}Wybór konta{% endblock %}
 {% block content %}
-    <style>
+<style>
+  .container {
+    display: flex;
+    flex-wrap: wrap; /* Pozwala elementom przejść do następnego wiersza przy zmniejszeniu okna */
+    align-items: center;
+    background-color: rgb(250,250,250,1);
+    color: #000000; /* Ciemnoszary */
+    padding: 20px;
+    border-radius: 15px;
+    width: 80%;
+    margin-top: 7%;
+    position: relative; /* Pozycja względna, aby przenieść obrazek */
+  }
+  .image-outside-container {
+    position: absolute; /* Absolutna pozycja dla obrazka */
+    left: -120px; /* Odległość od lewej strony */
+  }
+  .image-container {
+    flex: 1;
+    text-align: center;
+    margin-right: 20px; /* Odstęp między zdjęciem a formularzem logowania */
+  }
+  .image-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+  }
+  .container_signup_type {
+    flex: 1;
+    background-color: #b4dfe5; /* Pastelowy niebieski */
+    color: #000000; /* Ciemnoszary */
+    border-radius: 15px;
+    padding: 30px;
+    margin-top: 20px;
+    align-items: flex-start; /* Wyrównanie do góry */
+    text-align: center; /* Wyśrodkowanie zawartości */
+  }
+  .icon-container {
+    display: flex;
+    justify-content: center;
+  }
+  .icon-container img {
+    width: 80px; /* Nowy rozmiar ikon */
+    height: auto;
+    margin: 0 20px; /* Margines między ikonami */
+  }
+  button {
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #467a7a; /* Niebieski */
+    color: #ffffff; /* Biały */
+    cursor: pointer;
+  }
+
+  @media (max-width: 1200px) {
+    .image-outside-container {
+      position: relative; /* Względna pozycja dla mniejszych ekranów */
+      left: 0; /* Resetowanie odległości od lewej strony */
+      margin-bottom: 20px; /* Odstęp poniżej obrazka */
+      text-align: center;
+    }
     .container {
-        background-color: #f8f9fa; /* Jasny szary */
-        color: #333333; /* Ciemnoszary */
-        text-align: center;
-        padding: 20px;
-        padding-top: 4px;
-        border-radius: 15px;
-        width: 80%;
-        margin-top: 7%;
+      flex-direction: column; /* Elementy w kolumnie */
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      width: 100%; /* Pełna szerokość dla bardzo małych ekranów */
+      padding: 10px;
     }
     .container_signup_type {
-        position: relative;
-        background-color: #b4dfe5; /* Pastelowy niebieski */
-        color: #333333; /* Ciemnoszary */
-        justify-content: center;
-        align-items: center;
-        border-radius: 15px;
-        padding: 30px;
+      padding: 20px; /* Mniejsze padding dla małych ekranów */
     }
-    .spacer {
-        display: inline-block;
-        width: 20px; /* Ustaw szerokość pustego elementu na odstęp */
+    .icon-container img {
+      width: 60px; /* Mniejszy rozmiar ikon dla małych ekranów */
+      margin: 0 20px; /* Mniejszy margines między ikonami */
     }
     button {
-        padding: 10px 20px;
-        margin: 10px;
-        border: none;
-        border-radius: 5px;
-        background-color: #467a7a; /* Niebieski */
-        color: #ffffff; /* Biały */
-        cursor: pointer;
+      padding: 8px 16px; /* Mniejsze przyciski dla małych ekranów */
+      margin: 5px;
     }
-    </style>
-    <div class="container">
-        <h1 align="center">Zarejestruj się</h1>
-        <div class="container_signup_type">
-            <div style="text-align: center;">
-                <img src="{{ url_for('static', filename='użytkownik.png') }}"  width="100" height="100">
-                <div class="spacer"></div> <!-- Dodaj pusty element jako odstęp -->
-                <img src="{{ url_for('static', filename='mcdonalds.png') }}"  width="100" height="100">
-            </div>
-            <div>
-                <button type="submit" onclick="ChooseType(1)">Użytkownik</button>
-                <button type="submit" onclick="ChooseType(2)">Organizacja</button>
-            </div>
-        </div>
+  }
+</style>
+
+<div class="container">
+  <div class="image-outside-container">
+    <img src="{{ url_for('static', filename='info.png') }}" alt="Zdjęcie">
+  </div>
+  <div class="image-container">
+    <!-- Placeholder for additional content if needed -->
+  </div>
+  <div class="container_signup_type">
+    <h1>Zarejestruj się</h1>
+    <div class="icon-container">
+      <img src="{{ url_for('static', filename='ikona.png') }}" alt="Użytkownik">
+      <img src="{{ url_for('static', filename='ikona-grupa.png') }}" alt="Mcdonalds">
     </div>
-    <script>
-    function ChooseType(Number) {
-        switch(Number) {
-            case 1:
-                window.location.href = "{{ url_for('auth.sign_up_user') }}";
-                break;
-            case 2:
-                window.location.href = "{{ url_for('auth.sign_up_org') }}";
-                break;
-        }
+    <div>
+      <button type="button" onclick="ChooseType(1)">Użytkownik</button>
+      <button type="button" onclick="ChooseType(2)">Organizacja</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function ChooseType(Number) {
+    switch(Number) {
+        case 1:
+            window.location.href = "{{ url_for('auth.sign_up_user') }}";
+            break;
+        case 2:
+            window.location.href = "{{ url_for('auth.sign_up_org') }}";
+            break;
     }
-    </script>
+}
+</script>
 {% endblock %}

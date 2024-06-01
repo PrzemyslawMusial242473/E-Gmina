@@ -2,28 +2,33 @@
 {% block title %}Wymień punkty{% endblock %}
 {% block content %}
 <style>
-body {
-    font-family: Arial, sans-serif;
+.banner {
+    width: 100%; /* Rozciągnięcie na szerokość strony */
+    background-image: url('{{ url_for('static', filename='punkty.png') }}'); /* Ścieżka do twojego pliku PNG */
+    background-size: cover; /* Dopasowanie rozmiaru obrazka */
+    background-position: center; /* Wycentrowanie obrazka */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
 }
-
-.container{
-    background-color: #f8f9fa; /* Jasny szary */
-    color: #333333; /* Ciemnoszary */
+#container {
+    background-color: rgb(250,250,250,1);
+    color: #000000; /* Ciemnoszary */
     text-align: center;
     padding: 20px;
     border-radius: 15px;
-    width: 95%;
-    margin-top: 2%;
+    width: 100%;
+    margin-top: 1%;
 }
-.container_exchange_points{
+
+.container_exchange_points {
     position: relative;
-    background-color: #b4dfe5; /* Pastelowy niebieski */
-    color: #333333; /* Ciemnoszary */
+    background-color: #b4dfe5;;
+    color: #000000; /* Ciemnoszary */
     justify-content: center;
     align-items: center;
     border-radius: 15px;
     padding: 30px;
-    margin-top:20px;
+    margin-top: 20px;
 }
 
 h1 {
@@ -45,6 +50,7 @@ h1 {
 
 h2 {
     margin: 0;
+    margin-bottom:15px;
 }
 
 p {
@@ -53,7 +59,7 @@ p {
 
 button {
     margin-top: 10px;
-    background-color: #007BFF;
+    background-color: #328685;
     color: white;
     border: none;
     border-radius: 5px;
@@ -62,7 +68,7 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #328685;
 }
 
 .flashes {
@@ -86,7 +92,6 @@ button:hover {
     color: #721c24;
 }
 
-/* New styles */
 ul {
     list-style: none;
     padding: 0;
@@ -97,6 +102,11 @@ ul {
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
+    border-bottom: 1px dashed #000; /* Dodanie przerywanej linii */
+}
+
+.exchange-item:last-child {
+    border-bottom: none; /* Usunięcie dolnej granicy dla ostatniego elementu */
 }
 
 .exchange-item form {
@@ -104,21 +114,52 @@ ul {
 }
 </style>
 
-<div class="container">
-    <h1>Wymiana Punktów</h1>
+<div class="banner"></div>
+
+<div id="container">
+    <h1>Sklepy użytkowników</h1>
     <div class="container_exchange_points">
-        <ul>
-            {% for store_key, store in stores.items() %}
-            <li class="exchange-item">
-                <span>{{ store.name }} - {{ store.cost }} punktów</span>
-                <form action="{{ url_for('views.exchange_points') }}" method="POST">
-                    <input type="hidden" name="store" value="{{ store_key }}">
-                    <button type="submit">Wymień</button>
-                </form>
-            </li>
-            {% endfor %}
-        </ul>
-        <a href="{{ url_for('views.my_vouchers') }}">Moje Bony</a>
+        {% if user.role == "admin" %}
+            <ul>
+                {% for store_key, store in stores.items() %}
+                <li class="exchange-item">
+                    <span>{{ store.name }} - {{ store.cost }} punktów</span>
+                </li>
+                {% endfor %}
+            </ul>
+            <h2>Dodaj nowy sklep</h2>
+            <form action="{{ url_for('views.exchange_points') }}" method="POST">
+                <input type="text" name="new_store_name" placeholder="Nazwa sklepu" required>
+                <input type="number" name="new_store_cost" placeholder="Koszt punktowy" required><br>
+                <button type="submit">Dodaj sklep</button>
+            </form>
+        {% elif user.role == "organisation" %}
+            <h2>Sklepy organizacji</h2>
+            <ul>
+                {% for store_key, store in org_stores.items() %}
+                <li class="exchange-item">
+                    <span>{{ store.name }} - {{ store.cost }} punktów</span>
+                    <form action="{{ url_for('views.exchange_points') }}" method="POST">
+                        <input type="hidden" name="store" value="{{ store_key }}">
+                        <button type="submit">Wymień</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <ul>
+                {% for store_key, store in stores.items() %}
+                <li class="exchange-item">
+                    <span>{{ store.name }} - {{ store.cost }} punktów</span>
+                    <form action="{{ url_for('views.exchange_points') }}" method="POST">
+                        <input type="hidden" name="store" value="{{ store_key }}">
+                        <button type="submit">Wymień</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            <a class="btn btn-info" href="{{ url_for('views.my_vouchers') }}">Moje bony</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

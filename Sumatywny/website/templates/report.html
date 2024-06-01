@@ -1,22 +1,23 @@
 {% extends "base.html" %}
-{% block title %}Zgłoś przestępstwo{% endblock %}
+{% block title %}Zgłoś naruszenie środowiskowe{% endblock %}
 {% block content %}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+    #Reports{
+        background-color: #b4dfe5;
+        border-radius: 15px;
+        padding: 10px;
+    }
+     .list-group-item{
+        background-color: #b4dfe5;
+    }
         .container1, .container2 {
             background-color: #f8f9fa; /* Jasny szary */
             color: #333333; /* Ciemnoszary */
             text-align: center;
             padding: 20px;
-            padding-top: 4px;
             border-radius: 15px;
-            width: 95%;
+            width: 100%;
             margin-top: 2%;
-            margin-left: 2%;
         }
         .container_event {
             position: relative;
@@ -44,37 +45,45 @@
             cursor: pointer;
             width:15%;
         }
-    </style>
-    <div class="container">
+    .banner {
+    width: 100%; /* Rozciągnięcie na szerokość strony */
+    background-image: url('{{ url_for('static', filename='naruszenia.png') }}'); /* Ścieżka do twojego pliku PNG */
+    background-size: cover; /* Dopasowanie rozmiaru obrazka */
+    background-position: center; /* Wycentrowanie obrazka */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
+}
+
+</style>
+<div class="banner"></div>
         <div class="row">
             <div class="col-md-6">
                 <div class="container1">
+                    <h1 align="center">Zgłoś naruszenie środowiskowe</h1>
                     <div class="container_event">
-                        <h1 align="center">Zgłoś nieprawidłowość ekologiczną</h1>
-                        <body>
-                            <form method="POST">
-                                <label for="place">Gdzie to jest?:</label><br>
-                                <input type="text" id="place" name="place" required><br>
+                        <form method="POST">
+                            <label for="place">Wskaż miejsce naruszenia:</label><br>
+                            <input type="text" id="place" name="place" required><br>
 
-                                <label for="data">Co się dzieje:</label><br>
-                                <input type="text" id="data" name="data" required><br>
-                                <button type="submit">Zgłoś</button>
-                            </form>
-                        </body>
+                            <label for="data">Opis naruszenia:</label><br>
+                            <input type="text" id="data" name="data" required><br>
+                            <button type="submit">Zgłoś</button>
+                        </form>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="container2">
                     <div class="container_report">
-                        <h2 align="center">Moje zgłoszenia</h2>
+                        <h1 align="center">Moje zgłoszenia</h1>
                         <ul class="list-group list-group-flush" id="Reports">
+                        {% if user_reports %}
                             {% for report in user_reports %}
                                 <li class="list-group-item">
                                     <strong>Opis:</strong> {{ report.data }}<br>
                                     <strong>Data:</strong> {{ report.date }}<br>
                                     <strong>Miejsce:</strong> {{ report.place }}<br>
-                                    <div id="map-{{ report.id }}" style="height: 200px;"></div>
+                                    <div id="map-{{ report.id }}" style="height: 155px;"></div>
                                     {% if report.status == 'rejected' %}
                                         <p>Twoje zgłoszenie zostało odrzucone.</p>
                                     {% elif report.status == 'accepted' %}
@@ -84,12 +93,14 @@
                                     {% endif %}
                                 </li>
                             {% endfor %}
+                        {% else %}
+                            <li class="list-group-item">Nie dodano żadnego zgłoszenia.</li>
+                        {% endif %}
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M"></script>
     <script>
         {% for report in user_reports %}
