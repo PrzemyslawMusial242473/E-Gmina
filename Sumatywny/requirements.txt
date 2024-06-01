@@ -5,3 +5,4 @@ requests
 stripe
 Flask-Mail
 pandas
+openpyxl
