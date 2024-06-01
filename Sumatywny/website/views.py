@@ -165,22 +165,39 @@ def event():
         date = request.form.get('date')
         place = request.form.get('place')
         name = request.form.get('name')
-        
+
         if data and date and place and name:
             try:
                 date = datetime.strptime(date, '%Y-%m-%dT%H:%M')
             except ValueError:
-                return 'Zły format daty'
-            
-            new_event = Event(data=data, date=date, place=place, name=name, user_id=current_user.id, status='pending')
-            db.session.add(new_event) 
-            db.session.commit()  
-            flash('Wydarzenie zawnioskowano!', category='success')
-            
-            
-            return redirect(url_for('views.event'))  
-    
-    return render_template('events.html', user=current_user,user_events=user_events)
+                flash('Zły format daty', category='error')
+                return redirect(url_for('views.event'))
+
+            # Sprawdzamy poprawność adresu za pomocą API Google Maps
+            api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'
+            geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={place}&key={api_key}'
+            response = requests.get(geocoding_url)
+            data = response.json()
+
+            if data['status'] == 'OK':
+                # Zapisujemy wydarzenie do bazy danych tylko, jeśli adres jest poprawny
+                new_event = Event(
+                    data=request.form.get('data'),  # Tylko dane tekstowe z formularza
+                    date=date,
+                    place=place,
+                    name=name,
+                    user_id=current_user.id,
+                    status='pending'
+                )
+                db.session.add(new_event)
+                db.session.commit()
+                flash('Wydarzenie zawnioskowano!', category='success')
+                return redirect(url_for('views.event'))
+            else:
+                flash('Nie znaleziono koordynatów dla podanego adresu', category='error')
+                return redirect(url_for('views.event'))
+
+    return render_template('events.html', user=current_user, user_events=user_events)
 
 
 @views.route('/invite-friends', methods=['GET', 'POST'])
