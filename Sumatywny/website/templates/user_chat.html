@@ -2,11 +2,20 @@
 {% block title %}Czat{% endblock %}
 {% block content %}
 <style>
-  .container {
+.banner {
+    width: 100%; /* Rozciągnięcie na szerokość strony */
+    background-image: url('{{ url_for('static', filename='chat.png') }}'); /* Ścieżka do twojego pliku PNG */
+    background-size: cover; /* Dopasowanie rozmiaru obrazka */
+    background-position: center; /* Wycentrowanie obrazka */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
+  }
+  #container {
     border-radius: 15px; /* Zaokrąglamy rogi */
     {#border: 2px solid white; /* Dodajemy białą obwódkę */#}
     overflow: hidden; /* Zapobiega wydostawaniu się elementów potomnych poza kontener */
     font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
+      margin-top:1%;
   }
 
   .bg-custom {
@@ -16,7 +25,9 @@
     color: #000000; /* Kolor tekstu nagłówka */
   }
 </style>
-<div class="container">
+
+<div class="banner"></div>
+<div id="container">
   <div class="bg-custom rounded p-3 mb-4">
     <h1 class="text-custom text-center mb-0">Chat z {{ receiver.username }}</h1>
   </div>

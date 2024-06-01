@@ -3,7 +3,15 @@
 
 {% block content %}
 <style>
-    .container {
+.banner {
+    width: 100%; /* Rozciągnięcie na szerokość strony */
+    background-image: url('{{ url_for('static', filename='platnosci.png') }}'); /* Ścieżka do twojego pliku PNG */
+    background-size: cover; /* Dopasowanie rozmiaru obrazka */
+    background-position: center; /* Wycentrowanie obrazka */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
+}
+    #container {
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
@@ -13,11 +21,9 @@
         color: #000000; /* Ciemnoszary */
         text-align: center;
         padding: 20px;
-        padding-top: 4px;
         border-radius: 15px;
-        width: 95%;
+        width: 100%;
         margin-top: 1%;
-        margin-left: 2%;
     }
     .payments-table {
         width: 100%;
@@ -47,11 +53,20 @@
     .btn-pay:hover {
         background-color: #328685;
     }
+     .box {
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 1%;
+        min-height: 80px;
+    }
 </style>
-
-<div class="container">
+<div class="banner"></div>
+<div id="container">
     <div class="payments-container">
         <h1>Dodaj płatności</h1>
+        <div class="box">
         <form action="{{ url_for('views.admin_payments') }}" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="file">Wybierz plik Excel:</label>
@@ -61,6 +76,7 @@
         </form>
         <br>
         <a href="{{ url_for('views.download_sample') }}" class="btn btn-pay">Pobierz przykładowy plik</a>
+    </div>
     </div>
 </div>
 {% endblock %}

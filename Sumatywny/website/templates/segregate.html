@@ -2,38 +2,36 @@
 {% block title %}Segregacja Odpadów{% endblock %}
 {% block content %}
 <style>
-    .container {
-        width: 70%;
-        margin: 0 auto;
-        text-align: center;
-        background-color: rgb(250,250,250,1);
-        color: #000000; /* Ciemnoszary */
+    .segregation-container, .schedule-container {
+        background-color: #f8f9fa; /* Jasny szary */
+        color: #333333; /* Ciemnoszary */
         padding: 20px;
         border-radius: 15px;
+        margin-bottom: 20px;
         margin-top: 1%;
     }
-    form {
-        background-color: rgb(180,223,229,0);
-        color: #000000; /* Ciemnoszary */
-        justify-content: center;
-        align-items: center;
-        border-radius: 15px;
+    .form-container {
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
         padding: 30px;
-        margin-top: 20px;
+        border-radius: 15px;
     }
-    h1 {
-        white-space: nowrap; /* Nie dziel tytułu na wiele linii */
-        margin-bottom: 20px; /* Dodaj margines na dole */
+    h1, h2 {
         text-align: center;
+        margin-bottom: 20px;
     }
     input[type="text"], input[type="email"], input[type="password"], datalist {
         width: 100%;
         padding: 10px;
         margin: 10px 0;
     }
+    .button-container {
+        text-align: center;
+        margin-top: 20px;
+    }
     button {
         padding: 10px 20px;
-        background-color: #328685;
+        background-color: #4CAF50;
         color: white;
         border: none;
         cursor: pointer;
@@ -41,38 +39,63 @@
     button:hover {
         background-color: #45a049;
     }
-    /* Styl dla map */
     .map-container {
-        margin-top: 20px;
         display: flex;
-        justify-content: space-around;
-        flex-wrap: wrap; /* Nowa linia dla map na węższych ekranach */
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
     }
-    .map {
-        width: 30%;
-        height: 400px;
+    .map-box {
+        width: 49%;
+        background-color: #f8f9fa; /* Pastelowy niebieski */
         border-radius: 15px;
-        overflow: hidden;
-        margin-bottom: 20px; /* Dodatkowy margines między mapami */
-        display: flex;
-        flex-direction: column;
+        padding: 20px;
+
+    }
+    .map-box2 {
+        background-color: #b4dfe5; /* Pastelowy niebieski */
+        color: #333333; /* Ciemnoszary */
+        padding: 30px;
+        border-radius: 15px;
+        margin-top: 1%;
+    }
+    .map-title-container {
+        background-color: #b4dfe5; /* Jasny szary */
+        border-radius: 15px 15px 0 0;
+        padding: 10px;
     }
     .map-title {
-        flex: 1; /* Rozciąganie tytułu na całą wysokość */
         text-align: center;
-        font-size: 1.2em; /* Dopasowanie rozmiaru czcionki */
-        margin: 0; /* Usunięcie domyślnego marginesu */
+        font-size: 1.2em;
+        margin: 0;
     }
     .map-canvas {
-        flex: 9; /* Rozciąganie mapy na większą część */
+        height: 300px; /* Wysokość mapy */
+        border-radius: 0 0 15px 15px;
     }
-    /* Zwiększenie rozmiaru czcionki w informacyjnym okienku na mapie */
-    .gm-style-iw div {
-        font-size: 20px !important; /* Zwiększenie rozmiaru czcionki */
+    .bold-message {
+        font-weight: bold;
+        text-align: center;
+        margin-top: 20px;
     }
+    .banner {
+    width: 100%; /* Rozciągnięcie na szerokość strony */
+    background-image: url('{{ url_for('static', filename='segreguj.png') }}'); /* Ścieżka do twojego pliku PNG */
+    background-size: cover; /* Dopasowanie rozmiaru obrazka */
+    background-position: center; /* Wycentrowanie obrazka */
+    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
+    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
+}
+    .button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
 </style>
-<div class="container">
+<div class="banner"></div>
+<div class="segregation-container">
     <h1>Segregacja</h1>
+    <div class="form-container">
     <form action="{{ url_for('views.segregate') }}" method="post">
         <label for="waste_description">Opis odpadu:</label>
         <input type="text" id="waste_description" name="waste_description" list="waste_list" required>
@@ -83,26 +106,33 @@
                 {% endfor %}
             {% endfor %}
         </datalist>
-        <button type="submit">Segreguj</button>
+        <div class="button-container">
+    <button type="submit">Segreguj</button>
+</div>
     </form>
     {% if result %}
-        <p>{{ result }}</p>
-    {% endif %}
+            <p class="bold-message">{{ result }}</p>
+        {% endif %}
+</div>
 </div>
 
 <!-- Mapy -->
 <div class="map-container">
-    <div class="map">
+    <div class="map-box">
         <h2 class="map-title">Mapa aptek do których można przekazać przeterminowane leki</h2>
-        <div id="map2" class="map-canvas"></div>
+        <div class="map-box2">
+        <div class="map-canvas" id="map2"></div>
+        </div>
     </div>
-    <div class="map">
-        <h2 class="map-title">Mapa punktów selektywnego zbierania odpadów komunalnych</h2>
-        <div id="map3" class="map-canvas"></div>
+    <div class="map-box">
+            <h2 class="map-title">Mapa punktów selektywnego zbierania odpadów komunalnych</h2>
+        <div class="map-box2">
+        <div class="map-canvas" id="map3"></div>
+        </div>
     </div>
 </div>
 <!-- Rozpocznij dodawanie harmonogramu tutaj -->
-<div class="container">
+<div class="schedule-container">
     <h2>Harmonogram wywozu śmieci w Konstantynowie Łódzkim</h2>
     <table class="table">
         <thead>
