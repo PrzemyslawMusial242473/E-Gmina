@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Admin - Płatności{% endblock %}
+{% block title %}Admin - płatności{% endblock %}
 
 {% block content %}
 <style>
@@ -72,7 +72,7 @@
                 <label for="file">Wybierz plik Excel:</label>
                 <input type="file" class="form-control" id="file" name="file" required>
             </div>
-            <button type="submit" class="btn btn-pay">Wgraj</button>
+            <button type="submit" class="btn btn-pay">Wczytaj</button>
         </form>
         <br>
         <a href="{{ url_for('views.download_sample') }}" class="btn btn-pay">Pobierz przykładowy plik</a>

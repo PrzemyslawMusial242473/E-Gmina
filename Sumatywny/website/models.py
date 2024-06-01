@@ -286,5 +286,5 @@ class Payment(db.Model):
 class Config:
     UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static/document_images')
     
-UPLOAD_FOLDER = 'Sumatywny/website/templates/static/document_images'
+UPLOAD_FOLDER = 'website/templates/static/document_images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}

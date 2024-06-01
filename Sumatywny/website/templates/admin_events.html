@@ -49,6 +49,7 @@
     <h1 class="text-center">Weryfikacja wydarzeń</h1>
     <div class="container_create_survey">
         <ul class="list-group list-group-flush">
+        {% if pending_events %}
             {% for event in pending_events %}
                 <li class="list-group-item container3">
                     <div class="d-flex w-100 justify-content-between">
@@ -67,6 +68,9 @@
                     </div>
                 </li>
             {% endfor %}
+        {% else %}
+            <p>Brak wydarzeń do weryfikacji.</p>
+        {% endif %}
         </ul>
     </div>
 </div>

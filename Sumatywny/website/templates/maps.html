@@ -76,6 +76,7 @@
                 <div class="container3">
                     <h1>Znaczniki</h1>
                     <div class="container_map">
+                    {% if markers %}
                         {% for marker in markers %}
                         <div class="card">
                             <div class="card-body">
@@ -88,6 +89,9 @@
                         </div>
                         <br>
                         {% endfor %}
+                    {% else %}
+                        <p>Brak znaczników do wyświetlenia.</p>
+                    {% endif %}
                     </div>
                 </div>
             </div>
