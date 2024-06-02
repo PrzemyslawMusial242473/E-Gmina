@@ -25,7 +25,6 @@
     .container_create_survey2 {
         position: relative;
         background-color: #b4dfe5;
-        ;
         color: #000000; /* Ciemnoszary */
         justify-content: center;
         align-items: center;
@@ -39,16 +38,9 @@
     .container2,
     .container3 {
         background-color: #b4dfe5;
-        ;
         border-radius: 15px;
         overflow: hidden; /* Zapobiega wydostawaniu się elementów potomnych poza kontener */
         font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
-    }
-
-    .profile-image {
-        max-width: 100px;
-        max-height: 100px;
-        border-radius: 50%;
     }
 
     .btn-group {
@@ -89,16 +81,15 @@
                 <strong>Email:</strong> {{ user.email }}<br>
                 <strong>NIP:</strong> {{ user.uid }}<br>
                 {% if user.document_image %}
-                <img src="{{ url_for('static', filename=user.document_image) }}" alt="Profile Image"
-                    class="profile-image">
+                <a href="{{ url_for('auth.get_document_image', user_id=user.id) }}" data-lightbox="image-{{ user.id }}" data-title="{{ user.name }}">
+                    <button class="btn btn-primary">Dokument</button>
+                </a>
                 {% endif %}
                 <div class="btn-group mt-2" role="group">
-                    <form method="POST"
-                        action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
+                    <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
                         <button type="submit" class="btn btn-success">Zatwierdź</button>
                     </form>
-                    <form method="POST"
-                        action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
+                    <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
                         <button type="submit" class="btn btn-danger">Odrzuć</button>
                     </form>
                 </div>
@@ -124,16 +115,15 @@
                 <strong>Email:</strong> {{ user.email }}<br>
                 <strong>Pesel:</strong> {{ user.uid }}<br>
                 {% if user.document_image %}
-                <img src="{{ url_for('static', filename='document_images/' ~ user.document_image) }}"
-                    class="document-image" width="300" height="200">
+                <a href="{{ url_for('auth.get_document_image', user_id=user.id) }}" data-lightbox="image-{{ user.id }}" data-title="{{ user.name }} {{ user.surname }}">
+                    <button class="btn btn-primary">Dokument</button>
+                </a>
                 {% endif %}
                 <div class="btn-group mt-2" role="group">
-                    <form method="POST"
-                        action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
+                    <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
                         <button type="submit" class="btn btn-success">Zatwierdź</button>
                     </form>
-                    <form method="POST"
-                        action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
+                    <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
                         <button type="submit" class="btn btn-danger">Odrzuć</button>
                     </form>
                 </div>
