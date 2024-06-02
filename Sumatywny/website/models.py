@@ -1,6 +1,7 @@
 from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
+from sqlalchemy.dialects.mysql import BLOB
 import os
 from datetime import datetime
 friends = db.Table(
@@ -73,7 +74,7 @@ class User(db.Model, UserMixin):
     status = db.Column(db.String(50), default='pending')
     role = db.Column(db.String(50), default='user')
     loyalty_points = db.Column(db.Integer, default=0)
-    document_image = db.Column(db.String(150), nullable=True)
+    document_image = db.Column(BLOB, nullable=True)
     Events = db.relationship('Event')
     Reports = db.relationship('Report')
     payments = db.relationship('Payment', backref='user', lazy=True)
