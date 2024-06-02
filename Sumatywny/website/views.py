@@ -100,7 +100,7 @@ def delete_event():
     eventId = event['eventId']
     event = Event.query.get(eventId)
     if event:
-        if event.user_id == current_user.id:
+        if event.user_id == current_user.id or current_user.role == "admin":
             db.session.delete(event)
             db.session.commit()
 
@@ -161,7 +161,10 @@ def delete_marker(marker_id):
 @views.route('/events', methods=['GET', 'POST'])
 @login_required
 def event():
-    user_events = Event.query.filter(Event.user_id == current_user.id, Event.date >= datetime.now()).order_by(Event.date.asc()).all()
+    if current_user.role=="admin":
+        user_events = Event.query.order_by(Event.date.asc()).all()
+    else:
+        user_events = Event.query.filter(Event.user_id == current_user.id, Event.date >= datetime.now()).order_by(Event.date.asc()).all()
     if request.method == 'POST':
         data = request.form.get('data')
         date = request.form.get('date')
@@ -182,14 +185,17 @@ def event():
             data = response.json()
 
             if data['status'] == 'OK':
-                # Zapisujemy wydarzenie do bazy danych tylko, jeśli adres jest poprawny
+                if current_user.role =="admin":
+                    status_state = "accepted"
+                else:
+                    status_state = "pending"
                 new_event = Event(
-                    data=request.form.get('data'),  # Tylko dane tekstowe z formularza
+                    data=request.form.get('data'),  
                     date=date,
                     place=place,
                     name=name,
                     user_id=current_user.id,
-                    status='pending'
+                    status=status_state
                 )
                 db.session.add(new_event)
                 db.session.commit()
@@ -659,12 +665,21 @@ def add_loyalty_points(user, points):
 @login_required
 def exchange_points():
     available_stores = stores
+
     if request.method == 'POST':
-        if current_user.role == "admin" and 'new_store_name' in request.form:
-            new_store_name = request.form.get('new_store_name')
-            new_store_cost = int(request.form.get('new_store_cost'))
-            stores[f'store{len(stores) + 1}'] = {'name': new_store_name, 'cost': new_store_cost}
-            flash('Nowy sklep został dodany!', 'success')
+        if current_user.role == "admin":
+            if 'new_store_name' in request.form:
+                new_store_name = request.form.get('new_store_name')
+                new_store_cost = int(request.form.get('new_store_cost'))
+                stores[f'store{len(stores) + 1}'] = {'name': new_store_name, 'cost': new_store_cost}
+                flash('Nowy sklep został dodany!', 'success')
+            elif 'delete_store' in request.form:
+                store_key = request.form.get('delete_store')
+                if store_key in stores:
+                    del stores[store_key]
+                    flash('Sklep został usunięty!', 'success')
+                else:
+                    flash('Sklep nie istnieje.', 'danger')
         else:
             store_key = request.form.get('store')
             store = available_stores.get(store_key)
