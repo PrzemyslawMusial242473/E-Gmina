@@ -158,6 +158,34 @@ def delete_marker(marker_id):
         flash('Znacznik nie został znaleziony', category='error')
     return redirect(url_for('views.maps'))
 
+
+@views.route('/edit-marker', methods=['POST'])
+def edit_marker():
+    marker_id = request.form['editMarkerId']
+    new_address = request.form['editAddress']
+    new_description = request.form['editDescription']
+    api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'
+    geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={new_address}&key={api_key}'
+
+    response = requests.get(geocoding_url)
+    data = response.json()
+
+    marker = MapMarker.query.get(marker_id)
+    if data['status'] == 'OK':
+        lat = data['results'][0]['geometry']['location']['lat']
+        lng = data['results'][0]['geometry']['location']['lng']
+
+        new_marker = MapMarker(lat=lat, lng=lng, address=new_address, description=new_description, user_id=current_user.id)
+        db.session.delete(marker)
+        db.session.add(new_marker)
+        db.session.commit()
+        flash('Znacznik zaktualizowany pomyślnie', category='success')
+    else:
+        flash('Nie znaleziono znacznika do edycji', category='error')
+
+    return redirect(url_for('views.maps'))
+
+
 @views.route('/events', methods=['GET', 'POST'])
 @login_required
 def event():

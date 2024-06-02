@@ -85,6 +85,7 @@
                                 <form action="{{ url_for('views.delete_marker', marker_id=marker.id) }}" method="post">
                                     <button type="submit" class="btn btn-danger">Usuń</button>
                                 </form>
+                                  <button type="button" class="btn btn-primary" onclick="openEditModal('{{ marker.id }}', '{{ marker.address }}', '{{ marker.description }}')">Edytuj</button>
                             </div>
                         </div>
                         <br>
@@ -96,6 +97,42 @@
                 </div>
             </div>
         </div>
+<!-- Modal -->
+<div class="modal fade" id="editMarkerModal" tabindex="-1" aria-labelledby="editMarkerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editMarkerModalLabel">Edytuj znacznik</h5>
+            </div>
+            <form id="editMarkerForm" action="{{ url_for('views.edit_marker') }}" method="post">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="editAddress">Nowy adres:</label>
+                        <input type="text" class="form-control" id="editAddress" name="editAddress" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDescription">Nowy opis:</label>
+                        <input type="text" class="form-control" id="editDescription" name="editDescription">
+                    </div>
+                    <input type="hidden" id="editMarkerId" name="editMarkerId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    <script>
+    function openEditModal(id, address, description) {
+        document.getElementById('editMarkerId').value = id;
+        document.getElementById('editAddress').value = address;
+        document.getElementById('editDescription').value = description;
+        $('#editMarkerModal').modal('show');
+    }
+</script>
 
 <script>
     function initMap() {
