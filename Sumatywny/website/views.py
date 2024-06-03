@@ -451,34 +451,61 @@ def update_event_status(event_id, action):
 
     return redirect(url_for('views.admin_events'))
 
+
 @views.route('/admin-users', methods=['GET', 'POST'])
 @login_required
 def admin_users():
     if not current_user.is_authenticated or current_user.role != 'admin':
         flash('Nie masz uprawnień administratora do tej strony.', category='danger')
         return redirect(url_for('views.home'))
-    
+
     pending_users = User.query.filter_by(status='pending').all()
-    
+    accepted_users = User.query.filter_by(status='accepted').all()
+
+    # Wykluczenie konta administratora
+    accepted_users = [user for user in accepted_users if user.role != 'admin']
+
     if request.method == 'POST':
         user_id = request.form.get('user_id')
-        action = request.form.get('action')  
-        
-        if action == 'accept':
-            user = User.query.get(user_id)
-            user.status = 'accepted'
-            db.session.add(user)
-            db.session.commit()
-            flash('Stworzenie konta zostało zatwierdzone.', category='success')
-        elif action == 'reject':
-            user = User.query.get(user_id)
-            user.status = 'rejected'
-            flash('Stworzenie konta zostało odrzucone.', category='warning')
-        
+        action = request.form.get('action')
+
+        user = User.query.get(user_id)
+        if user:
+            if action == 'accept':
+                user.status = 'accepted'
+                db.session.add(user)
+                db.session.commit()
+                flash('Stworzenie konta zostało zatwierdzone.', category='success')
+            elif action == 'reject':
+                user.status = 'rejected'
+                db.session.commit()
+                flash('Stworzenie konta zostało odrzucone.', category='warning')
+
         return redirect(url_for('views.admin_users'))
 
-    return render_template('admin_users.html', user=current_user, pending_users=pending_users)
+    return render_template('admin_users.html', user=current_user, pending_users=pending_users,
+                           accepted_users=accepted_users)
 
+
+@views.route('/delete-user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej operacji.', category='danger')
+        return redirect(url_for('views.home'))
+
+    user = User.query.get(user_id)
+    if user:
+        if user.id == current_user.id:
+            flash('Nie możesz usunąć samego siebie.', category='danger')
+        else:
+            db.session.delete(user)
+            db.session.commit()
+            flash('Użytkownik został usunięty.', category='success')
+    else:
+        flash('Użytkownik nie istnieje.', category='danger')
+
+    return redirect(url_for('views.admin_users'))
 
 @views.route("/report", methods=['GET', 'POST'])
 @login_required
