@@ -2,10 +2,12 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
+from flask_migrate import Migrate
 from flask_mail import Mail
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
+migrate = Migrate()
 mail = Mail()
 
 
@@ -20,6 +22,7 @@ def create_app():
     app.config['MAIL_PASSWORD'] = 'ayim zjaa yvdo fmjx'
     app.config['MAIL_DEFAULT_SENDER'] = 'egminakonstantynow@gmail.com'
     db.init_app(app)
+    migrate.init_app(app, db)
     mail.init_app(app)
     from .views import views
     from .auth import auth

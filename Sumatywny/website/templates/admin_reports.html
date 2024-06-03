@@ -62,10 +62,10 @@
         <li class="list-group-item container3">
           <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">{{ report.name }}</h5>
-            <small>{{ report.date }}</small>
+            <small><strong>Data:</strong>{{ report.date }}</small>
           </div>
-          <p class="mb-1" style="font-weight:bold;">{{ report.data }}</p>
-          <p class="mb-1">{{ report.place }}</p>
+          <p class="mb-1"><strong>Opis wydarzeń:</strong>{{ report.data }}</p>
+          <p class="mb-1"><strong>Miejsce wydarzeń:</strong>{{ report.place }}</p>
           <div class="btn-group" role="group">
             <form method="POST" action="{{ url_for('views.update_report_status', report_id=report.id, action='accept') }}">
               <button type="submit" class="btn btn-success">Zaakceptuj</button>
