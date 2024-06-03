@@ -53,16 +53,20 @@
             {% for event in pending_events %}
                 <li class="list-group-item container3">
                     <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">{{ event.name }}</h5>
-                        <small>{{ event.date }}</small>
+                        <h5 class="mb-1"><strong>Nazwa:</strong> {{ event.name }}</h5>
+                        <small><strong>Data:</strong> {{ event.date }}</small>
                     </div>
-                    <p class="mb-1">{{ event.data }}</p>
-                    <p class="mb-1">{{ event.place }}</p>
+                    <p class="mb-1"><strong>Opis:</strong> {{ event.data }}</p>
+                    <p class="mb-1"><strong>Adres:</strong> {{ event.place }}</p>
+                    <p class="mb-1"><strong>Organizator:</strong> {{ event.user.name }}</p>
+                    <p class="mb-1"><strong>E-mail organizatora:</strong> {{ event.user.email }}</p>
                     <div class="btn-group" role="group">
                         <form method="POST" action="{{ url_for('views.update_event_status', event_id=event.id, action='accept') }}">
+                            <input type="hidden" name="event_id" value="{{ event.id }}">
                             <button type="submit" class="btn btn-success">Zatwierdź</button>
                         </form>
                         <form method="POST" action="{{ url_for('views.update_event_status', event_id=event.id, action='reject') }}">
+                            <input type="hidden" name="event_id" value="{{ event.id }}">
                             <button type="submit" class="btn btn-danger">Odrzuć</button>
                         </form>
                     </div>
