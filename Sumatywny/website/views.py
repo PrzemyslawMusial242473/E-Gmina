@@ -1,7 +1,7 @@
 
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for,send_from_directory
 from flask_login import login_required, current_user
-from .models import Event,Payment, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste,Voucher,stores
+from .models import Event,Payment, MapMarker, User, Message, Report, Survey, Answer, Question, CATEGORIES, segregate_waste, Voucher, stores, SurveyResponse
 from datetime import datetime, date
 from . import db
 from . import mail
@@ -625,20 +625,35 @@ def admin_reports():
     return render_template('admin_reports.html', user=current_user, pending_reports=pending_reports)
 
 
-@views.route('/surveys', methods=['GET'])
+@views.route('/surveys', methods=['GET', 'POST'])
 @login_required
 def surveys():
-    surveys = Survey.query.filter_by(status='active').all()
-    return render_template('surveys.html', surveys=surveys,user=current_user)
+    surveys = Survey.query.filter_by(approved=True, status='active').all()
+    if request.method == 'POST':
+        survey_id = request.form.get('survey_id')
+        action = request.form.get('action')
+        survey = Survey.query.get(survey_id)
+        if action == 'accept':
+            survey.approved = True
+        elif action == 'reject':
+            survey.approved = False
+        db.session.commit()
+        return redirect(url_for('views.surveys'))
+
+    return render_template('surveys.html', surveys=surveys, user=current_user)
+
 
 @views.route('/survey/<int:survey_id>', methods=['GET', 'POST'])
 @login_required
 def fill_survey(survey_id):
     survey = Survey.query.get_or_404(survey_id)
     if request.method == 'POST':
+        response = SurveyResponse(survey_id=survey.id, user_id=current_user.id)
+        db.session.add(response)
+        db.session.commit()
         for question in survey.questions:
             answer_text = request.form.get(f'question_{question.id}')
-            answer = Answer(text=answer_text, question_id=question.id, user_id=current_user.id)
+            answer = Answer(text=answer_text, question_id=question.id, response_id=response.id, user_id=current_user.id)
             db.session.add(answer)
         db.session.commit()
         survey.status = "completed"
@@ -649,24 +664,33 @@ def fill_survey(survey_id):
         return redirect(url_for('views.surveys'))
     return render_template('survey.html', survey=survey, user=current_user)
 
+
 @views.route('/create-survey', methods=['GET', 'POST'])
 @login_required
 def create_survey():
     if request.method == 'POST':
         title = request.form.get('title')
-        survey = Survey(title=title)
         questions = request.form.getlist('questions[]')
-        db.session.add(survey)
-        db.session.commit()
+
+        if not title or not questions:
+            flash('Title and questions are required!', 'danger')
+            return redirect(url_for('views.create_survey'))
+
+        # Tworzenie nowej ankiety
+        survey = Survey(title=title, user_id=current_user.id)
+
+        # Dodawanie pytań do ankiety
         for question_text in questions:
-            if question_text.strip():  
-                question = Question(text=question_text, survey_id=survey.id)
+            if question_text:
+                question = Question(text=question_text, survey=survey)
                 db.session.add(question)
 
-        db.session.commit()  
-        flash('Ankieta została utworzona!', 'success')
-        return redirect(url_for('views.create_survey'))
-    return render_template('create_survey.html',user=current_user)
+        db.session.add(survey)
+        db.session.commit()
+        flash('Survey created successfully!', 'success')
+        return redirect(url_for('views.surveys'))
+
+    return render_template('create_survey.html')
 
 @views.route('/segregate', methods=['GET', 'POST'])
 @login_required
@@ -908,3 +932,49 @@ def download_sample():
         flash('Brak dostępu')
         return redirect(url_for('views.home'))
     return send_from_directory(directory='.', path='sample.xlsx', as_attachment=True)
+
+
+@views.route('/approve-surveys', methods=['GET', 'POST'])
+@login_required
+def approve_surveys():
+    if request.method == 'POST':
+        survey_id = request.form.get('survey_id')
+        survey = Survey.query.get_or_404(survey_id)
+        action = request.form.get('action')
+        if action == 'approve':
+            survey.approved = True
+            db.session.commit()
+            flash('Ankieta zatwierdzona!', 'success')
+        elif action == 'reject':
+            db.session.delete(survey)
+            db.session.commit()
+            flash('Ankieta odrzucona!', 'danger')
+        return redirect(url_for('views.approve_surveys'))
+
+    surveys = Survey.query.filter_by(approved=False).all()
+    return render_template('approve_surveys.html', surveys=surveys)
+
+
+@views.route('/survey_results', methods=['GET'])
+@login_required
+def survey_results():
+    if current_user.role == 'admin':
+        surveys = Survey.query.all()
+    else:
+        surveys = Survey.query.filter_by(user_id=current_user.id).all()
+
+    results = []
+    for survey in surveys:
+        survey_data = {
+            'title': survey.title,
+            'questions': []
+        }
+        for question in survey.questions:
+            question_data = {
+                'text': question.text,
+                'answers': [answer.text for answer in question.answers]
+            }
+            survey_data['questions'].append(question_data)
+        results.append(survey_data)
+
+    return render_template('survey_results.html', surveys=results)

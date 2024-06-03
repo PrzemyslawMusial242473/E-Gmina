@@ -62,8 +62,8 @@
                 {% if current_user.is_authenticated %}
                     {% if current_user.role == 'user'%}
                         <a class="nav-item nav-link" id="platnosc-button" href='/payments'>Płatność</a>
-                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymiana punktów </a>
-                        <a class="nav-item nav-link" id="odpady-button" href='/segregate'>Segregacja </a>
+                        <a class="nav-item nav-link" id="wymiana-button" href='/exchange'>Wymiana punktów</a>
+                        <a class="nav-item nav-link" id="odpady-button" href='/segregate'>Segregacja</a>
                         <a class="nav-item nav-link" id="report-button" href='/report'>Naruszenia środowiskowe</a>
                         <a class="nav-item nav-link" id="ankiety-button" href='/surveys'>Ankiety</a>
                         <a class="nav-item nav-link" id="friends-button" href="/invite-friends">Znajomi</a>
@@ -84,10 +84,14 @@
                         <a class="nav-item nav-link" id="events" href="/events">Dodaj wydarzenia</a>
                         <a class="nav-item nav-link" id="maps" href="/maps">Ważne miejsca</a>
                         <a class="nav-item nav-link" id="admin_users" href="/create-survey">Ankiety</a>
+                        <a class="nav-link nav-link" id="approve-surveys" href="/approve-surveys">Weryfikuj ankiety</a>
+                        <a class="nav-link nav-link" id="survey-results" href="/survey_results">Wyniki ankiet</a>
                     {% endif %}
                     {% if current_user.role == 'organisation' %}
                         <a class="nav-item nav-link" id="events" href="/events">Dodaj wydarzenia</a>
                         <a class="nav-item nav-link" id="surveys" href="/create-survey">Ankiety</a>
+                        <a class="nav-link nav-link" href="/survey_results">Odpowiedzi na ankiety</a>
+                    </li>
                     {% endif %}
                 {% else %}
                     <a class="nav-item nav-link" id="login" href="/login">Zaloguj</a>
@@ -95,7 +99,7 @@
                 {% endif %}
             </div>
             <div class="navbar-nav ml-auto"> <!-- Dodanie klasy ml-auto, aby opcja "Logout" była na prawym kraju -->
-                {% if user.is_authenticated %}
+                {% if current_user.is_authenticated %}
                     {% if current_user.role != 'admin' %}
                         <a class="nav-item nav-link" id="user_info" href="/user_info">Konto</a>
                     {% endif %}
