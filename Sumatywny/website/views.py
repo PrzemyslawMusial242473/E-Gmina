@@ -100,7 +100,7 @@ def delete_event():
     eventId = event['eventId']
     event = Event.query.get(eventId)
     if event:
-        if event.user_id == current_user.id:
+        if event.user_id == current_user.id or current_user.role == "admin":
             db.session.delete(event)
             db.session.commit()
 
@@ -158,10 +158,41 @@ def delete_marker(marker_id):
         flash('Znacznik nie został znaleziony', category='error')
     return redirect(url_for('views.maps'))
 
+
+@views.route('/edit-marker', methods=['POST'])
+def edit_marker():
+    marker_id = request.form['editMarkerId']
+    new_address = request.form['editAddress']
+    new_description = request.form['editDescription']
+    api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'
+    geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={new_address}&key={api_key}'
+
+    response = requests.get(geocoding_url)
+    data = response.json()
+
+    marker = MapMarker.query.get(marker_id)
+    if data['status'] == 'OK':
+        lat = data['results'][0]['geometry']['location']['lat']
+        lng = data['results'][0]['geometry']['location']['lng']
+
+        new_marker = MapMarker(lat=lat, lng=lng, address=new_address, description=new_description, user_id=current_user.id)
+        db.session.delete(marker)
+        db.session.add(new_marker)
+        db.session.commit()
+        flash('Znacznik zaktualizowany pomyślnie', category='success')
+    else:
+        flash('Nie znaleziono znacznika do edycji', category='error')
+
+    return redirect(url_for('views.maps'))
+
+
 @views.route('/events', methods=['GET', 'POST'])
 @login_required
 def event():
-    user_events = Event.query.filter(Event.user_id == current_user.id, Event.date >= datetime.now()).order_by(Event.date.asc()).all()
+    if current_user.role=="admin":
+        user_events = Event.query.order_by(Event.date.asc()).all()
+    else:
+        user_events = Event.query.filter(Event.user_id == current_user.id, Event.date >= datetime.now()).order_by(Event.date.asc()).all()
     if request.method == 'POST':
         data = request.form.get('data')
         date = request.form.get('date')
@@ -182,14 +213,17 @@ def event():
             data = response.json()
 
             if data['status'] == 'OK':
-                # Zapisujemy wydarzenie do bazy danych tylko, jeśli adres jest poprawny
+                if current_user.role =="admin":
+                    status_state = "accepted"
+                else:
+                    status_state = "pending"
                 new_event = Event(
-                    data=request.form.get('data'),  # Tylko dane tekstowe z formularza
+                    data=request.form.get('data'),  
                     date=date,
                     place=place,
                     name=name,
                     user_id=current_user.id,
-                    status='pending'
+                    status=status_state
                 )
                 db.session.add(new_event)
                 db.session.commit()
@@ -480,7 +514,33 @@ def report():
         else:
             flash('Wszystkie pola muszą być wypełnione', category='error')
 
-    return render_template('report.html', user=current_user, user_reports=user_reports)
+    all_hidden = all(report.hidden for report in user_reports)
+    return render_template('report.html', user=current_user, user_reports=user_reports, all_hidden=all_hidden)
+
+
+@views.route("/report/delete/<int:report_id>", methods=['POST'])
+@login_required
+def delete_report(report_id):
+    report_to_delete = Report.query.get_or_404(report_id)
+    if report_to_delete.user_id == current_user.id:
+        db.session.delete(report_to_delete)
+        db.session.commit()
+        flash('Zgłoszenie zostało usunięte.', category='success')
+    else:
+        flash('Nie masz uprawnień do usunięcia tego zgłoszenia.', category='error')
+    return redirect(url_for('views.report'))
+
+@views.route("/report/hide/<int:report_id>", methods=['POST'])
+@login_required
+def hide_report(report_id):
+    report_to_hide = Report.query.get_or_404(report_id)
+    if report_to_hide.user_id == current_user.id:
+        report_to_hide.hidden = True
+        db.session.commit()
+        flash('Zgłoszenie zostało ukryte.', category='success')
+    else:
+        flash('Nie masz uprawnień do ukrycia tego zgłoszenia.', category='error')
+    return redirect(url_for('views.report'))
 
 
 @views.route('/update_user_status/<int:user_id>/<string:action>', methods=['POST'])
@@ -633,12 +693,21 @@ def add_loyalty_points(user, points):
 @login_required
 def exchange_points():
     available_stores = stores
+
     if request.method == 'POST':
-        if current_user.role == "admin" and 'new_store_name' in request.form:
-            new_store_name = request.form.get('new_store_name')
-            new_store_cost = int(request.form.get('new_store_cost'))
-            stores[f'store{len(stores) + 1}'] = {'name': new_store_name, 'cost': new_store_cost}
-            flash('Nowy sklep został dodany!', 'success')
+        if current_user.role == "admin":
+            if 'new_store_name' in request.form:
+                new_store_name = request.form.get('new_store_name')
+                new_store_cost = int(request.form.get('new_store_cost'))
+                stores[f'store{len(stores) + 1}'] = {'name': new_store_name, 'cost': new_store_cost}
+                flash('Nowy sklep został dodany!', 'success')
+            elif 'delete_store' in request.form:
+                store_key = request.form.get('delete_store')
+                if store_key in stores:
+                    del stores[store_key]
+                    flash('Sklep został usunięty!', 'success')
+                else:
+                    flash('Sklep nie istnieje.', 'danger')
         else:
             store_key = request.form.get('store')
             store = available_stores.get(store_key)

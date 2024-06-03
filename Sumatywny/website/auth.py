@@ -1,11 +1,12 @@
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for,current_app
-from .models import User,ALLOWED_EXTENSIONS,UPLOAD_FOLDER
-from . import db
+from flask import Blueprint, render_template, request, flash, redirect, url_for,send_file,make_response
+from .models import User,ALLOWED_EXTENSIONS
 from flask_login import login_user, login_required, logout_user, current_user
-import hashlib,os
+import hashlib
 from werkzeug.utils import secure_filename
 from .views import send_confirmation_email
+from io import BytesIO
+from . import db
 
 auth = Blueprint('auth', __name__)
 
@@ -99,14 +100,9 @@ def sign_up_user():
         elif len(password1) < 7:
             flash('Hasło musi się składać z 7 znaków.', category='error')
         elif document_image and allowed_file(document_image.filename):
-            if not os.path.exists(UPLOAD_FOLDER):
-                os.makedirs(UPLOAD_FOLDER)
-            
-            filename = secure_filename(document_image.filename)
-            document_image_path = os.path.join(UPLOAD_FOLDER, filename)
-            document_image.save(document_image_path)
+            document_image_data = document_image.read()
             new_user = User(email=email, username=username, name=name, surname=surname, address=address,
-                            uid=pesel, password=hash_password(password1), document_image=filename)
+                            uid=pesel, password=hash_password(password1), document_image=document_image_data)
             db.session.add(new_user)
             db.session.commit()
             send_confirmation_email(new_user)
@@ -158,3 +154,11 @@ def sign_up_org():
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@auth.route('/document-image/<int:user_id>')
+def get_document_image(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.document_image:
+        return send_file(BytesIO(user.document_image), mimetype='image/jpeg')
+    else:
+        return make_response("No image found", 404)
