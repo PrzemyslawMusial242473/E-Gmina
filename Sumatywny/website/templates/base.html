@@ -8,57 +8,41 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" crossorigin="anonymous">
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
         body {
-            background-image: url('{{ url_for('static', filename='tlo.png') }}');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: center;
-            color: #000000;
-            display: flex;
-            flex-direction: column;
+            background-image: url('{{ url_for('static', filename='tlo.png') }}'); /* Ustawienie tła z pliku tlo.png */
+            background-size: cover; /* Dopasowanie tła do rozmiaru strony */
+            background-repeat: no-repeat; /* Brak powtarzania tła */
+            background-attachment: fixed; /* Tło pozostaje w miejscu przy przewijaniu */
+            background-position: center; /* Wyśrodkowanie tła */
+            color: #000000; /* Ciemny kolor tekstu */
         }
         .navbar {
-            background-color: #2c3e50 !important;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #2c3e50 !important; /* Granatowy kolor paska nawigacji */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Cień */
         }
         .navbar-brand, .navbar-nav .nav-link {
-            color: #fff !important;
+            color: #fff !important; /* Biały kolor tekstu dla marki i linków nawigacyjnych */
             margin-right: 20px;
         }
         .navbar-brand:hover, .navbar-nav .nav-link:hover {
-            color: #dcdde1 !important;
+            color: #dcdde1 !important; /* Biały kolor tekstu dla marki i linków nawigacyjnych po najechaniu myszką */
         }
         .navbar-toggler {
-            border-color: #fff !important;
+            border-color: #fff !important; /* Biały kolor obramowania przycisku rozwijania */
         }
         .navbar-toggler-icon {
-            background-image: url('static/menu.jpg');
-            background-size: cover;
+            background-image: url('static/menu.jpg'); /* Ustawienie obrazu jako tła */
+            background-size: cover; /* Dopasowanie obrazu do rozmiaru okna przeglądarki */
         }
         .container {
-            background-color: rgba(236, 240, 241, 0);
-            border-radius: 5px;
-            max-width: 100%;
-            margin: 20px auto;
-            padding: 0 15px;
-            flex: 1;
+            background-color: rgba(236, 240, 241, 0); /* Jasnoszare tło kontenera z przezroczystością */
+            border-radius: 5px; /* Zaokrąglenie rogów kontenera */
+            max-width: 100%; /* Zwiększenie maksymalnej szerokości kontenera */
+            margin: 20px auto; /* Ustawienie marginesu poziomego na 20px z lewej i prawej strony */
+            padding: 0 15px; /* Dodanie wewnętrznego wypełnienia poziomego */
         }
         .alert {
-            margin-bottom: 20px;
-        }
-        .footer {
-            background-color: #2c3e50;
-            color: #ffffff;
-            text-align: center;
-            padding: 10px 0;
-            width: 100%;
-            bottom: 0;
+            margin-bottom: 20px; /* Margines od dolnej krawędzi alertu */
         }
     </style>
 </head>
@@ -128,11 +112,6 @@
         {% endif %} {% endfor %} {% endif %} {% endwith %}
 
     <div class="container">{% block content %} {% endblock %}</div>
-
-    <div class="footer">
-        <p>Kontakt: <a href="mailto:egminakonstantynow@gmail.com" style="color: #ffffff;">egminakonstantynow@gmail.com</a></p>
-        <p>Gmina Konstantynów Łódzki, Zgierska 2, 95-050 Konstantynów Łódzki</p>
-    </div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7W3UibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
