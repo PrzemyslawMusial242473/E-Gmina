@@ -2,126 +2,123 @@
 {% block title %}Wydarzenia{% endblock %}
 {% block content %}
 <style>
-     .list-group-item{
+     .list-group-item {
         background-color: #b4dfe5;
     }
-        .container1, .container2 {
-            background-color: #f8f9fa; /* Jasny szary */
-            color: #333333; /* Ciemnoszary */
-            text-align: center;
-            padding: 20px;
-            border-radius: 15px;
-            width: 100%;
-            margin-top: 2%;
-        }
-        .container_event {
-            position: relative;
-            background-color: #b4dfe5; /* Pastelowy niebieski */
-            color: #333333; /* Ciemnoszary */
-            justify-content: center;
-            align-items: center;
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 20px;
-        }
-        input[type="text"],
-        input[type="datetime-local"],
-        button {
-            padding: 10px;
-            margin: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 90%;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #328685; /* Niebieski */
-            color: #ffffff; /* Biały */
-            cursor: pointer;
-            width:auto;
-        }
+    .container1, .container2 {
+        background-color: #f8f9fa;
+        color: #333333;
+        text-align: center;
+        padding: 20px;
+        border-radius: 15px;
+        width: 100%;
+        margin-top: 2%;
+    }
+    .container_event {
+        position: relative;
+        background-color: #b4dfe5;
+        color: #333333;
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top: 20px;
+    }
+    input[type="text"],
+    input[type="datetime-local"],
+    button {
+        padding: 10px;
+        margin: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 90%;
+        box-sizing: border-box;
+    }
+    button {
+        background-color: #328685;
+        color: #ffffff;
+        cursor: pointer;
+        width: auto;
+    }
     .banner {
-    width: 100%; /* Rozciągnięcie na szerokość strony */
-    background-image: url('{{ url_for('static', filename='wydarz.png') }}'); /* Ścieżka do twojego pliku PNG */
-    background-size: cover; /* Dopasowanie rozmiaru obrazka */
-    background-position: center; /* Wycentrowanie obrazka */
-    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
-    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
-}
-
+        width: 100%;
+        background-image: url('{{ url_for('static', filename='wydarz.png') }}');
+        background-size: cover;
+        background-position: center;
+        height: 400px;
+        border-radius: 15px;
+    }
 </style>
 <div class="banner"></div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="container1">
-                    <h1 align="center">Dodaj wydarzenie</h1>
-                    <div class="container_event">
-                        <body>
-                            <form method="POST">
-                                <label for="name">Nazwa:</label><br>
-                                <input type="text" id="name" name="name" required><br>
-
-                                <label for="data">Opis:</label><br>
-                                <input type="text" id="data" name="data" required><br>
-
-                                <label for="date">Data:</label><br>
-                                <input type="datetime-local" id="date" name="date" required><br>
-
-                                <label for="place">Adres:</label><br>
-                                <input type="text" id="place" name="place" required><br>
-
-                                <button type="submit">Dodaj wydarzenie</button>
-                            </form>
-                        </body>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="container2">
-                 <h1 align="center">Moje wydarzenia</h1>
-                    <div class="container_event">
-                        <ul class="list-group list-group-flush" id="Events">
-                            {% for event in user_events %}
-                                <li class="list-group-item">
-                                    {% if event.status == 'rejected' %}
-                                        <p>Twoje wydarzenie "{{ event.name }}" zostało odrzucone.</p>
-                                        <button type="button"  onclick="deleteEvent({{ event.id }})" >Usuń</button>
-                                    {% else %}
-                                        <strong>Nazwa:</strong> {{ event.name }}<br>
-                                        <strong>Opis:</strong> {{ event.data }}<br>
-                                        <strong>Data:</strong> {{ event.date }}<br>
-                                        <strong>Adres:</strong> {{ event.place }}<br>
-                                        <div id="map-{{ event.id }}" style="height: 200px;"></div>
-                                        <button type="button"  onclick="deleteEvent({{ event.id }})" >Usuń</button>
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="container1">
+            <h1 align="center">Dodaj wydarzenie</h1>
+            <div class="container_event">
+                <form method="POST">
+                    <label for="name">Nazwa:</label><br>
+                    <input type="text" id="name" name="name" required><br>
+                    
+                    <label for="data">Opis:</label><br>
+                    <input type="text" id="data" name="data" required><br>
+                    
+                    <label for="date">Data:</label><br>
+                    <input type="datetime-local" id="date" name="date" required><br>
+                    
+                    <label for="place">Adres:</label><br>
+                    <input type="text" id="place" name="place" required><br>
+                    
+                    <button type="submit">Dodaj wydarzenie</button>
+                </form>
             </div>
         </div>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M"></script>
-    <script>
-        {% for event in user_events %}
-            var map{{ event.id }} = new google.maps.Map(document.getElementById('map-{{ event.id }}'), {
-                center: { lat: -34.397, lng: 150.644 },
-                zoom: 15
-            });
+    </div>
+    <div class="col-md-6">
+        <div class="container2">
+            <h1 align="center">{% if current_user.role=="admin" %}Wszystkie wydarzenia{% else %}Moje wydarzenia{% endif %}</h1>
+            <div class="container_event">
+                <ul class="list-group list-group-flush" id="Events">
+                    {% if user_events %}
+                        {% for event in user_events %}
+                            <li class="list-group-item">
+                                <strong>Nazwa:</strong> {{ event.name }}<br>
+                                <strong>Opis:</strong> {{ event.data }}<br>
+                                <strong>Data:</strong> {{ event.date }}<br>
+                                <strong>Adres:</strong> {{ event.place }}<br>
+                                <strong>Status:</strong> {{ event.status }}<br>
+                                <div id="map-{{ event.id }}" style="height: 200px;"></div>
+                                <button type="button" onclick="deleteEvent({{ event.id }})">Usuń</button>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <p>Brak wydarzeń do wyświetlenia.</p>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M"></script>
+<script>
+    {% for event in user_events %}
+        var map{{ event.id }} = new google.maps.Map(document.getElementById('map-{{ event.id }}'), {
+            center: { lat: -34.397, lng: 150.644 },
+            zoom: 15
+        });
 
-            var geocoder{{ event.id }} = new google.maps.Geocoder();
-            var address{{ event.id }} = "{{ event.place }}";
-            geocoder{{ event.id }}.geocode({ 'address': address{{ event.id }} }, function (results, status) {
-                if (status === 'OK') {
-                    map{{ event.id }}.setCenter(results[0].geometry.location);
-                    var marker{{ event.id }} = new google.maps.Marker({
-                        map: map{{ event.id }},
-                        position: results[0].geometry.location
-                    });
-                } else {
-                    console.error('Geocode was not successful for the following reason: ' + status);
-                }
-            });
-        {% endfor %}
-    </script>
+        var geocoder{{ event.id }} = new google.maps.Geocoder();
+        var address{{ event.id }} = "{{ event.place }}";
+        geocoder{{ event.id }}.geocode({ 'address': address{{ event.id }} }, function (results, status) {
+            if (status === 'OK') {
+                map{{ event.id }}.setCenter(results[0].geometry.location);
+                var marker{{ event.id }} = new google.maps.Marker({
+                    map: map{{ event.id }},
+                    position: results[0].geometry.location
+                });
+            } else {
+                console.error('Geocode was not successful for the following reason: ' + status);
+            }
+        });
+    {% endfor %}
+</script>
 {% endblock %}

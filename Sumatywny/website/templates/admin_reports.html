@@ -54,9 +54,10 @@
 </style>
     <div class="banner"></div>
 <div id="container">
-  <h1 class="text-center">Weryfikacja naruszeń ekologicznych</h1>
+  <h1 class="text-center">Weryfikacja naruszeń środowiskowych</h1>
   <div class="container_create_survey">
     <ul class="list-group list-group-flush">
+    {% if pending_reports%}
       {% for report in pending_reports %}
         <li class="list-group-item container3">
           <div class="d-flex w-100 justify-content-between">
@@ -75,6 +76,9 @@
           </div>
         </li>
       {% endfor %}
+    {% else %}
+        <p>Brak pozycji do wyświetlenia.</p>
+    {% endif %}
     </ul>
   </div>
 </div>

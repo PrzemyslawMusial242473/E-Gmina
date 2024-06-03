@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Wyniki Ankiety{% endblock %}
+{% block content %}
+<style>
+    .container {
+        background-color: rgb(250, 250, 250, 1);
+        color: #000000;
+        text-align: center;
+        padding: 20px;
+        border-radius: 15px;
+        width: 100%;
+        margin-top: 1%;
+        min-height: 200px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+    th {
+        background-color: #b4dfe5;
+    }
+</style>
+<div class="container">
+    <h1>Wyniki Ankiet</h1>
+    {% for survey in surveys %}
+        <h2>{{ survey.title }}</h2>
+        {% for question in survey.questions %}
+            <h3>{{ question.text }}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Odpowiedzi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for answer in question.answers %}
+                        <tr>
+                            <td>{{ answer }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% endblock %}

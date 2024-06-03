@@ -1,116 +1,116 @@
 {% extends "base.html" %}
 {% block title %}Stwórz nową ankietę{% endblock %}
 {% block content %}
-    <style>
+<style>
     .banner {
-    width: 100%; /* Rozciągnięcie na szerokość strony */
-    background-image: url('{{ url_for('static', filename='ankiety.png') }}'); /* Ścieżka do twojego pliku PNG */
-    background-size: cover; /* Dopasowanie rozmiaru obrazka */
-    background-position: center; /* Wycentrowanie obrazka */
-    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
-    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
-}
-        #container {
-            background-color: rgb(250,250,250,1);
-            color: #000000; /* Ciemnoszary */
-            text-align: center;
-            padding: 20px;
-            border-radius: 15px;
-            width: 100%;
-            margin: 1% auto; /* Zmieniono margin-top na margin, aby centrować */
-        }
-        .container_create_survey {
-            position: relative;
-            background-color: #b4dfe5;;
-            color: #000000; /* Ciemnoszary */
-            justify-content: center;
-            align-items: center;
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #000000;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #000000;
-        }
-        input[type="text"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #328685FF;
-            color: #ffffff;
-            padding: 10px 20px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #328685;
-        }
-    </style>
-    <script>
-        function addQuestionField() {
-            const questionList = document.getElementById('question-list');
-            const newQuestion = document.createElement('div');
-            newQuestion.classList.add('question');
-            const questionCount = document.querySelectorAll('.question').length + 1;
-            newQuestion.innerHTML = `
-                <label for="question_${questionCount}">Pytanie ${questionCount}:</label>
-                <input type="text" id="question_${questionCount}" name="questions[]" required>
-                <button type="button" onclick="removeQuestionField(this)">Usuń</button>
-            `;
-            questionList.appendChild(newQuestion);
-            updateQuestionLabels();
-        }
+        width: 100%;
+        background-image: url('{{ url_for('static', filename='ankiety.png') }}');
+        background-size: cover;
+        background-position: center;
+        height: 400px;
+        border-radius: 15px;
+    }
+    #container {
+        background-color: rgb(250,250,250,1);
+        color: #000000;
+        text-align: center;
+        padding: 20px;
+        border-radius: 15px;
+        width: 100%;
+        margin: 1% auto;
+    }
+    .container_create_survey {
+        position: relative;
+        background-color: #b4dfe5;
+        color: #000000;
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top: 20px;
+    }
+    h1 {
+        text-align: center;
+        color: #000000;
+    }
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: #000000;
+    }
+    input[type="text"],
+    textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    button {
+        background-color: #328685FF;
+        color: #ffffff;
+        padding: 10px 20px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #328685;
+    }
+</style>
+<script>
+    function addQuestionField() {
+        const questionList = document.getElementById('question-list');
+        const newQuestion = document.createElement('div');
+        newQuestion.classList.add('question');
+        const questionCount = document.querySelectorAll('.question').length + 1;
+        newQuestion.innerHTML = `
+            <label for="question_${questionCount}">Pytanie ${questionCount}:</label>
+            <input type="text" id="question_${questionCount}" name="questions[]" required>
+            <button type="button" onclick="removeQuestionField(this)">Usuń</button>
+        `;
+        questionList.appendChild(newQuestion);
+        updateQuestionLabels();
+    }
 
-        function removeQuestionField(button) {
-            const questionList = document.getElementById('question-list');
-            questionList.removeChild(button.parentElement);
-            updateQuestionLabels();
-        }
+    function removeQuestionField(button) {
+        const questionList = document.getElementById('question-list');
+        questionList.removeChild(button.parentElement);
+        updateQuestionLabels();
+    }
 
-        function updateQuestionLabels() {
-            const questions = document.querySelectorAll('.question');
-            questions.forEach((question, index) => {
-                const label = question.querySelector('label');
-                const input = question.querySelector('input');
-                label.setAttribute('for', `question_${index + 1}`);
-                label.textContent = `Pytanie ${index + 1}:`;
-                input.setAttribute('id', `question_${index + 1}`);
-            });
-        }
-    </script>
-    <div class="banner"></div>
+    function updateQuestionLabels() {
+        const questions = document.querySelectorAll('.question');
+        questions.forEach((question, index) => {
+            const label = question.querySelector('label');
+            const input = question.querySelector('input');
+            label.setAttribute('for', `question_${index + 1}`);
+            label.textContent = `Pytanie ${index + 1}:`;
+            input.setAttribute('id', `question_${index + 1}`);
+        });
+    }
+</script>
+<div class="banner"></div>
 <div id="container">
     <h1>Stwórz nową ankietę</h1>
     <div class="container_create_survey">
-    <form method="POST">
-        <div>
-            <label for="title">Nazwa ankiety:</label>
-            <input type="text" id="title" name="title" required>
-        </div>
-        <div id="question-list">
-            <div class="question">
-                <label for="question_1">Pytanie 1:</label>
-                <input type="text" id="question_1" name="questions[]" required>
-                <button type="button" onclick="removeQuestionField(this)">Usuń</button>
+        <form method="POST">
+            <div>
+                <label for="title">Nazwa ankiety:</label>
+                <input type="text" id="title" name="title" required>
             </div>
-        </div>
-        <button type="button" onclick="addQuestionField()">Dodaj pytanie</button>
-        <button type="submit">Stwórz ankietę</button>
-    </form>
+            <div id="question-list">
+                <div class="question">
+                    <label for="question_1">Pytanie 1:</label>
+                    <input type="text" id="question_1" name="questions[]" required>
+                    <button type="button" onclick="removeQuestionField(this)">Usuń</button>
+                </div>
+            </div>
+            <button type="button" onclick="addQuestionField()">Dodaj pytanie</button>
+            <button type="submit">Stwórz ankietę</button>
+        </form>
     </div>
 </div>
 {% endblock %}

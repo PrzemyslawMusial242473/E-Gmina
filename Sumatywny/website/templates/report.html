@@ -77,7 +77,9 @@
                     <div class="container_report">
                         <h1 align="center">Moje zgłoszenia</h1>
                         <ul class="list-group list-group-flush" id="Reports">
+                        {% if user_reports %}
                             {% for report in user_reports %}
+                                {% if not report.hidden %}
                                 <li class="list-group-item">
                                     <strong>Opis:</strong> {{ report.data }}<br>
                                     <strong>Data:</strong> {{ report.date }}<br>
@@ -85,13 +87,27 @@
                                     <div id="map-{{ report.id }}" style="height: 155px;"></div>
                                     {% if report.status == 'rejected' %}
                                         <p>Twoje zgłoszenie zostało odrzucone.</p>
+                                        <form action="{{ url_for('views.hide_report', report_id=report.id) }}" method="POST">
+                                            <button type="submit">Ukryj zgłoszenie</button>
+                                        </form>
                                     {% elif report.status == 'accepted' %}
                                         <p>Twoje zgłoszenie zostało zatwierdzone.</p>
+                                        <form action="{{ url_for('views.hide_report', report_id=report.id) }}" method="POST">
+                                            <button type="submit">Ukryj zgłoszenie</button>
+                                        </form>
                                     {%else%}
                                         <p>Twoje zgłoszenie czeka na rozpatrzenie.</p>
+                                            <form action="{{ url_for('views.delete_report', report_id=report.id) }}" method="POST">
+                                                <button type="submit">Cofnij zgłoszenie</button>
+                                            </form>
                                     {% endif %}
                                 </li>
+                                {% endif %}
                             {% endfor %}
+                        {% endif %}
+                        {% if not user_reports or all_hidden %}
+                            <li class="list-group-item">Nie dodano nowego zgłoszenia.</li>
+                        {% endif %}
                         </ul>
                     </div>
                 </div>

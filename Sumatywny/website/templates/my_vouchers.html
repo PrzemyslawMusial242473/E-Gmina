@@ -106,11 +106,15 @@ button:hover {
 <div id="container">
     <h1>Moje bony</h1>
     <div class="box">
+    {% if vouchers %}
         {% for voucher in vouchers %}
         <div class="voucher-item">
             Sklep: {{ voucher.store_name }} - Kod: {{ voucher.code }} - Data wydania: {{ voucher.creation_time }}
         </div>
         {% endfor %}
+    {% else %}
+        <p>Nie masz żadnych bonów.</p>
+    {% endif %}
         <br>
         <a class="btn btn-info" href="{{ url_for('views.exchange_points') }}">Wróć</a>
     </div>

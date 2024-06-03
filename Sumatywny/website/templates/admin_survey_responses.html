@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}All Survey Responses{% endblock %}
+{% block content %}
+<h1>All Survey Responses</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Survey ID</th>
+            <th>Response ID</th>
+            <th>Responses</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for response in responses %}
+        <tr>
+            <td>{{ response.survey_id }}</td>
+            <td>{{ response.id }}</td>
+            <td>{{ response.answers }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

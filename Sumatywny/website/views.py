@@ -1,7 +1,7 @@
 
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for,send_from_directory
 from flask_login import login_required, current_user
-from .models import Event,Payment, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste,Voucher,stores
+from .models import Event,Payment, MapMarker, User, Message, Report, Survey, Answer, Question, CATEGORIES, segregate_waste, Voucher, stores, SurveyResponse
 from datetime import datetime, date
 from . import db
 from . import mail
@@ -10,6 +10,7 @@ import json,calendar,stripe,random,string,requests,uuid
 import os
 from werkzeug.utils import secure_filename
 import pandas as pd
+from openpyxl import load_workbook
 
 views = Blueprint('views', __name__)
 
@@ -41,7 +42,6 @@ def generate_calendar(year, month, month_events):
             current_week.append((day, events_for_day))
         weeks.append(current_week)
     return weeks
-
 
 @views.route('/', methods=['GET', 'POST'])
 def home():
@@ -79,7 +79,8 @@ def home():
     month_events = get_month_events(year, month)
     accepted_month_events = [event for event in month_events if event.status == 'accepted']
     weeks = generate_calendar(year, month, accepted_month_events)
-    accepted_events = Event.query.filter_by(status='accepted').all()
+    # Pobierz tylko przyszłe zaakceptowane wydarzenia i sortuj je chronologicznie
+    accepted_events = Event.query.filter(Event.date >= datetime.now(), Event.status == 'accepted').order_by(Event.date.asc()).all()
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
 
     # Pobierz nazwę aktualnego miesiąca po polsku
@@ -92,13 +93,14 @@ def home():
                            user=current_user, accepted_events=accepted_events, markers=markers)
 
 
+
 @views.route('/delete-event', methods=['POST'])
 def delete_event():  
     event = json.loads(request.data)
     eventId = event['eventId']
     event = Event.query.get(eventId)
     if event:
-        if event.user_id == current_user.id:
+        if event.user_id == current_user.id or current_user.role == "admin":
             db.session.delete(event)
             db.session.commit()
 
@@ -156,31 +158,82 @@ def delete_marker(marker_id):
         flash('Znacznik nie został znaleziony', category='error')
     return redirect(url_for('views.maps'))
 
+
+@views.route('/edit-marker', methods=['POST'])
+def edit_marker():
+    marker_id = request.form['editMarkerId']
+    new_address = request.form['editAddress']
+    new_description = request.form['editDescription']
+    api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'
+    geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={new_address}&key={api_key}'
+
+    response = requests.get(geocoding_url)
+    data = response.json()
+
+    marker = MapMarker.query.get(marker_id)
+    if data['status'] == 'OK':
+        lat = data['results'][0]['geometry']['location']['lat']
+        lng = data['results'][0]['geometry']['location']['lng']
+
+        new_marker = MapMarker(lat=lat, lng=lng, address=new_address, description=new_description, user_id=current_user.id)
+        db.session.delete(marker)
+        db.session.add(new_marker)
+        db.session.commit()
+        flash('Znacznik zaktualizowany pomyślnie', category='success')
+    else:
+        flash('Nie znaleziono znacznika do edycji', category='error')
+
+    return redirect(url_for('views.maps'))
+
+
 @views.route('/events', methods=['GET', 'POST'])
 @login_required
 def event():
-    user_events = current_user.Events
+    if current_user.role=="admin":
+        user_events = Event.query.order_by(Event.date.asc()).all()
+    else:
+        user_events = Event.query.filter(Event.user_id == current_user.id, Event.date >= datetime.now()).order_by(Event.date.asc()).all()
     if request.method == 'POST':
         data = request.form.get('data')
         date = request.form.get('date')
         place = request.form.get('place')
         name = request.form.get('name')
-        
+
         if data and date and place and name:
             try:
                 date = datetime.strptime(date, '%Y-%m-%dT%H:%M')
             except ValueError:
-                return 'Zły format daty'
-            
-            new_event = Event(data=data, date=date, place=place, name=name, user_id=current_user.id, status='pending')
-            db.session.add(new_event) 
-            db.session.commit()  
-            flash('Wydarzenie zawnioskowano!', category='success')
-            
-            
-            return redirect(url_for('views.event'))  
-    
-    return render_template('events.html', user=current_user,user_events=user_events)
+                flash('Zły format daty', category='error')
+                return redirect(url_for('views.event'))
+
+            # Sprawdzamy poprawność adresu za pomocą API Google Maps
+            api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'
+            geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={place}&key={api_key}'
+            response = requests.get(geocoding_url)
+            data = response.json()
+
+            if data['status'] == 'OK':
+                if current_user.role =="admin":
+                    status_state = "accepted"
+                else:
+                    status_state = "pending"
+                new_event = Event(
+                    data=request.form.get('data'),  
+                    date=date,
+                    place=place,
+                    name=name,
+                    user_id=current_user.id,
+                    status=status_state
+                )
+                db.session.add(new_event)
+                db.session.commit()
+                flash('Wydarzenie zawnioskowano!', category='success')
+                return redirect(url_for('views.event'))
+            else:
+                flash('Nie znaleziono koordynatów dla podanego adresu', category='error')
+                return redirect(url_for('views.event'))
+
+    return render_template('events.html', user=current_user, user_events=user_events)
 
 
 @views.route('/invite-friends', methods=['GET', 'POST'])
@@ -398,33 +451,61 @@ def update_event_status(event_id, action):
 
     return redirect(url_for('views.admin_events'))
 
+
 @views.route('/admin-users', methods=['GET', 'POST'])
 @login_required
 def admin_users():
     if not current_user.is_authenticated or current_user.role != 'admin':
         flash('Nie masz uprawnień administratora do tej strony.', category='danger')
         return redirect(url_for('views.home'))
-    
+
     pending_users = User.query.filter_by(status='pending').all()
-    
+    accepted_users = User.query.filter_by(status='accepted').all()
+
+    # Wykluczenie konta administratora
+    accepted_users = [user for user in accepted_users if user.role != 'admin']
+
     if request.method == 'POST':
         user_id = request.form.get('user_id')
-        action = request.form.get('action')  
-        
-        if action == 'accept':
-            user = User.query.get(user_id)
-            user.status = 'accepted'
-            db.session.add(user)
-            db.session.commit()
-            flash('Stworzenie konta zostało zatwierdzone.', category='success')
-        elif action == 'reject':
-            user = User.query.get(user_id)
-            user.status = 'rejected'
-            flash('Stworzenie konta zostało odrzucone.', category='warning')
-        
+        action = request.form.get('action')
+
+        user = User.query.get(user_id)
+        if user:
+            if action == 'accept':
+                user.status = 'accepted'
+                db.session.add(user)
+                db.session.commit()
+                flash('Stworzenie konta zostało zatwierdzone.', category='success')
+            elif action == 'reject':
+                user.status = 'rejected'
+                db.session.commit()
+                flash('Stworzenie konta zostało odrzucone.', category='warning')
+
         return redirect(url_for('views.admin_users'))
 
-    return render_template('admin_users.html', user=current_user, pending_users=pending_users)
+    return render_template('admin_users.html', user=current_user, pending_users=pending_users,
+                           accepted_users=accepted_users)
+
+
+@views.route('/delete-user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej operacji.', category='danger')
+        return redirect(url_for('views.home'))
+
+    user = User.query.get(user_id)
+    if user:
+        if user.id == current_user.id:
+            flash('Nie możesz usunąć samego siebie.', category='danger')
+        else:
+            db.session.delete(user)
+            db.session.commit()
+            flash('Użytkownik został usunięty.', category='success')
+    else:
+        flash('Użytkownik nie istnieje.', category='danger')
+
+    return redirect(url_for('views.admin_users'))
 
 @views.route("/report", methods=['GET', 'POST'])
 @login_required
@@ -434,16 +515,60 @@ def report():
         data = request.form.get('data')
         place = request.form.get('place')
         date = datetime.now()
-            
-        new_report = Report(data=data, date=date, place=place, user_id=current_user.id, status='pending')
-        db.session.add(new_report) 
-        db.session.commit()  
-        flash('Wydarzenie zawnioskowano!', category='success')
-            
-            
-        return redirect(url_for('views.report'))  
-    
-    return render_template('report.html', user=current_user,user_reports=user_reports)
+
+        if data and place:
+            # Sprawdzamy poprawność adresu za pomocą API Google Maps
+            api_key = 'AIzaSyDgRv7f0CZS1zchzAV9WsXTMRrCmIHxY_M'
+            geocoding_url = f'https://maps.googleapis.com/maps/api/geocode/json?address={place}&key={api_key}'
+            response = requests.get(geocoding_url)
+            response_data = response.json()
+
+            if response_data['status'] == 'OK' and response_data['results']:
+                # Adres jest poprawny, zapisujemy zgłoszenie
+                new_report = Report(
+                    data=data,
+                    date=date,
+                    place=place,
+                    user_id=current_user.id,
+                    status='pending'
+                )
+                db.session.add(new_report)
+                db.session.commit()
+                flash('Raport zawnioskowano!', category='success')
+                return redirect(url_for('views.report'))
+            else:
+                flash('Nie znaleziono koordynatów dla podanego adresu', category='error')
+        else:
+            flash('Wszystkie pola muszą być wypełnione', category='error')
+
+    all_hidden = all(report.hidden for report in user_reports)
+    return render_template('report.html', user=current_user, user_reports=user_reports, all_hidden=all_hidden)
+
+
+@views.route("/report/delete/<int:report_id>", methods=['POST'])
+@login_required
+def delete_report(report_id):
+    report_to_delete = Report.query.get_or_404(report_id)
+    if report_to_delete.user_id == current_user.id:
+        db.session.delete(report_to_delete)
+        db.session.commit()
+        flash('Zgłoszenie zostało usunięte.', category='success')
+    else:
+        flash('Nie masz uprawnień do usunięcia tego zgłoszenia.', category='error')
+    return redirect(url_for('views.report'))
+
+@views.route("/report/hide/<int:report_id>", methods=['POST'])
+@login_required
+def hide_report(report_id):
+    report_to_hide = Report.query.get_or_404(report_id)
+    if report_to_hide.user_id == current_user.id:
+        report_to_hide.hidden = True
+        db.session.commit()
+        flash('Zgłoszenie zostało ukryte.', category='success')
+    else:
+        flash('Nie masz uprawnień do ukrycia tego zgłoszenia.', category='error')
+    return redirect(url_for('views.report'))
+
 
 @views.route('/update_user_status/<int:user_id>/<string:action>', methods=['POST'])
 @login_required
@@ -527,20 +652,35 @@ def admin_reports():
     return render_template('admin_reports.html', user=current_user, pending_reports=pending_reports)
 
 
-@views.route('/surveys', methods=['GET'])
+@views.route('/surveys', methods=['GET', 'POST'])
 @login_required
 def surveys():
-    surveys = Survey.query.filter_by(status='active').all()
-    return render_template('surveys.html', surveys=surveys,user=current_user)
+    surveys = Survey.query.filter_by(approved=True, status='active').all()
+    if request.method == 'POST':
+        survey_id = request.form.get('survey_id')
+        action = request.form.get('action')
+        survey = Survey.query.get(survey_id)
+        if action == 'accept':
+            survey.approved = True
+        elif action == 'reject':
+            survey.approved = False
+        db.session.commit()
+        return redirect(url_for('views.surveys'))
+
+    return render_template('surveys.html', surveys=surveys, user=current_user)
+
 
 @views.route('/survey/<int:survey_id>', methods=['GET', 'POST'])
 @login_required
 def fill_survey(survey_id):
     survey = Survey.query.get_or_404(survey_id)
     if request.method == 'POST':
+        response = SurveyResponse(survey_id=survey.id, user_id=current_user.id)
+        db.session.add(response)
+        db.session.commit()
         for question in survey.questions:
             answer_text = request.form.get(f'question_{question.id}')
-            answer = Answer(text=answer_text, question_id=question.id, user_id=current_user.id)
+            answer = Answer(text=answer_text, question_id=question.id, response_id=response.id, user_id=current_user.id)
             db.session.add(answer)
         db.session.commit()
         survey.status = "completed"
@@ -551,24 +691,33 @@ def fill_survey(survey_id):
         return redirect(url_for('views.surveys'))
     return render_template('survey.html', survey=survey, user=current_user)
 
+
 @views.route('/create-survey', methods=['GET', 'POST'])
 @login_required
 def create_survey():
     if request.method == 'POST':
         title = request.form.get('title')
-        survey = Survey(title=title)
         questions = request.form.getlist('questions[]')
-        db.session.add(survey)
-        db.session.commit()
+
+        if not title or not questions:
+            flash('Title and questions are required!', 'danger')
+            return redirect(url_for('views.create_survey'))
+
+        # Tworzenie nowej ankiety
+        survey = Survey(title=title, user_id=current_user.id)
+
+        # Dodawanie pytań do ankiety
         for question_text in questions:
-            if question_text.strip():  
-                question = Question(text=question_text, survey_id=survey.id)
+            if question_text:
+                question = Question(text=question_text, survey=survey)
                 db.session.add(question)
 
-        db.session.commit()  
-        flash('Ankieta została utworzona!', 'success')
-        return redirect(url_for('views.create_survey'))
-    return render_template('create_survey.html',user=current_user)
+        db.session.add(survey)
+        db.session.commit()
+        flash('Survey created successfully!', 'success')
+        return redirect(url_for('views.surveys'))
+
+    return render_template('create_survey.html')
 
 @views.route('/segregate', methods=['GET', 'POST'])
 @login_required
@@ -595,12 +744,21 @@ def add_loyalty_points(user, points):
 @login_required
 def exchange_points():
     available_stores = stores
+
     if request.method == 'POST':
-        if current_user.role == "admin" and 'new_store_name' in request.form:
-            new_store_name = request.form.get('new_store_name')
-            new_store_cost = int(request.form.get('new_store_cost'))
-            stores[f'store{len(stores) + 1}'] = {'name': new_store_name, 'cost': new_store_cost}
-            flash('Nowy sklep został dodany!', 'success')
+        if current_user.role == "admin":
+            if 'new_store_name' in request.form:
+                new_store_name = request.form.get('new_store_name')
+                new_store_cost = int(request.form.get('new_store_cost'))
+                stores[f'store{len(stores) + 1}'] = {'name': new_store_name, 'cost': new_store_cost}
+                flash('Nowy sklep został dodany!', 'success')
+            elif 'delete_store' in request.form:
+                store_key = request.form.get('delete_store')
+                if store_key in stores:
+                    del stores[store_key]
+                    flash('Sklep został usunięty!', 'success')
+                else:
+                    flash('Sklep nie istnieje.', 'danger')
         else:
             store_key = request.form.get('store')
             store = available_stores.get(store_key)
@@ -632,71 +790,122 @@ stripe.api_key = 'sk_test_51P9F8mAHsD0ooQchiY1nEJu6Q5jpeRG1lvI8JqL0eHXuLbjDdgsZR
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
 @views.route('/admin-payments', methods=['GET', 'POST'])
 @login_required
 def admin_payments():
     if current_user.role != 'admin':
-        flash('Brak dostępu')
+        flash('Brak dostępu', 'error')
         return redirect(url_for('views.home'))
 
     if request.method == 'POST':
         file = request.files['file']
-        if file and file.filename.endswith('.xlsx'):
-            filename = secure_filename(file.filename)
+        if file:
+            filename = file.filename
+            file_extension = os.path.splitext(filename)[1].lower()
+            if file_extension != '.xlsx':
+                flash("Akceptowane formaty plików to tylko XLSX", 'error')
+                return redirect(url_for('views.admin_payments'))
+
+            filename = secure_filename(filename)
             file_path = os.path.join('uploads', filename)
             file.save(file_path)
 
-            # Read Excel file
-            df = pd.read_excel(file_path)
-            for index, row in df.iterrows():
-                user = User.query.filter_by(email=row['Email']).first()
+            try:
+                wb = load_workbook(file_path)
+                ws = wb.active
+            except Exception as e:
+                flash(f"Wystąpił błąd podczas wczytywania pliku: {e}", 'error')
+                return redirect(url_for('views.admin_payments'))
+
+            # Pobierz nagłówki
+            actual_columns = [cell.value for cell in ws[1]]
+            expected_columns = ['Email', 'Description', 'Amount', 'Due Date']
+
+            # Sprawdzenie kolumn
+            if not all(column in actual_columns for column in expected_columns):
+                flash(f"Nazwy kolumn są niepoprawne, prosimy pobrać plik przykładowy. Znalezione kolumny: {', '.join(actual_columns)}. Wymagane kolumny: {', '.join(expected_columns)}.", 'error')
+                return redirect(url_for('views.admin_payments'))
+
+            # Przetwarzanie danych
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                data = dict(zip(actual_columns, row))
+                user = User.query.filter_by(email=data['Email']).first()
                 if user:
-                    due_date_str = row['Due Date'].strftime('%Y-%m-%d') if isinstance(row['Due Date'], pd.Timestamp) else row['Due Date']
-                    payment = Payment(
-                        user_uid=user.uid,
-                        description=row['Description'],
-                        amount=row['Amount'],
-                        due_date=datetime.strptime(due_date_str, '%Y-%m-%d')
-                    )
-                    db.session.add(payment)
+                    try:
+                        due_date_str = data['Due Date'].strftime('%Y-%m-%d') if isinstance(data['Due Date'], datetime) else data['Due Date']
+                        payment = Payment(
+                            user_uid=user.uid,
+                            description=data['Description'],
+                            amount=data['Amount'],
+                            due_date=datetime.strptime(due_date_str, '%Y-%m-%d')
+                        )
+                        db.session.add(payment)
+                    except Exception as e:
+                        flash(f"Błąd podczas przetwarzania wiersza: {e}", 'error')
+                        return redirect(url_for('views.admin_payments'))
             db.session.commit()
-            flash('Płatności zostały dodane')
+            flash('Płatności zostały dodane', 'success')
             return redirect(url_for('views.admin_payments'))
-    
+
     return render_template('admin_payments.html', user=current_user)
 
 @views.route('/upload-payments', methods=['GET', 'POST'])
 @login_required
 def upload_payments():
     if current_user.role != 'admin':
-        flash('Brak dostępu')
+        flash('Brak dostępu', 'error')
         return redirect(url_for('views.home'))
 
     if request.method == 'POST':
         file = request.files['file']
-        if file and file.filename.endswith('.xlsx'):
-            filename = secure_filename(file.filename)
+        if file:
+            filename = file.filename
+            file_extension = os.path.splitext(filename)[1].lower()
+            if file_extension != '.xlsx':
+                flash("Akceptowane formaty plików to tylko XLSX", 'error')
+                return redirect(url_for('views.upload_payments'))
+
+            filename = secure_filename(filename)
             file_path = os.path.join('uploads', filename)
             file.save(file_path)
 
-            # Read Excel file
-            df = pd.read_excel(file_path)
-            for index, row in df.iterrows():
-                user = User.query.filter_by(email=row['Email']).first()
+            try:
+                wb = load_workbook(file_path)
+                ws = wb.active
+            except Exception as e:
+                flash(f"Wystąpił błąd podczas wczytywania pliku: {e}", 'error')
+                return redirect(url_for('views.upload_payments'))
+
+            # Pobierz nagłówki
+            actual_columns = [cell.value for cell in ws[1]]
+            expected_columns = ['Email', 'Description', 'Amount', 'Due Date']
+
+            # Sprawdzenie kolumn
+            if not all(column in actual_columns for column in expected_columns):
+                flash(f"Nazwy kolumn są niepoprawne, prosimy pobrać plik przykładowy. Znalezione kolumny: {', '.join(actual_columns)}. Wymagane kolumny: {', '.join(expected_columns)}.", 'error')
+                return redirect(url_for('views.upload_payments'))
+
+            # Przetwarzanie danych
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                data = dict(zip(actual_columns, row))
+                user = User.query.filter_by(email=data['Email']).first()
                 if user:
-                    due_date_str = row['Due Date'].strftime('%Y-%m-%d') if isinstance(row['Due Date'], pd.Timestamp) else row['Due Date']
-                    payment = Payment(
-                        user_uid=user.uid,
-                        description=row['Description'],
-                        amount=row['Amount'],
-                        due_date=datetime.strptime(due_date_str, '%Y-%m-%d')
-                    )
-                    db.session.add(payment)
+                    try:
+                        due_date_str = data['Due Date'].strftime('%Y-%m-%d') if isinstance(data['Due Date'], datetime) else data['Due Date']
+                        payment = Payment(
+                            user_uid=user.uid,
+                            description=data['Description'],
+                            amount=data['Amount'],
+                            due_date=datetime.strptime(due_date_str, '%Y-%m-%d')
+                        )
+                        db.session.add(payment)
+                    except Exception as e:
+                        flash(f"Błąd podczas przetwarzania wiersza: {e}", 'error')
+                        return redirect(url_for('views.upload_payments'))
             db.session.commit()
-            flash('Płatności zostały dodane')
+            flash('Płatności zostały dodane', 'success')
             return redirect(url_for('views.home'))
-    
+
     return render_template('upload_payments.html', user=current_user)
 
 @views.route('/payments')
@@ -750,3 +959,49 @@ def download_sample():
         flash('Brak dostępu')
         return redirect(url_for('views.home'))
     return send_from_directory(directory='.', path='sample.xlsx', as_attachment=True)
+
+
+@views.route('/approve-surveys', methods=['GET', 'POST'])
+@login_required
+def approve_surveys():
+    if request.method == 'POST':
+        survey_id = request.form.get('survey_id')
+        survey = Survey.query.get_or_404(survey_id)
+        action = request.form.get('action')
+        if action == 'approve':
+            survey.approved = True
+            db.session.commit()
+            flash('Ankieta zatwierdzona!', 'success')
+        elif action == 'reject':
+            db.session.delete(survey)
+            db.session.commit()
+            flash('Ankieta odrzucona!', 'danger')
+        return redirect(url_for('views.approve_surveys'))
+
+    surveys = Survey.query.filter_by(approved=False).all()
+    return render_template('approve_surveys.html', surveys=surveys)
+
+
+@views.route('/survey_results', methods=['GET'])
+@login_required
+def survey_results():
+    if current_user.role == 'admin':
+        surveys = Survey.query.all()
+    else:
+        surveys = Survey.query.filter_by(user_id=current_user.id).all()
+
+    results = []
+    for survey in surveys:
+        survey_data = {
+            'title': survey.title,
+            'questions': []
+        }
+        for question in survey.questions:
+            question_data = {
+                'text': question.text,
+                'answers': [answer.text for answer in question.answers]
+            }
+            survey_data['questions'].append(question_data)
+        results.append(survey_data)
+
+    return render_template('survey_results.html', surveys=results)

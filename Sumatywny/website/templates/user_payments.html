@@ -64,6 +64,7 @@
     <div class="payments-container">
         <h1>Twoje płatności</h1>
     <div class="box">
+    {% if payments %}
         <table class="payments-table">
             <thead>
                 <tr>
@@ -93,6 +94,9 @@
                 {% endfor %}
             </tbody>
         </table>
+    {% else %}
+        <p>Nie masz żadnych płatności do wyświetlenia.</p>
+    {% endif %}
     </div>
     </div>
 {% endblock %}
