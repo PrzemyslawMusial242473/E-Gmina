@@ -74,7 +74,7 @@ class Event(db.Model):
     name = db.Column(db.String(150))
     status = db.Column(db.String(50), default='pending')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('User', backref='events')
+    user = db.relationship('User', back_populates='Events')
 
 
 class User(db.Model, UserMixin):
@@ -90,7 +90,7 @@ class User(db.Model, UserMixin):
     role = db.Column(db.String(50), default='user')
     loyalty_points = db.Column(db.Integer, default=0)
     document_image = db.Column(BLOB, nullable=True)
-    Events = db.relationship('Event')
+    Events = db.relationship('Event', back_populates='user')
     Reports = db.relationship('Report')
     payments = db.relationship('Payment', backref='user', lazy=True)
     answers = db.relationship('Answer', backref='user', lazy=True)
