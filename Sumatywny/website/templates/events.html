@@ -87,7 +87,7 @@
                                 <strong>Adres:</strong> {{ event.place }}<br>
                                 <strong>Status:</strong> {{ event.status }}<br>
                                 <div id="map-{{ event.id }}" style="height: 200px;"></div>
-                                <button type="button" onclick="deleteEvent({{ event.id }})">Usuń</button>
+                                <button type="button" class="btn btn-danger" onclick="deleteEvent({{ event.id }})">Usuń</button>
                             </li>
                         {% endfor %}
                     {% else %}
