@@ -37,6 +37,9 @@ class Survey(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     status = db.Column(db.String(50), default='active')
+    approved = db.Column(db.Boolean, default=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref='surveys', lazy=True)
     questions = db.relationship('Question', backref='survey', lazy=True)
 
 class Question(db.Model):
@@ -45,11 +48,20 @@ class Question(db.Model):
     survey_id = db.Column(db.Integer, db.ForeignKey('survey.id'), nullable=False)
     answers = db.relationship('Answer', backref='question', lazy=True)
 
+class SurveyResponse(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    survey_id = db.Column(db.Integer, db.ForeignKey('survey.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    answers = db.relationship('Answer', backref='response', lazy=True)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
 class Answer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(500), nullable=False)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    response_id = db.Column(db.Integer, db.ForeignKey('survey_response.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
