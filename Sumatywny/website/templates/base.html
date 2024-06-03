@@ -160,6 +160,21 @@
             });
         }
     </script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var dropdownItems = document.querySelectorAll(".dropdown-item");
+        dropdownItems.forEach(function(item) {
+            item.addEventListener("mouseenter", function() {
+                this.style.backgroundColor = "#328685";
+                this.style.color = "#fff";
+            });
+            item.addEventListener("mouseleave", function() {
+                this.style.backgroundColor = "";
+                this.style.color = "";
+            });
+        });
+    });
+    </script>
     {% endblock %}
 </body>
 </html>
