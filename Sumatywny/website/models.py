@@ -74,6 +74,7 @@ class Event(db.Model):
     name = db.Column(db.String(150))
     status = db.Column(db.String(50), default='pending')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref='events')
 
 
 class User(db.Model, UserMixin):

@@ -7,6 +7,7 @@ from . import db
 from . import mail
 from flask_mail import Message as MailMessage
 import json,calendar,stripe,random,string,requests,uuid
+from sqlalchemy.orm import joinedload
 import os
 from werkzeug.utils import secure_filename
 import pandas as pd
@@ -400,7 +401,7 @@ def admin_events():
         flash('Nie masz uprawnień administratora do tej strony.', category='danger')
         return redirect(url_for('views.home'))
     
-    pending_events = Event.query.filter_by(status='pending').all()
+    pending_events = Event.query.options(joinedload(Event.user)).filter_by(status='pending').all()
     
     if request.method == 'POST':
         event_id = request.form.get('event_id')
