@@ -1,6 +1,6 @@
 
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for,send_from_directory
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
 from .models import Event,Payment, MapMarker, User, Message, Report, Survey, Answer, Question, CATEGORIES, segregate_waste, Voucher, stores, SurveyResponse
 from datetime import datetime, date
 from . import db
@@ -507,6 +507,22 @@ def delete_user(user_id):
         flash('Użytkownik nie istnieje.', category='danger')
 
     return redirect(url_for('views.admin_users'))
+
+
+@views.route('/delete-account', methods=['POST'])
+@login_required
+def delete_account():
+    user = User.query.get(current_user.id)
+    if user:
+        logout_user()
+        db.session.delete(user)
+        db.session.commit()
+        flash('Twoje konto zostało usunięte.', category='success')
+        return redirect(url_for('views.home'))
+    else:
+        flash('Wystąpił błąd podczas usuwania konta.', category='error')
+        return redirect(url_for('views.user_info'))
+
 
 @views.route("/report", methods=['GET', 'POST'])
 @login_required
