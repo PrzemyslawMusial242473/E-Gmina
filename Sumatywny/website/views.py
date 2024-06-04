@@ -269,7 +269,10 @@ def search_user():
         else:
             flash('Użytkownik nie został znaleziony!', category='error')
         return redirect(url_for('views.search_user'))
-    return render_template('invite-friends.html', user=current_user)
+    has_friends = current_user.friends.count() > 0
+    has_invite = current_user.invitations.count() > 0
+    is_blocked = current_user.blocked.count() > 0
+    return render_template('invite-friends.html', user=current_user, has_friends=has_friends, has_invite=has_invite, is_blocked=is_blocked)
 
 
 @views.route('/send-message/<int:user_id>', methods=['POST'])
