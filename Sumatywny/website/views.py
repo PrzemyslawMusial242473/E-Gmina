@@ -738,7 +738,7 @@ def create_survey():
 
         db.session.add(survey)
         db.session.commit()
-        flash('Survey created successfully!', 'success')
+        flash('Ankieta została stworzona pomyślnie!', 'success')
         return redirect(url_for('views.create_survey'))
 
     return render_template('create_survey.html')
