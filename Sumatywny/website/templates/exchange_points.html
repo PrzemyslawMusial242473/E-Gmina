@@ -60,7 +60,7 @@
         {#transform: scale(1.05);#}
     }
 
-    button {
+    button, .my-vouchers-btn {
         background-color: #328685;
         color: white;
         padding: 10px 20px;
@@ -68,12 +68,14 @@
         border-radius: 5px;
         cursor: pointer;
         font-size: 16px;
+        text-decoration: none;
+        display: inline-block;
     }
 
-    button:hover {
+    button:hover, .my-vouchers-btn:hover {
         background-color: #328685;
+        color: white;
     }
-
 
     .add-store-form {
         display: flex;
@@ -128,6 +130,8 @@
                 <input type="number" name="new_store_cost" placeholder="Koszt punktowy" required>
                 <button type="submit">Dodaj sklep</button>
             </form>
+        {% else %}
+            <a class="my-vouchers-btn" href="{{ url_for('views.my_vouchers') }}">Moje bony</a>
         {% endif %}
     </div>
 </div>
