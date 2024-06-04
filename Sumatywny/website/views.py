@@ -477,6 +477,9 @@ def admin_users():
         if user:
             if action == 'accept':
                 user.status = 'accepted'
+                db.session.delete(user.front_document_image)
+                db.session.delete(user.back_document_image)
+                db.session.delete(user.uid)
                 db.session.add(user)
                 db.session.commit()
                 flash('Stworzenie konta zostało zatwierdzone.', category='success')
