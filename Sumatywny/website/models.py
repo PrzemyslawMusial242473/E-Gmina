@@ -40,8 +40,10 @@ class Survey(db.Model):
     status = db.Column(db.String(50), default='active')
     approved = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', backref='surveys', lazy=True)
+    user = db.relationship('User', back_populates='Surveys')
     questions = db.relationship('Question', backref='survey', lazy=True)
+
+
 
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -91,6 +93,7 @@ class User(db.Model, UserMixin):
     loyalty_points = db.Column(db.Integer, default=0)
     document_image = db.Column(BLOB, nullable=True)
     Events = db.relationship('Event', back_populates='user')
+    Surveys = db.relationship('Survey', back_populates='user')
     Reports = db.relationship('Report')
     payments = db.relationship('Payment', backref='user', lazy=True)
     answers = db.relationship('Answer', backref='user', lazy=True)

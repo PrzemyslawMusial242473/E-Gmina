@@ -16,43 +16,43 @@
             padding: 0;
         }
         body {
-            background-image: url('{{ url_for('static', filename='tlo.png') }}'); /* Ustawienie tła z pliku tlo.png */
-            background-size: cover; /* Dopasowanie tła do rozmiaru strony */
-            background-repeat: no-repeat; /* Brak powtarzania tła */
-            background-attachment: fixed; /* Tło pozostaje w miejscu przy przewijaniu */
-            background-position: center; /* Wyśrodkowanie tła */
-            color: #000000; /* Ciemny kolor tekstu */
+            background-image: url('{{ url_for('static', filename='tlo.png') }}'); 
+            background-size: cover; 
+            background-repeat: no-repeat; 
+            background-attachment: fixed; 
+            background-position: center; 
+            color: #000000; 
             display: flex;
             flex-direction: column;
         }
         .navbar {
-            background-color: #2c3e50 !important; /* Granatowy kolor paska nawigacji */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Cień */
+            background-color: #2c3e50 !important; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .navbar-brand, .navbar-nav .nav-link {
-            color: #fff !important; /* Biały kolor tekstu dla marki i linków nawigacyjnych */
+            color: #fff !important; 
             margin-right: 20px;
         }
         .navbar-brand:hover, .navbar-nav .nav-link:hover {
-            color: #dcdde1 !important; /* Biały kolor tekstu dla marki i linków nawigacyjnych po najechaniu myszką */
+            color: #dcdde1 !important; 
         }
         .navbar-toggler {
-            border-color: #fff !important; /* Biały kolor obramowania przycisku rozwijania */
+            border-color: #fff !important; 
         }
         .navbar-toggler-icon {
-            background-image: url('static/menu.jpg'); /* Ustawienie obrazu jako tła */
-            background-size: cover; /* Dopasowanie obrazu do rozmiaru okna przeglądarki */
+            background-image: url('static/menu.jpg'); 
+            background-size: cover; 
         }
         .container {
-            background-color: rgba(236, 240, 241, 0); /* Jasnoszare tło kontenera z przezroczystością */
-            border-radius: 5px; /* Zaokrąglenie rogów kontenera */
-            max-width: 100%; /* Zwiększenie maksymalnej szerokości kontenera */
-            margin: 20px auto; /* Ustawienie marginesu poziomego na 20px z lewej i prawej strony */
-            padding: 0 15px; /* Dodanie wewnętrznego wypełnienia poziomego */
+            background-color: rgba(236, 240, 241, 0); 
+            border-radius: 5px; 
+            max-width: 100%; 
+            margin: 20px auto;
+            padding: 0 15px; 
             flex: 1;
         }
         .alert {
-            margin-bottom: 20px; /* Margines od dolnej krawędzi alertu */
+            margin-bottom: 20px;
         }
         .footer {
             background-color: #2c3e50;
@@ -67,13 +67,13 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <a class="navbar-brand" id="home" href="/">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="E-Gmina" style="height: 40px;">
-        </a> <!-- Dodanie napisu E-gmina -->
+        </a> 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbar">
-            <div class="navbar-nav mr-auto"> <!-- Używamy klasy mr-auto, aby przesunąć opcje "Home", "Calendar" i "Map" w lewo -->
+            <div class="navbar-nav mr-auto">
                 {% if current_user.is_authenticated %}
                     {% if current_user.role == 'user'%}
                         <a class="nav-item nav-link" id="platnosc-button" href='/payments'>Płatność</a>
@@ -92,6 +92,7 @@
                                 <a class="dropdown-item" id="admin_events" href="/admin-events">Weryfikuj wydarzenia</a>
                                 <a class="dropdown-item" id="admin_users" href="/admin-users">Weryfikuj konta</a>
                                 <a class="dropdown-item" id="admin_reports" href="/admin-reports">Weryfikuj zgłoszenia</a>
+                                <a class="dropdown-item" id="approve-surveys" href="/approve-surveys">Weryfikuj ankiety</a>
                             </div>
                         </div>
                         <a class="nav-item nav-link" id="admin_payment" href="/admin-payments">Wprowadź płatności</a>
@@ -99,7 +100,6 @@
                         <a class="nav-item nav-link" id="events" href="/events">Dodaj wydarzenia</a>
                         <a class="nav-item nav-link" id="maps" href="/maps">Ważne miejsca</a>
                         <a class="nav-item nav-link" id="admin_users" href="/create-survey">Ankiety</a>
-                        <a class="nav-link nav-link" id="approve-surveys" href="/approve-surveys">Weryfikuj ankiety</a>
                         <a class="nav-link nav-link" id="survey-results" href="/survey_results">Wyniki ankiet</a>
                     {% endif %}
                     {% if current_user.role == 'organisation' %}
@@ -112,12 +112,12 @@
                     <a class="nav-item nav-link" id="signUp" href="/sign-up">Zarejestruj</a>
                 {% endif %}
             </div>
-            <div class="navbar-nav ml-auto"> <!-- Dodanie klasy ml-auto, aby opcja "Logout" była na prawym kraju -->
+            <div class="navbar-nav ml-auto"> 
                 {% if current_user.is_authenticated %}
                     {% if current_user.role != 'admin' %}
                         <a class="nav-item nav-link" id="user_info" href="/user_info">Konto</a>
                     {% endif %}
-                    <a class="nav-item nav-link" id="logout" href="/logout">Wyloguj</a> <!-- Przeniesienie opcji Logout do prawej strony -->
+                    <a class="nav-item nav-link" id="logout" href="/logout">Wyloguj</a> 
                 {% endif %}
             </div>
         </div>

@@ -3,16 +3,16 @@
 {% block content %}
 <style>
 .banner {
-    width: 100%; /* Rozciągnięcie na szerokość strony */
-    background-image: url('{{ url_for('static', filename='bony.png') }}'); /* Ścieżka do twojego pliku PNG */
-    background-size: cover; /* Dopasowanie rozmiaru obrazka */
-    background-position: center; /* Wycentrowanie obrazka */
-    height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
-    border-radius: 15px; /* Dodanie zaokrąglonych rogów */
+    width: 100%; 
+    background-image: url('{{ url_for('static', filename='bony.png') }}'); 
+    background-size: cover; 
+    background-position: center; 
+    height: 400px;
+    border-radius: 15px;
 }
 #container{
     background-color: rgb(250,250,250,1);
-    color: #333333; /* Ciemnoszary */
+    color: #333333; 
     text-align: center;
     padding: 20px;
     border-radius: 15px;
@@ -83,8 +83,8 @@ button:hover {
     color: #721c24;
 }
 .box {
-    background-color: #b4dfe5; /* Pastelowy niebieski */
-    color: #333333; /* Ciemnoszary */
+    background-color: #b4dfe5; 
+    color: #333333; 
     padding: 20px;
     border-radius: 15px;
     margin-top: 1%;
@@ -93,11 +93,11 @@ button:hover {
 
 .voucher-item {
     padding: 10px 0;
-    border-bottom: 1px dashed #000; /* Przerywana linia */
+    border-bottom: 1px dashed #000; 
 }
 
 .voucher-item:last-child {
-    border-bottom: none; /* Usunięcie dolnej granicy dla ostatniego elementu */
+    border-bottom: none;
 }
 </style>
 

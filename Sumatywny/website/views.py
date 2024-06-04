@@ -80,7 +80,7 @@ def home():
     month_events = get_month_events(year, month)
     accepted_month_events = [event for event in month_events if event.status == 'accepted']
     weeks = generate_calendar(year, month, accepted_month_events)
-    # Pobierz tylko przyszłe zaakceptowane wydarzenia i sortuj je chronologicznie
+
     accepted_events = Event.query.filter(Event.date >= datetime.now(), Event.status == 'accepted').order_by(Event.date.asc()).all()
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
 
@@ -704,10 +704,11 @@ def create_survey():
             flash('Title and questions are required!', 'danger')
             return redirect(url_for('views.create_survey'))
 
-        # Tworzenie nowej ankiety
         survey = Survey(title=title, user_id=current_user.id)
 
-        # Dodawanie pytań do ankiety
+        if current_user.role == 'admin':
+            survey.approved = True
+
         for question_text in questions:
             if question_text:
                 question = Question(text=question_text, survey=survey)
@@ -716,9 +717,10 @@ def create_survey():
         db.session.add(survey)
         db.session.commit()
         flash('Survey created successfully!', 'success')
-        return redirect(url_for('views.surveys'))
+        return redirect(url_for('views.create_survey'))
 
     return render_template('create_survey.html')
+
 
 @views.route('/segregate', methods=['GET', 'POST'])
 @login_required
@@ -818,16 +820,13 @@ def admin_payments():
                 flash(f"Wystąpił błąd podczas wczytywania pliku: {e}", 'error')
                 return redirect(url_for('views.admin_payments'))
 
-            # Pobierz nagłówki
             actual_columns = [cell.value for cell in ws[1]]
             expected_columns = ['Email', 'Description', 'Amount', 'Due Date']
 
-            # Sprawdzenie kolumn
             if not all(column in actual_columns for column in expected_columns):
                 flash(f"Nazwy kolumn są niepoprawne, prosimy pobrać plik przykładowy. Znalezione kolumny: {', '.join(actual_columns)}. Wymagane kolumny: {', '.join(expected_columns)}.", 'error')
                 return redirect(url_for('views.admin_payments'))
 
-            # Przetwarzanie danych
             for row in ws.iter_rows(min_row=2, values_only=True):
                 data = dict(zip(actual_columns, row))
                 user = User.query.filter_by(email=data['Email']).first()
@@ -877,16 +876,13 @@ def upload_payments():
                 flash(f"Wystąpił błąd podczas wczytywania pliku: {e}", 'error')
                 return redirect(url_for('views.upload_payments'))
 
-            # Pobierz nagłówki
             actual_columns = [cell.value for cell in ws[1]]
             expected_columns = ['Email', 'Description', 'Amount', 'Due Date']
 
-            # Sprawdzenie kolumn
             if not all(column in actual_columns for column in expected_columns):
                 flash(f"Nazwy kolumn są niepoprawne, prosimy pobrać plik przykładowy. Znalezione kolumny: {', '.join(actual_columns)}. Wymagane kolumny: {', '.join(expected_columns)}.", 'error')
                 return redirect(url_for('views.upload_payments'))
 
-            # Przetwarzanie danych
             for row in ws.iter_rows(min_row=2, values_only=True):
                 data = dict(zip(actual_columns, row))
                 user = User.query.filter_by(email=data['Email']).first()
@@ -967,34 +963,33 @@ def download_sample():
 def approve_surveys():
     if request.method == 'POST':
         survey_id = request.form.get('survey_id')
-        survey = Survey.query.get_or_404(survey_id)
         action = request.form.get('action')
+        
+        survey = Survey.query.get(survey_id)
         if action == 'approve':
             survey.approved = True
-            db.session.commit()
-            flash('Ankieta zatwierdzona!', 'success')
         elif action == 'reject':
             db.session.delete(survey)
-            db.session.commit()
-            flash('Ankieta odrzucona!', 'danger')
+        db.session.commit()
         return redirect(url_for('views.approve_surveys'))
 
     surveys = Survey.query.filter_by(approved=False).all()
     return render_template('approve_surveys.html', surveys=surveys)
 
-
 @views.route('/survey_results', methods=['GET'])
 @login_required
 def survey_results():
     if current_user.role == 'admin':
-        surveys = Survey.query.all()
+        surveys = Survey.query.order_by(Survey.user_id).all()  
     else:
         surveys = Survey.query.filter_by(user_id=current_user.id).all()
 
     results = []
     for survey in surveys:
+        creator_name = 'Admin' if survey.user.role == 'admin' else survey.user.name if survey.user else 'Unknown'
         survey_data = {
             'title': survey.title,
+            'creator_name': creator_name, 
             'questions': []
         }
         for question in survey.questions:
@@ -1006,3 +1001,4 @@ def survey_results():
         results.append(survey_data)
 
     return render_template('survey_results.html', surveys=results)
+
