@@ -1,6 +1,7 @@
 from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
+from sqlalchemy.dialects.mysql import BLOB
 import os
 from datetime import datetime
 friends = db.Table(
@@ -37,7 +38,12 @@ class Survey(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     status = db.Column(db.String(50), default='active')
+    approved = db.Column(db.Boolean, default=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', back_populates='Surveys')
     questions = db.relationship('Question', backref='survey', lazy=True)
+
+
 
 class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,11 +51,22 @@ class Question(db.Model):
     survey_id = db.Column(db.Integer, db.ForeignKey('survey.id'), nullable=False)
     answers = db.relationship('Answer', backref='question', lazy=True)
 
+
+class SurveyResponse(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    survey_id = db.Column(db.Integer, db.ForeignKey('survey.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    answers = db.relationship('Answer', backref='response', lazy=True)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+
 class Answer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(500), nullable=False)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    response_id = db.Column(db.Integer, db.ForeignKey('survey_response.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -59,6 +76,7 @@ class Event(db.Model):
     name = db.Column(db.String(150))
     status = db.Column(db.String(50), default='pending')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', back_populates='Events')
 
 
 class User(db.Model, UserMixin):
@@ -73,8 +91,9 @@ class User(db.Model, UserMixin):
     status = db.Column(db.String(50), default='pending')
     role = db.Column(db.String(50), default='user')
     loyalty_points = db.Column(db.Integer, default=0)
-    document_image = db.Column(db.String(150), nullable=True)
-    Events = db.relationship('Event')
+    document_image = db.Column(BLOB, nullable=True)
+    Events = db.relationship('Event', back_populates='user')
+    Surveys = db.relationship('Survey', back_populates='user')
     Reports = db.relationship('Report')
     payments = db.relationship('Payment', backref='user', lazy=True)
     answers = db.relationship('Answer', backref='user', lazy=True)

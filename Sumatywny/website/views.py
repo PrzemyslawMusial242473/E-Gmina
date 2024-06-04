@@ -1,11 +1,12 @@
 
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for,send_from_directory
 from flask_login import login_required, current_user
-from .models import Event,Payment, MapMarker, User, Message,Report, Survey, Answer, Question, CATEGORIES,segregate_waste,Voucher,stores
+from .models import Event,Payment, MapMarker, User, Message, Report, Survey, Answer, Question, CATEGORIES, segregate_waste, Voucher, stores, SurveyResponse
 from datetime import datetime, date
 from . import db
 from . import mail
 from flask_mail import Message as MailMessage
+from sqlalchemy.orm import joinedload
 import json,calendar,stripe,random,string,requests,uuid
 import os
 from werkzeug.utils import secure_filename
@@ -79,7 +80,7 @@ def home():
     month_events = get_month_events(year, month)
     accepted_month_events = [event for event in month_events if event.status == 'accepted']
     weeks = generate_calendar(year, month, accepted_month_events)
-    # Pobierz tylko przyszłe zaakceptowane wydarzenia i sortuj je chronologicznie
+
     accepted_events = Event.query.filter(Event.date >= datetime.now(), Event.status == 'accepted').order_by(Event.date.asc()).all()
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
 
@@ -100,7 +101,7 @@ def delete_event():
     eventId = event['eventId']
     event = Event.query.get(eventId)
     if event:
-        if event.user_id == current_user.id:
+        if event.user_id == current_user.id or current_user.role == "admin":
             db.session.delete(event)
             db.session.commit()
 
@@ -189,7 +190,10 @@ def edit_marker():
 @views.route('/events', methods=['GET', 'POST'])
 @login_required
 def event():
-    user_events = Event.query.filter(Event.user_id == current_user.id, Event.date >= datetime.now()).order_by(Event.date.asc()).all()
+    if current_user.role=="admin":
+        user_events = Event.query.order_by(Event.date.asc()).all()
+    else:
+        user_events = Event.query.filter(Event.user_id == current_user.id, Event.date >= datetime.now()).order_by(Event.date.asc()).all()
     if request.method == 'POST':
         data = request.form.get('data')
         date = request.form.get('date')
@@ -210,14 +214,17 @@ def event():
             data = response.json()
 
             if data['status'] == 'OK':
-                # Zapisujemy wydarzenie do bazy danych tylko, jeśli adres jest poprawny
+                if current_user.role =="admin":
+                    status_state = "accepted"
+                else:
+                    status_state = "pending"
                 new_event = Event(
-                    data=request.form.get('data'),  # Tylko dane tekstowe z formularza
+                    data=request.form.get('data'),  
                     date=date,
                     place=place,
                     name=name,
                     user_id=current_user.id,
-                    status='pending'
+                    status=status_state
                 )
                 db.session.add(new_event)
                 db.session.commit()
@@ -394,7 +401,7 @@ def admin_events():
         flash('Nie masz uprawnień administratora do tej strony.', category='danger')
         return redirect(url_for('views.home'))
     
-    pending_events = Event.query.filter_by(status='pending').all()
+    pending_events = Event.query.options(joinedload(Event.user)).filter_by(status='pending').all()
     
     if request.method == 'POST':
         event_id = request.form.get('event_id')
@@ -445,34 +452,61 @@ def update_event_status(event_id, action):
 
     return redirect(url_for('views.admin_events'))
 
+
 @views.route('/admin-users', methods=['GET', 'POST'])
 @login_required
 def admin_users():
     if not current_user.is_authenticated or current_user.role != 'admin':
         flash('Nie masz uprawnień administratora do tej strony.', category='danger')
         return redirect(url_for('views.home'))
-    
+
     pending_users = User.query.filter_by(status='pending').all()
-    
+    accepted_users = User.query.filter_by(status='accepted').all()
+
+    # Wykluczenie konta administratora
+    accepted_users = [user for user in accepted_users if user.role != 'admin']
+
     if request.method == 'POST':
         user_id = request.form.get('user_id')
-        action = request.form.get('action')  
-        
-        if action == 'accept':
-            user = User.query.get(user_id)
-            user.status = 'accepted'
-            db.session.add(user)
-            db.session.commit()
-            flash('Stworzenie konta zostało zatwierdzone.', category='success')
-        elif action == 'reject':
-            user = User.query.get(user_id)
-            user.status = 'rejected'
-            flash('Stworzenie konta zostało odrzucone.', category='warning')
-        
+        action = request.form.get('action')
+
+        user = User.query.get(user_id)
+        if user:
+            if action == 'accept':
+                user.status = 'accepted'
+                db.session.add(user)
+                db.session.commit()
+                flash('Stworzenie konta zostało zatwierdzone.', category='success')
+            elif action == 'reject':
+                user.status = 'rejected'
+                db.session.commit()
+                flash('Stworzenie konta zostało odrzucone.', category='warning')
+
         return redirect(url_for('views.admin_users'))
 
-    return render_template('admin_users.html', user=current_user, pending_users=pending_users)
+    return render_template('admin_users.html', user=current_user, pending_users=pending_users,
+                           accepted_users=accepted_users)
 
+
+@views.route('/delete-user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej operacji.', category='danger')
+        return redirect(url_for('views.home'))
+
+    user = User.query.get(user_id)
+    if user:
+        if user.id == current_user.id:
+            flash('Nie możesz usunąć samego siebie.', category='danger')
+        else:
+            db.session.delete(user)
+            db.session.commit()
+            flash('Użytkownik został usunięty.', category='success')
+    else:
+        flash('Użytkownik nie istnieje.', category='danger')
+
+    return redirect(url_for('views.admin_users'))
 
 @views.route("/report", methods=['GET', 'POST'])
 @login_required
@@ -619,20 +653,35 @@ def admin_reports():
     return render_template('admin_reports.html', user=current_user, pending_reports=pending_reports)
 
 
-@views.route('/surveys', methods=['GET'])
+@views.route('/surveys', methods=['GET', 'POST'])
 @login_required
 def surveys():
-    surveys = Survey.query.filter_by(status='active').all()
-    return render_template('surveys.html', surveys=surveys,user=current_user)
+    surveys = Survey.query.filter_by(approved=True, status='active').all()
+    if request.method == 'POST':
+        survey_id = request.form.get('survey_id')
+        action = request.form.get('action')
+        survey = Survey.query.get(survey_id)
+        if action == 'accept':
+            survey.approved = True
+        elif action == 'reject':
+            survey.approved = False
+        db.session.commit()
+        return redirect(url_for('views.surveys'))
+
+    return render_template('surveys.html', surveys=surveys, user=current_user)
+
 
 @views.route('/survey/<int:survey_id>', methods=['GET', 'POST'])
 @login_required
 def fill_survey(survey_id):
     survey = Survey.query.get_or_404(survey_id)
     if request.method == 'POST':
+        response = SurveyResponse(survey_id=survey.id, user_id=current_user.id)
+        db.session.add(response)
+        db.session.commit()
         for question in survey.questions:
             answer_text = request.form.get(f'question_{question.id}')
-            answer = Answer(text=answer_text, question_id=question.id, user_id=current_user.id)
+            answer = Answer(text=answer_text, question_id=question.id, response_id=response.id, user_id=current_user.id)
             db.session.add(answer)
         db.session.commit()
         survey.status = "completed"
@@ -643,24 +692,35 @@ def fill_survey(survey_id):
         return redirect(url_for('views.surveys'))
     return render_template('survey.html', survey=survey, user=current_user)
 
+
 @views.route('/create-survey', methods=['GET', 'POST'])
 @login_required
 def create_survey():
     if request.method == 'POST':
         title = request.form.get('title')
-        survey = Survey(title=title)
         questions = request.form.getlist('questions[]')
-        db.session.add(survey)
-        db.session.commit()
+
+        if not title or not questions:
+            flash('Title and questions are required!', 'danger')
+            return redirect(url_for('views.create_survey'))
+
+        survey = Survey(title=title, user_id=current_user.id)
+
+        if current_user.role == 'admin':
+            survey.approved = True
+
         for question_text in questions:
-            if question_text.strip():  
-                question = Question(text=question_text, survey_id=survey.id)
+            if question_text:
+                question = Question(text=question_text, survey=survey)
                 db.session.add(question)
 
-        db.session.commit()  
-        flash('Ankieta została utworzona!', 'success')
+        db.session.add(survey)
+        db.session.commit()
+        flash('Survey created successfully!', 'success')
         return redirect(url_for('views.create_survey'))
-    return render_template('create_survey.html',user=current_user)
+
+    return render_template('create_survey.html')
+
 
 @views.route('/segregate', methods=['GET', 'POST'])
 @login_required
@@ -687,12 +747,21 @@ def add_loyalty_points(user, points):
 @login_required
 def exchange_points():
     available_stores = stores
+
     if request.method == 'POST':
-        if current_user.role == "admin" and 'new_store_name' in request.form:
-            new_store_name = request.form.get('new_store_name')
-            new_store_cost = int(request.form.get('new_store_cost'))
-            stores[f'store{len(stores) + 1}'] = {'name': new_store_name, 'cost': new_store_cost}
-            flash('Nowy sklep został dodany!', 'success')
+        if current_user.role == "admin":
+            if 'new_store_name' in request.form:
+                new_store_name = request.form.get('new_store_name')
+                new_store_cost = int(request.form.get('new_store_cost'))
+                stores[f'store{len(stores) + 1}'] = {'name': new_store_name, 'cost': new_store_cost}
+                flash('Nowy sklep został dodany!', 'success')
+            elif 'delete_store' in request.form:
+                store_key = request.form.get('delete_store')
+                if store_key in stores:
+                    del stores[store_key]
+                    flash('Sklep został usunięty!', 'success')
+                else:
+                    flash('Sklep nie istnieje.', 'danger')
         else:
             store_key = request.form.get('store')
             store = available_stores.get(store_key)
@@ -751,16 +820,13 @@ def admin_payments():
                 flash(f"Wystąpił błąd podczas wczytywania pliku: {e}", 'error')
                 return redirect(url_for('views.admin_payments'))
 
-            # Pobierz nagłówki
             actual_columns = [cell.value for cell in ws[1]]
             expected_columns = ['Email', 'Description', 'Amount', 'Due Date']
 
-            # Sprawdzenie kolumn
             if not all(column in actual_columns for column in expected_columns):
                 flash(f"Nazwy kolumn są niepoprawne, prosimy pobrać plik przykładowy. Znalezione kolumny: {', '.join(actual_columns)}. Wymagane kolumny: {', '.join(expected_columns)}.", 'error')
                 return redirect(url_for('views.admin_payments'))
 
-            # Przetwarzanie danych
             for row in ws.iter_rows(min_row=2, values_only=True):
                 data = dict(zip(actual_columns, row))
                 user = User.query.filter_by(email=data['Email']).first()
@@ -810,16 +876,13 @@ def upload_payments():
                 flash(f"Wystąpił błąd podczas wczytywania pliku: {e}", 'error')
                 return redirect(url_for('views.upload_payments'))
 
-            # Pobierz nagłówki
             actual_columns = [cell.value for cell in ws[1]]
             expected_columns = ['Email', 'Description', 'Amount', 'Due Date']
 
-            # Sprawdzenie kolumn
             if not all(column in actual_columns for column in expected_columns):
                 flash(f"Nazwy kolumn są niepoprawne, prosimy pobrać plik przykładowy. Znalezione kolumny: {', '.join(actual_columns)}. Wymagane kolumny: {', '.join(expected_columns)}.", 'error')
                 return redirect(url_for('views.upload_payments'))
 
-            # Przetwarzanie danych
             for row in ws.iter_rows(min_row=2, values_only=True):
                 data = dict(zip(actual_columns, row))
                 user = User.query.filter_by(email=data['Email']).first()
@@ -893,3 +956,49 @@ def download_sample():
         flash('Brak dostępu')
         return redirect(url_for('views.home'))
     return send_from_directory(directory='.', path='sample.xlsx', as_attachment=True)
+
+
+@views.route('/approve-surveys', methods=['GET', 'POST'])
+@login_required
+def approve_surveys():
+    if request.method == 'POST':
+        survey_id = request.form.get('survey_id')
+        action = request.form.get('action')
+        
+        survey = Survey.query.get(survey_id)
+        if action == 'approve':
+            survey.approved = True
+        elif action == 'reject':
+            db.session.delete(survey)
+        db.session.commit()
+        return redirect(url_for('views.approve_surveys'))
+
+    surveys = Survey.query.filter_by(approved=False).all()
+    return render_template('approve_surveys.html', surveys=surveys)
+
+@views.route('/survey_results', methods=['GET'])
+@login_required
+def survey_results():
+    if current_user.role == 'admin':
+        surveys = Survey.query.order_by(Survey.user_id).all()  
+    else:
+        surveys = Survey.query.filter_by(user_id=current_user.id).all()
+
+    results = []
+    for survey in surveys:
+        creator_name = 'Admin' if survey.user.role == 'admin' else survey.user.name if survey.user else 'Unknown'
+        survey_data = {
+            'title': survey.title,
+            'creator_name': creator_name, 
+            'questions': []
+        }
+        for question in survey.questions:
+            question_data = {
+                'text': question.text,
+                'answers': [answer.text for answer in question.answers]
+            }
+            survey_data['questions'].append(question_data)
+        results.append(survey_data)
+
+    return render_template('survey_results.html', surveys=results)
+

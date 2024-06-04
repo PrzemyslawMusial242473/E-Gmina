@@ -4,24 +4,24 @@
 <style>
   .container {
     display: flex;
-    flex-wrap: wrap; /* Pozwala elementom przejść do następnego wiersza przy zmniejszeniu okna */
+    flex-wrap: wrap;
     align-items: center;
     background-color: rgb(250,250,250,1);
-    color: #000000; /* Ciemnoszary */
+    color: #000000; 
     padding: 20px;
     border-radius: 15px;
     width: 80%;
-    margin-top: 3%;
-    position: relative; /* Pozycja względna, aby przenieść obrazek */
+    margin-top: 2%;
+    position: relative;
   }
   .image-outside-container {
-    position: absolute; /* Absolutna pozycja dla obrazka */
-    left: -120px; /* Odległość od lewej strony */
+    position: absolute;
+    left: -10px; 
   }
   .image-container {
     flex: 1;
     text-align: center;
-    margin-right: 20px; /* Odstęp między zdjęciem a formularzem logowania */
+    margin-right: 20px; 
   }
   .image-container img {
     max-width: 100%;
@@ -30,36 +30,36 @@
   }
   .container_signup_org {
     flex: 1;
-    background-color: #b4dfe5; /* Pastelowy niebieski */
-    color: #333333; /* Ciemnoszary */
+    background-color: #b4dfe5; 
+    color: #333333; 
     border-radius: 15px;
     padding: 30px;
-    align-items: flex-start; /* Wyrównanie do góry */
-    text-align: center; /* Wyśrodkowanie zawartości */
+    align-items: flex-start; 
+    text-align: center; 
   }
 
   @media (max-width: 1200px) {
     .image-outside-container {
-      position: relative; /* Względna pozycja dla mniejszych ekranów */
-      left: 0; /* Resetowanie odległości od lewej strony */
-      margin-bottom: 20px; /* Odstęp poniżej obrazka */
+      position: relative;
+      left: 0; 
+      margin-bottom: 20px; 
       text-align: center;
     }
     .container {
-      flex-direction: column; /* Elementy w kolumnie */
+      flex-direction: column; 
     }
   }
 
   @media (max-width: 768px) {
     .container {
-      width: 100%; /* Pełna szerokość dla bardzo małych ekranów */
+      width: 100%;
       padding: 10px;
     }
     .container_signup_org {
-      padding: 20px; /* Mniejsze padding dla małych ekranów */
+      padding: 20px; 
     }
     .image-container img {
-      max-width: 80%; /* Zmniejszenie obrazka dla mniejszych ekranów */
+      max-width: 80%; 
     }
   }
 </style>
@@ -69,7 +69,6 @@
     <img src="{{ url_for('static', filename='info.png') }}" alt="Zdjęcie">
   </div>
   <div class="image-container">
-    <!-- Placeholder for additional content if needed -->
   </div>
   <div class="container_signup_org">
     <h3>Zarejestruj się</h3>

@@ -3,30 +3,30 @@
 {% block content %}
 <style>
     .banner {
-        width: 100%; /* Rozciągnięcie na szerokość strony */
-        background-image: url('{{ url_for('static', filename='znajomi.png') }}'); /* Ścieżka do twojego pliku PNG */
-        background-size: cover; /* Dopasowanie rozmiaru obrazka */
-        background-position: center; /* Wycentrowanie obrazka */
-        height: 400px; /* Wysokość obrazka (dostosuj do swoich potrzeb) */
-        border-radius: 15px; /* Dodanie zaokrąglonych rogów */
+        width: 100%;
+        background-image: url('{{ url_for('static', filename='znajomi.png') }}');
+        background-size: cover;
+        background-position: center;
+        height: 400px;
+        border-radius: 15px;
     }
 
     #container {
         background-color: rgb(250, 250, 250, 1);
-        color: #000000; /* Ciemnoszary */
+        color: #000000;
         text-align: center;
         padding: 20px;
         border-radius: 15px;
-        width: 100%;
-        margin: 1% auto; /* Zmieniono margin-top na margin, aby centrować */
+        width: 90%;
+        margin: 1% auto;
     }
 
     .container_create_survey,
-    .container_create_survey2 {
-        position: relative;
+    .container_create_survey2,
+    .container_accepted,
+    .container_accepted_org {
         background-color: #b4dfe5;
-        ;
-        color: #000000; /* Ciemnoszary */
+        color: #000000;
         justify-content: center;
         align-items: center;
         border-radius: 15px;
@@ -35,20 +35,20 @@
         margin-bottom: 20px;
     }
 
-    .container1,
-    .container2,
-    .container3 {
-        background-color: #b4dfe5;
-        ;
+    .user-card {
+        background-color: #e3f2fd;
         border-radius: 15px;
-        overflow: hidden; /* Zapobiega wydostawaniu się elementów potomnych poza kontener */
-        font-family: Arial, sans-serif; /* Ustawiamy font czcionki */
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        margin: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: left;
     }
 
-    .profile-image {
-        max-width: 100px;
-        max-height: 100px;
-        border-radius: 50%;
+    .user-card strong {
+        display: inline-block;
+        width: 150px;
     }
 
     .btn-group {
@@ -61,16 +61,22 @@
         margin: 0 5px;
     }
 
-    .list-group-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
     .dashed-line {
         border-top: 2px dashed #000000;
         margin: 20px 0;
+    }
+
+    h3 {
+        margin-bottom: 20px;
+    }
+    .btn-t {
+        background-color: #328685;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
     }
 </style>
 <div class="banner"></div>
@@ -79,71 +85,113 @@
     <div class="dashed-line"></div>
     <h3 class="mb-0">Weryfikacja organizacji</h3>
     <div class="container_create_survey">
-        <ul class="list-group list-group-flush">
-            {% if pending_users|selectattr('role', 'equalto', 'organisation')|list %}
-            {% for user in pending_users %}
-            {% if user.role == 'organisation' %}
-            <li class="list-group-item container3">
-                <strong>Nazwa:</strong> {{ user.name }}<br>
-                <strong>Adres:</strong> {{ user.address }}<br>
-                <strong>Email:</strong> {{ user.email }}<br>
-                <strong>NIP:</strong> {{ user.uid }}<br>
-                {% if user.document_image %}
-                <img src="{{ url_for('static', filename=user.document_image) }}" alt="Profile Image"
-                    class="profile-image">
-                {% endif %}
-                <div class="btn-group mt-2" role="group">
-                    <form method="POST"
-                        action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
-                        <button type="submit" class="btn btn-success">Zatwierdź</button>
-                    </form>
-                    <form method="POST"
-                        action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
-                        <button type="submit" class="btn btn-danger">Odrzuć</button>
-                    </form>
-                </div>
-            </li>
+        {% if pending_users|selectattr('role', 'equalto', 'organisation')|list %}
+        {% for user in pending_users %}
+        {% if user.role == 'organisation' %}
+        <div class="user-card">
+            <strong>Nazwa:</strong> {{ user.name }}<br>
+            <strong>Adres:</strong> {{ user.address }}<br>
+            <strong>Email:</strong> {{ user.email }}<br>
+            <strong>NIP:</strong> {{ user.uid }}<br>
+            {% if user.document_image %}
+            <a href="{{ url_for('auth.get_document_image', user_id=user.id) }}" data-lightbox="image-{{ user.id }}" data-title="{{ user.name }}">
+                <button class="btn-t">Dokument</button>
+            </a>
             {% endif %}
-            {% endfor %}
-            {% else %}
-            <p>Brak pozycji do wyświetlenia.</p>
-            {% endif %}
-        </ul>
+            <div class="btn-group mt-2" role="group">
+                <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
+                    <button type="submit" class="btn btn-success">Zatwierdź</button>
+                </form>
+                <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
+                    <button type="submit" class="btn btn-danger">Odrzuć</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <p>Brak pozycji do wyświetlenia.</p>
+        {% endif %}
     </div>
     <h3 class="mb-0">Weryfikacja użytkowników</h3>
     <div class="container_create_survey2">
-        <ul class="list-group list-group-flush">
-            {% if pending_users|selectattr('role', 'ne', 'organisation')|list %}
-            {% for user in pending_users %}
-            {% if user.role != 'organisation' %}
-            <li class="list-group-item container3">
-                <strong>Imię:</strong> {{ user.name }}<br>
-                <strong>Nazwisko:</strong> {{ user.surname }}<br>
-                <strong>Nazwa użytkownika:</strong> {{ user.username }}<br>
-                <strong>Adres:</strong> {{ user.address }}<br>
-                <strong>Email:</strong> {{ user.email }}<br>
-                <strong>Pesel:</strong> {{ user.uid }}<br>
-                {% if user.document_image %}
-                <img src="{{ url_for('static', filename='document_images/' ~ user.document_image) }}"
-                    class="document-image" width="300" height="200">
+        {% if pending_users|selectattr('role', 'ne', 'organisation')|list %}
+        {% for user in pending_users %}
+        {% if user.role != 'organisation' %}
+        <div class="user-card">
+            <strong>Imię:</strong> {{ user.name }}<br>
+            <strong>Nazwisko:</strong> {{ user.surname }}<br>
+            <strong>Nazwa użytkownika:</strong> {{ user.username }}<br>
+            <strong>Adres:</strong> {{ user.address }}<br>
+            <strong>Email:</strong> {{ user.email }}<br>
+            <strong>Pesel:</strong> {{ user.uid }}<br>
+            {% if user.document_image %}
+            <a href="{{ url_for('auth.get_document_image', user_id=user.id) }}" data-lightbox="image-{{ user.id }}" data-title="{{ user.name }} {{ user.surname }}">
+                <button class="btn-t">Dokument</button>
+            </a>
+            {% endif %}
+            <div class="btn-group mt-2" role="group">
+                <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
+                    <button type="submit" class="btn btn-success">Zatwierdź</button>
+                </form>
+                <form method="POST" action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
+                    <button type="submit" class="btn btn-danger">Odrzuć</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% else %}
+        <p>Brak pozycji do wyświetlenia.</p>
+        {% endif %}
+    </div>
+
+    <h3 class="mb-0">Zaakceptowane organizacje</h3>
+    <div class="container_accepted_org">
+        {% for user in accepted_users %}
+        {% if user.role == 'organisation' %}
+        <div class="user-card">
+            <strong>Nazwa:</strong> {{ user.name }}<br>
+            <strong>Adres:</strong> {{ user.address }}<br>
+            <strong>Email:</strong> {{ user.email }}<br>
+            <strong>NIP:</strong> {{ user.uid }}<br>
+            <div class="btn-group mt-2" role="group">
+                {% if user.id != current_user.id %}
+                <form method="POST" action="{{ url_for('views.delete_user', user_id=user.id) }}">
+                    <button type="submit" class="btn btn-danger">Usuń</button>
+                </form>
+                {% else %}
+                <button class="btn btn-secondary" disabled>Nie można usunąć siebie</button>
                 {% endif %}
-                <div class="btn-group mt-2" role="group">
-                    <form method="POST"
-                        action="{{ url_for('views.update_user_status', user_id=user.id, action='accept') }}">
-                        <button type="submit" class="btn btn-success">Zatwierdź</button>
-                    </form>
-                    <form method="POST"
-                        action="{{ url_for('views.update_user_status', user_id=user.id, action='reject') }}">
-                        <button type="submit" class="btn btn-danger">Odrzuć</button>
-                    </form>
-                </div>
-            </li>
-            {% endif %}
-            {% endfor %}
-            {% else %}
-            <p>Brak pozycji do wyświetlenia.</p>
-            {% endif %}
-        </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <h3 class="mb-0">Zaakceptowani użytkownicy</h3>
+    <div class="container_accepted">
+        {% for user in accepted_users %}
+        {% if user.role != 'organisation' %}
+        <div class="user-card">
+            <strong>Imię:</strong> {{ user.name }}<br>
+            <strong>Nazwisko:</strong> {{ user.surname }}<br>
+            <strong>Nazwa użytkownika:</strong> {{ user.username }}<br>
+            <strong>Adres:</strong> {{ user.address }}<br>
+            <strong>Email:</strong> {{ user.email }}<br>
+            <strong>Pesel:</strong> {{ user.uid }}<br>
+            <div class="btn-group mt-2" role="group">
+                {% if user.id != current_user.id %}
+                <form method="POST" action="{{ url_for('views.delete_user', user_id=user.id) }}">
+                    <button type="submit" class="btn btn-danger">Usuń</button>
+                </form>
+                {% else %}
+                <button class="btn btn-secondary" disabled>Konta admina</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
