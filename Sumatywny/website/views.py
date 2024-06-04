@@ -78,10 +78,10 @@ def home():
         next_year += 1
 
     month_events = get_month_events(year, month)
-    accepted_month_events = [event for event in month_events if event.status == 'accepted']
+    accepted_month_events = [event for event in month_events if event.status == 'Zaakceptowane']
     weeks = generate_calendar(year, month, accepted_month_events)
 
-    accepted_events = Event.query.filter(Event.date >= datetime.now(), Event.status == 'accepted').order_by(Event.date.asc()).all()
+    accepted_events = Event.query.filter(Event.date >= datetime.now(), Event.status == 'Zaakceptowane').order_by(Event.date.asc()).all()
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
 
     # Pobierz nazwę aktualnego miesiąca po polsku
@@ -115,7 +115,7 @@ def calendar_view():
     year = today.year
     month = today.month
     month_events = get_month_events(year, month)
-    accepted_month_events = [event for event in month_events if event.status == 'accepted']
+    accepted_month_events = [event for event in month_events if event.status == 'Zaakceptowane']
     weeks = generate_calendar(year, month, accepted_month_events)
     return render_template("calendar.html", user=current_user, calendar=weeks, current_month=current_month)
 
@@ -217,7 +217,7 @@ def event():
                 if current_user.role =="admin":
                     status_state = "Zaakceptowane"
                 else:
-                    status_state = "pending"
+                    status_state = "Oczekuje na rozpatrzenie"
                 new_event = Event(
                     data=request.form.get('data'),  
                     date=date,
@@ -228,7 +228,10 @@ def event():
                 )
                 db.session.add(new_event)
                 db.session.commit()
-                flash('Wydarzenie zawnioskowano!', category='success')
+                if current_user.role != "admin":
+                    flash('Wydarzenie zawnioskowano!', category='success')
+                else:
+                    flash('Wydarzenie zostało dodane!', category='success')
                 return redirect(url_for('views.event'))
             else:
                 flash('Nie znaleziono koordynatów dla podanego adresu', category='error')
@@ -404,7 +407,7 @@ def admin_events():
         flash('Nie masz uprawnień administratora do tej strony.', category='danger')
         return redirect(url_for('views.home'))
     
-    pending_events = Event.query.options(joinedload(Event.user)).filter_by(status='pending').all()
+    pending_events = Event.query.options(joinedload(Event.user)).filter_by(status='Oczekuje na rozpatrzenie').all()
     
     if request.method == 'POST':
         event_id = request.form.get('event_id')
@@ -443,13 +446,13 @@ def update_event_status(event_id, action):
         return redirect(url_for('views.admin_events'))
 
     if action == 'accept':
-        event.status = 'accepted'
+        event.status = 'Zaakceptowane'
         user = User.query.filter_by(id=event.user_id).first()
         add_loyalty_points(user, 10)
         db.session.commit()
         flash('Wydarzenie zostało zaakceptowane.', category='success')
     elif action == 'reject':
-        event.status = 'rejected'
+        event.status = 'Odrzucone'
         db.session.commit()
         flash('Wydarzenie zostało odrzucone.', category='warning')
 
