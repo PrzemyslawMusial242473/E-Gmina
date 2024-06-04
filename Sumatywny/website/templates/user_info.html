@@ -99,6 +99,13 @@ h2{
                     </div>
                 </div>
             {% endif %}
+         <div class="row mb-4">
+                <div class="col-md-12">
+                    <form method="POST" action="{{ url_for('views.delete_account') }}">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć swoje konto? Ta operacja jest nieodwracalna.')">Usuń konto</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -148,6 +148,7 @@
 
     <h3 class="mb-0">Zaakceptowane organizacje</h3>
     <div class="container_accepted_org">
+        {% if accepted_users|selectattr('role', 'equalto', 'organisation')|list %}
         {% for user in accepted_users %}
         {% if user.role == 'organisation' %}
         <div class="user-card">
@@ -167,10 +168,14 @@
         </div>
         {% endif %}
         {% endfor %}
+    {% else %}
+        <p>Brak pozycji do wyświetlenia.</p>
+        {% endif %}
     </div>
 
     <h3 class="mb-0">Zaakceptowani użytkownicy</h3>
     <div class="container_accepted">
+        {% if accepted_users|selectattr('role', 'ne', 'organisation')|list %}
         {% for user in accepted_users %}
         {% if user.role != 'organisation' %}
         <div class="user-card">
@@ -192,6 +197,9 @@
         </div>
         {% endif %}
         {% endfor %}
+    {% else %}
+        <p>Brak pozycji do wyświetlenia.</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
