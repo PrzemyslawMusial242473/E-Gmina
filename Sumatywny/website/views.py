@@ -1,6 +1,6 @@
 
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for,send_from_directory
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
 from .models import Event,Payment, MapMarker, User, Message, Report, Survey, Answer, Question, CATEGORIES, segregate_waste, Voucher, stores, SurveyResponse
 from datetime import datetime, date
 from . import db
@@ -215,7 +215,7 @@ def event():
 
             if data['status'] == 'OK':
                 if current_user.role =="admin":
-                    status_state = "accepted"
+                    status_state = "Zaakceptowane"
                 else:
                     status_state = "pending"
                 new_event = Event(
@@ -269,7 +269,10 @@ def search_user():
         else:
             flash('Użytkownik nie został znaleziony!', category='error')
         return redirect(url_for('views.search_user'))
-    return render_template('invite-friends.html', user=current_user)
+    has_friends = current_user.friends.count() > 0
+    has_invite = current_user.invitations.count() > 0
+    is_blocked = current_user.blocked.count() > 0
+    return render_template('invite-friends.html', user=current_user, has_friends=has_friends, has_invite=has_invite, is_blocked=is_blocked)
 
 
 @views.route('/send-message/<int:user_id>', methods=['POST'])
@@ -413,12 +416,12 @@ def admin_events():
             return redirect(url_for('views.admin_events'))
         
         if action == 'accept':
-            event.status = 'accepted'
+            event.status = 'Zaakceptowane'
             db.session.add(event)
             db.session.commit()
             flash('Wydarzenie zostało zaakceptowane.', category='success')
         elif action == 'reject':
-            event.status = 'rejected'
+            event.status = 'Odrzucone'
             db.session.add(event)
             db.session.commit()
             flash('Wydarzenie zostało odrzucone.', category='warning')
@@ -474,6 +477,9 @@ def admin_users():
         if user:
             if action == 'accept':
                 user.status = 'accepted'
+                db.session.delete(user.front_document_image)
+                db.session.delete(user.back_document_image)
+                db.session.delete(user.uid)
                 db.session.add(user)
                 db.session.commit()
                 flash('Stworzenie konta zostało zatwierdzone.', category='success')
@@ -507,6 +513,22 @@ def delete_user(user_id):
         flash('Użytkownik nie istnieje.', category='danger')
 
     return redirect(url_for('views.admin_users'))
+
+
+@views.route('/delete-account', methods=['POST'])
+@login_required
+def delete_account():
+    user = User.query.get(current_user.id)
+    if user:
+        logout_user()
+        db.session.delete(user)
+        db.session.commit()
+        flash('Twoje konto zostało usunięte.', category='success')
+        return redirect(url_for('views.home'))
+    else:
+        flash('Wystąpił błąd podczas usuwania konta.', category='error')
+        return redirect(url_for('views.user_info'))
+
 
 @views.route("/report", methods=['GET', 'POST'])
 @login_required
