@@ -215,7 +215,7 @@ def event():
 
             if data['status'] == 'OK':
                 if current_user.role =="admin":
-                    status_state = "accepted"
+                    status_state = "Zaakceptowane"
                 else:
                     status_state = "pending"
                 new_event = Event(
@@ -416,12 +416,12 @@ def admin_events():
             return redirect(url_for('views.admin_events'))
         
         if action == 'accept':
-            event.status = 'accepted'
+            event.status = 'Zaakceptowane'
             db.session.add(event)
             db.session.commit()
             flash('Wydarzenie zostało zaakceptowane.', category='success')
         elif action == 'reject':
-            event.status = 'rejected'
+            event.status = 'Odrzucone'
             db.session.add(event)
             db.session.commit()
             flash('Wydarzenie zostało odrzucone.', category='warning')
