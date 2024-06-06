@@ -21,6 +21,7 @@ def create_app():
     app.config['MAIL_USERNAME'] = 'egminakonstantynow@gmail.com'
     app.config['MAIL_PASSWORD'] = 'ayim zjaa yvdo fmjx'
     app.config['MAIL_DEFAULT_SENDER'] = 'egminakonstantynow@gmail.com'
+    app.config['NIP24_API_KEY'] = 'As50KY4HmoCW'
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
