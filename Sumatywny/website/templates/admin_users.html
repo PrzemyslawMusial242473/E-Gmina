@@ -17,7 +17,7 @@
         text-align: center;
         padding: 20px;
         border-radius: 15px;
-        width: 90%;
+        width: 100%;
         margin: 1% auto;
     }
 
@@ -125,9 +125,14 @@
             <strong>Adres:</strong> {{ user.address }}<br>
             <strong>Email:</strong> {{ user.email }}<br>
             <strong>Pesel:</strong> {{ user.uid }}<br>
-            {% if user.document_image %}
-            <a href="{{ url_for('auth.get_document_image', user_id=user.id) }}" data-lightbox="image-{{ user.id }}" data-title="{{ user.name }} {{ user.surname }}">
-                <button class="btn-t">Dokument</button>
+            {% if user.front_document_image %}
+            <a href="{{ url_for('auth.get_front_document_image', user_id=user.id) }}" data-lightbox="image-{{ user.id }}" data-title="{{ user.name }} {{ user.surname }}">
+                <button class="btn-t">Przód dokumentu</button>
+            </a>
+            {% endif %}
+            {% if user.back_document_image %}
+            <a href="{{ url_for('auth.get_back_document_image', user_id=user.id) }}" data-lightbox="image-{{ user.id }}" data-title="{{ user.name }} {{ user.surname }}">
+                <button class="btn-t">Tył dokumentu</button>
             </a>
             {% endif %}
             <div class="btn-group mt-2" role="group">
