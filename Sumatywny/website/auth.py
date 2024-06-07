@@ -1,12 +1,13 @@
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for,send_file,make_response
+from flask import Blueprint, render_template, request, flash, redirect, url_for,send_file,make_response,current_app as app
 from .models import User,ALLOWED_EXTENSIONS
 from flask_login import login_user, login_required, logout_user, current_user
-import hashlib
+import hashlib, requests
 from werkzeug.utils import secure_filename
 from .views import send_confirmation_email
 from io import BytesIO
 from . import db
+
 
 auth = Blueprint('auth', __name__)
 
@@ -137,6 +138,8 @@ def sign_up_org():
             flash('Adres musi być dłuższy niż 2 znaki.', category='error')
         elif len(nip) != 10:
             flash('NIP musi posiadać równo 10 liczb.', category='error')
+        elif not validate_nip(nip):
+            flash('NIP jest nieprawidłowy.', category='error')
         elif check_nip:
             flash('NIP już istnieje.', category='error')
         elif password1 != password2:
@@ -144,8 +147,7 @@ def sign_up_org():
         elif len(password1) < 7:
             flash('Hasło musi się składać z 7 znaków.', category='error')
         else:
-            new_user = User(email=email, name=name,address=address,uid=nip,role='organisation',password=hash_password(
-                password1))
+            new_user = User(email=email, name=name, address=address, uid=nip, role='organisation', password=hash_password(password1))
             db.session.add(new_user)
             db.session.commit()
             send_confirmation_email(new_user)
@@ -153,7 +155,6 @@ def sign_up_org():
             return redirect(url_for('views.home'))
 
     return render_template("sign_up_org.html", user=current_user)
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -172,3 +173,18 @@ def get_back_document_image(user_id):
         return send_file(BytesIO(user.back_document_image), mimetype='image/jpeg')
     else:
         return make_response("No image found", 404)
+    
+
+
+def validate_nip(nip):
+    api_key = app.config['NIP24_API_KEY']
+    url = f'https://www.nip24.pl/api/nip/{nip}?key={api_key}'
+    
+    try:
+        response = requests.get(url, verify=False)  # Remember to remove verify=False for production use
+        if response.status_code == 200:
+            data = response.json()
+            return data.get('valid', False)
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+    return False
