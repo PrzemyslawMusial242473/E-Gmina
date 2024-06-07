@@ -52,12 +52,10 @@
         border-radius: 5px;
         background-color: #fff;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        {#transition: transform 0.3s ease;#}
         width: 300px;
-    }
-
-    .store:hover {
-        {#transform: scale(1.05);#}
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
     button, .my-vouchers-btn {
@@ -70,6 +68,14 @@
         font-size: 16px;
         text-decoration: none;
         display: inline-block;
+    }
+
+    .guziczek1{
+        margin-left: 95%;
+    }
+
+    .guziczek2{
+
     }
 
     button:hover, .my-vouchers-btn:hover {
@@ -95,6 +101,15 @@
         margin-top: 10px;
         width: 250px;
     }
+
+    .store-buttons {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .store form {
+        margin: 5px 0; /* Dostosowanie odstępu między przyciskami */
+    }
 </style>
 
 <div class="banner"></div>
@@ -107,18 +122,20 @@
                 <li class="store">
                     <h2>{{ store.name }}</h2>
                     <p>{{ store.cost }} punktów</p>
-                    {% if user.role != "admin" %}
-                        <form action="{{ url_for('views.exchange_points') }}" method="POST">
-                            <input type="hidden" name="store" value="{{ store_key }}">
-                            <button type="submit">Wymień</button>
-                        </form>
-                    {% endif %}
-                    {% if user.role == "admin" %}
-                        <form action="{{ url_for('views.exchange_points') }}" method="POST">
-                            <input type="hidden" name="delete_store" value="{{ store_key }}">
-                            <button type="submit">Usuń</button>
-                        </form>
-                    {% endif %}
+                    <div class="store-buttons">
+                        {% if user.role != "admin" %}
+                            <form action="{{ url_for('views.exchange_points') }}" method="POST">
+                                <input type="hidden" name="store" value="{{ store_key }}">
+                                <button type="submit" class="guziczek1">Wymień</button>
+                            </form>
+                        {% endif %}
+                        {% if user.role == "admin" %}
+                            <form action="{{ url_for('views.exchange_points') }}" method="POST">
+                                <input type="hidden" name="delete_store" value="{{ store_key }}">
+                                <button type="submit" class="guziczek2">Usuń</button>
+                            </form>
+                        {% endif %}
+                    </div>
                 </li>
             {% endfor %}
         </ul>
