@@ -40,8 +40,11 @@ class Survey(db.Model):
     status = db.Column(db.String(50), default='active')
     approved = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', back_populates='Surveys')
+    user = db.relationship('User', back_populates='surveys')
     questions = db.relationship('Question', backref='survey', lazy=True)
+
+    def has_been_filled_by_user(self, user_id):
+        return SurveyResponse.query.filter_by(survey_id=self.id, user_id=user_id).first() is not None
 
 
 
@@ -94,7 +97,7 @@ class User(db.Model, UserMixin):
     front_document_image = db.Column(BLOB, nullable=True)
     back_document_image = db.Column(BLOB, nullable=True)
     Events = db.relationship('Event', back_populates='user')
-    Surveys = db.relationship('Survey', back_populates='user')
+    surveys = db.relationship('Survey', back_populates='user', lazy=True)
     Reports = db.relationship('Report')
     payments = db.relationship('Payment', backref='user', lazy=True)
     answers = db.relationship('Answer', backref='user', lazy=True)
