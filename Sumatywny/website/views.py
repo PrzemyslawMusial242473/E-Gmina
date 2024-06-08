@@ -742,6 +742,9 @@ def create_survey():
 @views.route('/approve-surveys', methods=['GET', 'POST'])
 @login_required
 def approve_surveys():
+    if not current_user.is_authenticated or current_user.role != 'admin':
+        flash('Nie masz uprawnień administratora do tej strony.', category='danger')
+        return redirect(url_for('views.home'))
     if request.method == 'POST':
         survey_id = request.form.get('survey_id')
         action = request.form.get('action')
