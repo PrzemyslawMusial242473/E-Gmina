@@ -678,21 +678,11 @@ def admin_reports():
     return render_template('admin_reports.html', user=current_user, pending_reports=pending_reports)
 
 
-@views.route('/surveys', methods=['GET', 'POST'])
+@views.route('/surveys', methods=['GET'])
 @login_required
 def surveys():
-    surveys = Survey.query.filter_by(approved=True, status='active').all()
-    if request.method == 'POST':
-        survey_id = request.form.get('survey_id')
-        action = request.form.get('action')
-        survey = Survey.query.get(survey_id)
-        if action == 'accept':
-            survey.approved = True
-        elif action == 'reject':
-            survey.approved = False
-        db.session.commit()
-        return redirect(url_for('views.surveys'))
-
+    filled_survey_ids = db.session.query(SurveyResponse.survey_id).filter_by(user_id=current_user.id).subquery()
+    surveys = Survey.query.filter(Survey.approved == True, Survey.status == 'active', ~Survey.id.in_(filled_survey_ids)).all()
     return render_template('surveys.html', surveys=surveys, user=current_user)
 
 
@@ -700,6 +690,11 @@ def surveys():
 @login_required
 def fill_survey(survey_id):
     survey = Survey.query.get_or_404(survey_id)
+    existing_response = SurveyResponse.query.filter_by(survey_id=survey_id, user_id=current_user.id).first()
+    if existing_response:
+        flash('Już wypełniłeś tę ankietę!', 'info')
+        return redirect(url_for('views.surveys'))
+        
     if request.method == 'POST':
         response = SurveyResponse(survey_id=survey.id, user_id=current_user.id)
         db.session.add(response)
@@ -709,10 +704,7 @@ def fill_survey(survey_id):
             answer = Answer(text=answer_text, question_id=question.id, response_id=response.id, user_id=current_user.id)
             db.session.add(answer)
         db.session.commit()
-        survey.status = "completed"
         add_loyalty_points(current_user, 5)
-        db.session.add(survey)
-        db.session.commit()
         flash('Dziękujemy za wypełnienie ankiety!', 'success')
         return redirect(url_for('views.surveys'))
     return render_template('survey.html', survey=survey, user=current_user)
@@ -746,6 +738,51 @@ def create_survey():
 
     return render_template('create_survey.html')
 
+
+@views.route('/approve-surveys', methods=['GET', 'POST'])
+@login_required
+def approve_surveys():
+    if request.method == 'POST':
+        survey_id = request.form.get('survey_id')
+        action = request.form.get('action')
+        
+        survey = Survey.query.get(survey_id)
+        if action == 'approve':
+            survey.approved = True
+        elif action == 'reject':
+            db.session.delete(survey)
+        db.session.commit()
+        return redirect(url_for('views.approve_surveys'))
+
+    surveys = Survey.query.filter_by(approved=False).all()
+    return render_template('approve_surveys.html', surveys=surveys)
+
+
+@views.route('/survey_results', methods=['GET'])
+@login_required
+def survey_results():
+    if current_user.role == 'admin':
+        surveys = Survey.query.order_by(Survey.user_id).all()  
+    else:
+        surveys = Survey.query.filter_by(user_id=current_user.id).all()
+
+    results = []
+    for survey in surveys:
+        creator_name = 'Admin' if survey.user.role == 'admin' else survey.user.name if survey.user else 'Unknown'
+        survey_data = {
+            'title': survey.title,
+            'creator_name': creator_name, 
+            'questions': []
+        }
+        for question in survey.questions:
+            question_data = {
+                'text': question.text,
+                'answers': [answer.text for answer in question.answers]
+            }
+            survey_data['questions'].append(question_data)
+        results.append(survey_data)
+
+    return render_template('survey_results.html', surveys=results)
 
 @views.route('/segregate', methods=['GET', 'POST'])
 @login_required
@@ -999,50 +1036,4 @@ def download_sample():
         flash('Brak dostępu')
         return redirect(url_for('views.home'))
     return send_from_directory(directory='.', path='sample.xlsx', as_attachment=True)
-
-
-@views.route('/approve-surveys', methods=['GET', 'POST'])
-@login_required
-def approve_surveys():
-    if request.method == 'POST':
-        survey_id = request.form.get('survey_id')
-        action = request.form.get('action')
-        
-        survey = Survey.query.get(survey_id)
-        if action == 'approve':
-            survey.approved = True
-        elif action == 'reject':
-            db.session.delete(survey)
-        db.session.commit()
-        return redirect(url_for('views.approve_surveys'))
-
-    surveys = Survey.query.filter_by(approved=False).all()
-    return render_template('approve_surveys.html', surveys=surveys)
-
-
-@views.route('/survey_results', methods=['GET'])
-@login_required
-def survey_results():
-    if current_user.role == 'admin':
-        surveys = Survey.query.order_by(Survey.user_id).all()  
-    else:
-        surveys = Survey.query.filter_by(user_id=current_user.id).all()
-
-    results = []
-    for survey in surveys:
-        creator_name = 'Admin' if survey.user.role == 'admin' else survey.user.name if survey.user else 'Unknown'
-        survey_data = {
-            'title': survey.title,
-            'creator_name': creator_name, 
-            'questions': []
-        }
-        for question in survey.questions:
-            question_data = {
-                'text': question.text,
-                'answers': [answer.text for answer in question.answers]
-            }
-            survey_data['questions'].append(question_data)
-        results.append(survey_data)
-
-    return render_template('survey_results.html', surveys=results)
 
