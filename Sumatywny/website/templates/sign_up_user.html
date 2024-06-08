@@ -135,13 +135,12 @@
         <input type="password" class="form-control" id="password2" name="password2" placeholder="Potwierdź hasło">
       </div>
       <div class="form-group">
-        <label for="document_image">Zdjęcie dokumentu potwierdzającego tożsamość</label>
-        <label class="custom-file-upload">
-          <input type="file" id="document_image" name="document_image" />
-          Wybierz plik
-        </label>
-        <div class="file-name" id="file-name">Brak wybranego pliku</div>
-        <button type="button" class="remove-file" id="remove-file">Usuń wybrany plik</button>
+        <label for="front_document_image">Zdjęcie przodu dokumentu potwierdzającego tożsamość</label>
+          <input type="file" id="front_document_image" name="front_document_image" />
+      </div>
+      <div class="form-group">
+        <label for="back_document_image">Zdjęcie tyłu dokumentu potwierdzającego tożsamość</label>
+          <input type="file" id="back_document_image" name="back_document_image" />
       </div>
       <br>
       <button type="submit" class="btn btn-register">Zarejestruj</button>
@@ -149,17 +148,4 @@
   </div>
 </div>
 
-<script>
-  document.getElementById('document_image').addEventListener('change', function() {
-    var fileName = this.files[0] ? this.files[0].name : 'Brak wybranego pliku';
-    document.getElementById('file-name').textContent = fileName;
-    document.getElementById('remove-file').style.display = 'inline-block';
-  });
-
-  document.getElementById('remove-file').addEventListener('click', function() {
-    document.getElementById('document_image').value = '';
-    document.getElementById('file-name').textContent = 'Brak wybranego pliku';
-    this.style.display = 'none';
-  });
-</script>
 {% endblock %}

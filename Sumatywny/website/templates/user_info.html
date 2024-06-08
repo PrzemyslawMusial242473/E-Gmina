@@ -11,7 +11,7 @@ h2{
         background-color: rgb(250,250,250,1);
         border-radius: 15px;
         padding: 20px;
-        margin-top: 4%;
+        margin-top: 2%;
     }
     .custom-card {
         background-color: #b4dfe5;;
@@ -99,6 +99,13 @@ h2{
                     </div>
                 </div>
             {% endif %}
+         <div class="row mb-4">
+                <div class="col-md-12">
+                    <form method="POST" action="{{ url_for('views.delete_account') }}">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć swoje konto? Ta operacja jest nieodwracalna.')">Usuń konto</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

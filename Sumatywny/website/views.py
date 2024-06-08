@@ -1,6 +1,6 @@
 
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for,send_from_directory
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
 from .models import Event,Payment, MapMarker, User, Message, Report, Survey, Answer, Question, CATEGORIES, segregate_waste, Voucher, stores, SurveyResponse
 from datetime import datetime, date
 from . import db
@@ -78,10 +78,10 @@ def home():
         next_year += 1
 
     month_events = get_month_events(year, month)
-    accepted_month_events = [event for event in month_events if event.status == 'accepted']
+    accepted_month_events = [event for event in month_events if event.status == 'Zaakceptowane']
     weeks = generate_calendar(year, month, accepted_month_events)
 
-    accepted_events = Event.query.filter(Event.date >= datetime.now(), Event.status == 'accepted').order_by(Event.date.asc()).all()
+    accepted_events = Event.query.filter(Event.date >= datetime.now(), Event.status == 'Zaakceptowane').order_by(Event.date.asc()).all()
     markers = MapMarker.query.all()  # Pobieramy wszystkie znaczniki z bazy danych
 
     # Pobierz nazwę aktualnego miesiąca po polsku
@@ -115,7 +115,7 @@ def calendar_view():
     year = today.year
     month = today.month
     month_events = get_month_events(year, month)
-    accepted_month_events = [event for event in month_events if event.status == 'accepted']
+    accepted_month_events = [event for event in month_events if event.status == 'Zaakceptowane']
     weeks = generate_calendar(year, month, accepted_month_events)
     return render_template("calendar.html", user=current_user, calendar=weeks, current_month=current_month)
 
@@ -215,9 +215,9 @@ def event():
 
             if data['status'] == 'OK':
                 if current_user.role =="admin":
-                    status_state = "accepted"
+                    status_state = "Zaakceptowane"
                 else:
-                    status_state = "pending"
+                    status_state = "Oczekuje na rozpatrzenie"
                 new_event = Event(
                     data=request.form.get('data'),  
                     date=date,
@@ -228,7 +228,10 @@ def event():
                 )
                 db.session.add(new_event)
                 db.session.commit()
-                flash('Wydarzenie zawnioskowano!', category='success')
+                if current_user.role != "admin":
+                    flash('Wydarzenie zawnioskowano!', category='success')
+                else:
+                    flash('Wydarzenie zostało dodane!', category='success')
                 return redirect(url_for('views.event'))
             else:
                 flash('Nie znaleziono koordynatów dla podanego adresu', category='error')
@@ -269,7 +272,10 @@ def search_user():
         else:
             flash('Użytkownik nie został znaleziony!', category='error')
         return redirect(url_for('views.search_user'))
-    return render_template('invite-friends.html', user=current_user)
+    has_friends = current_user.friends.count() > 0
+    has_invite = current_user.invitations.count() > 0
+    is_blocked = current_user.blocked.count() > 0
+    return render_template('invite-friends.html', user=current_user, has_friends=has_friends, has_invite=has_invite, is_blocked=is_blocked)
 
 
 @views.route('/send-message/<int:user_id>', methods=['POST'])
@@ -401,7 +407,7 @@ def admin_events():
         flash('Nie masz uprawnień administratora do tej strony.', category='danger')
         return redirect(url_for('views.home'))
     
-    pending_events = Event.query.options(joinedload(Event.user)).filter_by(status='pending').all()
+    pending_events = Event.query.options(joinedload(Event.user)).filter_by(status='Oczekuje na rozpatrzenie').all()
     
     if request.method == 'POST':
         event_id = request.form.get('event_id')
@@ -413,12 +419,12 @@ def admin_events():
             return redirect(url_for('views.admin_events'))
         
         if action == 'accept':
-            event.status = 'accepted'
+            event.status = 'Zaakceptowane'
             db.session.add(event)
             db.session.commit()
             flash('Wydarzenie zostało zaakceptowane.', category='success')
         elif action == 'reject':
-            event.status = 'rejected'
+            event.status = 'Odrzucone'
             db.session.add(event)
             db.session.commit()
             flash('Wydarzenie zostało odrzucone.', category='warning')
@@ -440,13 +446,13 @@ def update_event_status(event_id, action):
         return redirect(url_for('views.admin_events'))
 
     if action == 'accept':
-        event.status = 'accepted'
+        event.status = 'Zaakceptowane'
         user = User.query.filter_by(id=event.user_id).first()
         add_loyalty_points(user, 10)
         db.session.commit()
         flash('Wydarzenie zostało zaakceptowane.', category='success')
     elif action == 'reject':
-        event.status = 'rejected'
+        event.status = 'Odrzucone'
         db.session.commit()
         flash('Wydarzenie zostało odrzucone.', category='warning')
 
@@ -474,6 +480,9 @@ def admin_users():
         if user:
             if action == 'accept':
                 user.status = 'accepted'
+                db.session.delete(user.front_document_image)
+                db.session.delete(user.back_document_image)
+                db.session.delete(user.uid)
                 db.session.add(user)
                 db.session.commit()
                 flash('Stworzenie konta zostało zatwierdzone.', category='success')
@@ -507,6 +516,22 @@ def delete_user(user_id):
         flash('Użytkownik nie istnieje.', category='danger')
 
     return redirect(url_for('views.admin_users'))
+
+
+@views.route('/delete-account', methods=['POST'])
+@login_required
+def delete_account():
+    user = User.query.get(current_user.id)
+    if user:
+        logout_user()
+        db.session.delete(user)
+        db.session.commit()
+        flash('Twoje konto zostało usunięte.', category='success')
+        return redirect(url_for('views.home'))
+    else:
+        flash('Wystąpił błąd podczas usuwania konta.', category='error')
+        return redirect(url_for('views.user_info'))
+
 
 @views.route("/report", methods=['GET', 'POST'])
 @login_required
@@ -716,7 +741,7 @@ def create_survey():
 
         db.session.add(survey)
         db.session.commit()
-        flash('Survey created successfully!', 'success')
+        flash('Ankieta została stworzona pomyślnie!', 'success')
         return redirect(url_for('views.create_survey'))
 
     return render_template('create_survey.html')

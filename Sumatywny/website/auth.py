@@ -1,12 +1,13 @@
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for,send_file,make_response
+from flask import Blueprint, render_template, request, flash, redirect, url_for,send_file,make_response,current_app as app
 from .models import User,ALLOWED_EXTENSIONS
 from flask_login import login_user, login_required, logout_user, current_user
-import hashlib
+import hashlib, requests
 from werkzeug.utils import secure_filename
 from .views import send_confirmation_email
 from io import BytesIO
 from . import db
+
 
 auth = Blueprint('auth', __name__)
 
@@ -71,7 +72,8 @@ def sign_up_user():
         pesel = request.form.get('pesel')
         password1 = request.form.get('password1')
         password2 = request.form.get('password2')
-        document_image = request.files.get('document_image')
+        front_document_image = request.files.get('front_document_image')
+        back_document_image = request.files.get('back_document_image')
 
         user = User.query.filter_by(email=email).first()
         check_pesel = User.query.filter_by(uid=pesel).first()
@@ -99,10 +101,11 @@ def sign_up_user():
             flash('Hasła nie są takie same.', category='error')
         elif len(password1) < 7:
             flash('Hasło musi się składać z 7 znaków.', category='error')
-        elif document_image and allowed_file(document_image.filename):
-            document_image_data = document_image.read()
+        elif front_document_image and allowed_file(front_document_image.filename) and back_document_image:
+            front_document_image_data = front_document_image.read()
+            back_document_image_data = back_document_image.read()
             new_user = User(email=email, username=username, name=name, surname=surname, address=address,
-                            uid=pesel, password=hash_password(password1), document_image=document_image_data)
+                                uid=pesel, password=hash_password(password1), front_document_image=front_document_image_data,back_document_image=back_document_image_data)
             db.session.add(new_user)
             db.session.commit()
             send_confirmation_email(new_user)
@@ -135,6 +138,8 @@ def sign_up_org():
             flash('Adres musi być dłuższy niż 2 znaki.', category='error')
         elif len(nip) != 10:
             flash('NIP musi posiadać równo 10 liczb.', category='error')
+        elif not validate_nip(nip):
+            flash('NIP jest nieprawidłowy.', category='error')
         elif check_nip:
             flash('NIP już istnieje.', category='error')
         elif password1 != password2:
@@ -142,8 +147,7 @@ def sign_up_org():
         elif len(password1) < 7:
             flash('Hasło musi się składać z 7 znaków.', category='error')
         else:
-            new_user = User(email=email, name=name,address=address,uid=nip,role='organisation',password=hash_password(
-                password1))
+            new_user = User(email=email, name=name, address=address, uid=nip, role='organisation', password=hash_password(password1))
             db.session.add(new_user)
             db.session.commit()
             send_confirmation_email(new_user)
@@ -151,14 +155,36 @@ def sign_up_org():
             return redirect(url_for('views.home'))
 
     return render_template("sign_up_org.html", user=current_user)
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@auth.route('/document-image/<int:user_id>')
-def get_document_image(user_id):
+@auth.route('/front-document-image/<int:user_id>')
+def get_front_document_image(user_id):
     user = User.query.get_or_404(user_id)
-    if user.document_image:
-        return send_file(BytesIO(user.document_image), mimetype='image/jpeg')
+    if user.front_document_image:
+        return send_file(BytesIO(user.front_document_image), mimetype='image/jpeg')
     else:
         return make_response("No image found", 404)
+    
+@auth.route('/back-document-image/<int:user_id>')
+def get_back_document_image(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.back_document_image:
+        return send_file(BytesIO(user.back_document_image), mimetype='image/jpeg')
+    else:
+        return make_response("No image found", 404)
+    
+
+
+def validate_nip(nip):
+    api_key = app.config['NIP24_API_KEY']
+    url = f'https://www.nip24.pl/api/nip/{nip}?key={api_key}'
+    
+    try:
+        response = requests.get(url, verify=False)  # Remember to remove verify=False for production use
+        if response.status_code == 200:
+            data = response.json()
+            return data.get('valid', False)
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+    return False

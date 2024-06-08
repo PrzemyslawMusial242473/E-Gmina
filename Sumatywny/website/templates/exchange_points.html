@@ -52,15 +52,13 @@
         border-radius: 5px;
         background-color: #fff;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        {#transition: transform 0.3s ease;#}
         width: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
 
-    .store:hover {
-        {#transform: scale(1.05);#}
-    }
-
-    button {
+    button, .my-vouchers-btn {
         background-color: #328685;
         color: white;
         padding: 10px 20px;
@@ -68,12 +66,22 @@
         border-radius: 5px;
         cursor: pointer;
         font-size: 16px;
+        text-decoration: none;
+        display: inline-block;
     }
 
-    button:hover {
+    .guziczek1{
+        margin-left: 95%;
+    }
+
+    .guziczek2{
+
+    }
+
+    button:hover, .my-vouchers-btn:hover {
         background-color: #328685;
+        color: white;
     }
-
 
     .add-store-form {
         display: flex;
@@ -93,6 +101,15 @@
         margin-top: 10px;
         width: 250px;
     }
+
+    .store-buttons {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .store form {
+        margin: 5px 0; /* Dostosowanie odstępu między przyciskami */
+    }
 </style>
 
 <div class="banner"></div>
@@ -105,18 +122,20 @@
                 <li class="store">
                     <h2>{{ store.name }}</h2>
                     <p>{{ store.cost }} punktów</p>
-                    {% if user.role != "admin" %}
-                        <form action="{{ url_for('views.exchange_points') }}" method="POST">
-                            <input type="hidden" name="store" value="{{ store_key }}">
-                            <button type="submit">Wymień</button>
-                        </form>
-                    {% endif %}
-                    {% if user.role == "admin" %}
-                        <form action="{{ url_for('views.exchange_points') }}" method="POST">
-                            <input type="hidden" name="delete_store" value="{{ store_key }}">
-                            <button type="submit">Usuń</button>
-                        </form>
-                    {% endif %}
+                    <div class="store-buttons">
+                        {% if user.role != "admin" %}
+                            <form action="{{ url_for('views.exchange_points') }}" method="POST">
+                                <input type="hidden" name="store" value="{{ store_key }}">
+                                <button type="submit" class="guziczek1">Wymień</button>
+                            </form>
+                        {% endif %}
+                        {% if user.role == "admin" %}
+                            <form action="{{ url_for('views.exchange_points') }}" method="POST">
+                                <input type="hidden" name="delete_store" value="{{ store_key }}">
+                                <button type="submit" class="guziczek2">Usuń</button>
+                            </form>
+                        {% endif %}
+                    </div>
                 </li>
             {% endfor %}
         </ul>
@@ -128,7 +147,10 @@
                 <input type="number" name="new_store_cost" placeholder="Koszt punktowy" required>
                 <button type="submit">Dodaj sklep</button>
             </form>
+        {% else %}
+            <a class="my-vouchers-btn" href="{{ url_for('views.my_vouchers') }}">Moje bony</a>
         {% endif %}
     </div>
+    <h2><small>Przypominamy, że bony mają czas realizacji w wysokości 14 dni od dnia ich uzyskania</small></h2>
 </div>
 {% endblock %}
