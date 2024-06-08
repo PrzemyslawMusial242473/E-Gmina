@@ -56,6 +56,7 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        align-items: center; /* Add this line */
     }
 
     button, .my-vouchers-btn {
@@ -70,12 +71,12 @@
         display: inline-block;
     }
 
-    .guziczek1{
-        margin-left: 95%;
+    .guziczek1 {
+        margin-left: 0; /* Change this line */
     }
 
-    .guziczek2{
-
+    .guziczek2 {
+        margin-left: 0; /* Change this line */
     }
 
     button:hover, .my-vouchers-btn:hover {
@@ -104,11 +105,14 @@
 
     .store-buttons {
         display: flex;
-        justify-content: space-between;
+        justify-content: center; /* Change this line */
+        width: 100%;
     }
 
     .store form {
-        margin: 5px 0; /* Dostosowanie odstępu między przyciskami */
+        margin: 5px 0;
+        display: flex;
+        justify-content: center; /* Add this line */
     }
 </style>
 
