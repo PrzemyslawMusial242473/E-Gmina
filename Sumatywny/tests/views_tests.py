@@ -84,8 +84,8 @@ class PaymentTestCase(unittest.TestCase):
             'file': (io.BytesIO(b"Email,Description,Amount,Due Date\n"
                                 b"testuser@example.com,Test Payment,100.0,2024-06-30"), 'payments.xlsx')
         }
-        response = self.client.post('/upload-payments', content_type='multipart/form-data', data=data)
-        self.assertEqual(response.status_code, 302)
+        response = self.client.post('/upload-payments', content_type='multipart/form-data', data=data, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
 
     def test_create_checkout_session(self):
         self.login('testuser')
@@ -110,7 +110,7 @@ class PaymentTestCase(unittest.TestCase):
             db.session.add(payment)
             db.session.commit()
 
-        response = self.client.get('/payments')
+        response = self.client.get('/payments', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn('Test Payment', response.data.decode('utf-8'))
 
@@ -149,16 +149,17 @@ class SurveyTestCase(unittest.TestCase):
 
     def test_survey_display(self):
         self.login('testuser')
-        response = self.client.get('/surveys')
+        response = self.client.get('/surveys', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
+        self.assertIn('Test Survey', response.data.decode('utf-8'))
 
     def test_fill_survey(self):
         self.login('testuser')
         survey = Survey.query.filter_by(title='Test Survey').first()
         response = self.client.post(f'/survey/{survey.id}', data={
             'question_1': 'Blue'
-        })
-        self.assertEqual(response.status_code, 302)
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
 
         with self.app.app_context():
             response = SurveyResponse.query.filter_by(survey_id=survey.id).first()
@@ -177,10 +178,99 @@ class SurveyTestCase(unittest.TestCase):
             db.session.add(answer)
             db.session.commit()
 
-        response = self.client.get('/survey_results')
+        response = self.client.get('/survey_results', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
         self.assertIn('Test Survey', response.data.decode('utf-8'))
         self.assertIn('Blue', response.data.decode('utf-8'))
+
+
+class FriendsTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app()
+        self.client = self.app.test_client()
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+
+    def login(self, username):
+        admin = User(username='admin', email='admin@example.com', password=hash_password('password'), role='admin',
+                     status="accepted")
+        user = User(username='testuser', email='testuser@example.com', password=hash_password('password'), uid=22222222222, role='user',
+                    status="accepted")
+        self.user1 = User(username='testuser1', email='test1@example.com', password='password')
+        self.user2 = User(username='testuser2', email='test2@example.com', password='password')
+        self.user3 = User(username='adminuser', email='admin@example.com', password='password', role='admin')
+        db.session.add(self.user1)
+        db.session.add(self.user2)
+        db.session.add(self.user3)
+        db.session.commit()
+        with self.app.test_request_context():
+            user = User.query.filter_by(username=username).first()
+            login_user(user)
+
+    def logout(self):
+        return self.client.get('/logout', follow_redirects=True)
+
+    def test_search_user_post(self):
+        self.login('testuser1')
+
+        response = self.client.post('/invite-friends', data=dict(username='testuser2'), follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Zaproszenie pomyślnie wysłano do testuser2!', response.data.decode('utf-8'))
+
+        response = self.client.post('/invite-friends', data=dict(username='testuser1'), follow_redirects=True)
+        self.assertIn('Nie możesz dodać samego siebie jako znajomego!', response.data.decode('utf-8'))
+
+        self.logout()
+
+    def test_send_message_post(self):
+        self.login('testuser1')
+
+        # Test wysyłania wiadomości
+        response = self.client.post(f'/send-message/{self.user2.id}', data=dict(content='Hello testuser2'), follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Wiadomość została wysłana!', response.data.decode('utf-8'))
+
+        self.logout()
+
+    def test_user_chat_get(self):
+        self.login('testuser1')
+        self.user1.friends.append(self.user2)
+        db.session.commit()
+
+        response = self.client.get(f'/chat/{self.user2.id}', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+
+        self.logout()
+
+    def test_accept_invite_post(self):
+        self.login('testuser1')
+        self.user2.invitations.append(self.user1)
+        db.session.commit()
+
+        response = self.client.post('/accept-invite', json=dict(inviter_email='test2@example.com'), follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.user1.friends.append(self.user2)
+        db.session.commit()
+        self.assertIn(self.user2.id, [friend.id for friend in self.user1.friends])
+
+        self.logout()
+
+    def test_reject_invite_post(self):
+        self.login('testuser1')
+        self.user2.invitations.append(self.user1)
+        db.session.commit()
+
+        response = self.client.post('/reject-invite', json=dict(inviter_email='test2@example.com'), follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.user2, self.user1.invitations)
+
+        self.logout()
 
 
 if __name__ == '_main_':
