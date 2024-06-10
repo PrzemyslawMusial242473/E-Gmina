@@ -4,16 +4,16 @@
 {% block content %}
 <style>
     .banner {
-    width: 100%; 
-    background-image: url('{{ url_for('static', filename='platnosci.png') }}'); 
-    background-size: cover; 
-    background-position: center; 
-    height: 400px; 
-    border-radius: 15px; 
-}
+        width: 100%; 
+        background-image: url('{{ url_for('static', filename='platnosci.png') }}'); 
+        background-size: cover; 
+        background-position: center; 
+        height: 400px; 
+        border-radius: 15px; 
+    }
 
     .payments-container {
-        background-color: #f8f9fa;;
+        background-color: #f8f9fa;
         color: #000000; 
         text-align: center;
         border-radius: 15px;
@@ -58,45 +58,45 @@
         margin-top: 1%;
     }
 </style>
+
 <div class="banner"></div>
 
-
-    <div class="payments-container">
-        <h1>Twoje płatności</h1>
+<div class="payments-container">
+    <h1>Twoje płatności</h1>
     <div class="box">
-    {% if payments %}
-        <table class="payments-table">
-            <thead>
-                <tr>
-                    <th>Opis</th>
-                    <th>Kwota</th>
-                    <th>Termin</th>
-                    <th>Status</th>
-                    <th>Akcja</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for payment in payments %}
-                <tr>
-                    <td>{{ payment.description }}</td>
-                    <td>{{ payment.amount }}</td>
-                    <td>{{ payment.due_date.strftime('%Y-%m-%d') }}</td>
-                    <td>{% if payment.paid %}Opłacone{% else %}Nieopłacone{% endif %}</td>
-                    <td>
-                        {% if not payment.paid %}
-                        <form action="{{ url_for('views.create_checkout_session') }}" method="POST">
-                            <input type="hidden" name="payment_id" value="{{ payment.id }}">
-                            <button type="submit" class="btn-pay">Zapłać</button>
-                        </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>Nie masz żadnych płatności do wyświetlenia.</p>
-    {% endif %}
+        {% if payments %}
+            <table class="payments-table">
+                <thead>
+                    <tr>
+                        <th>Opis</th>
+                        <th>Kwota</th>
+                        <th>Termin</th>
+                        <th>Status</th>
+                        <th>Akcja</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.description }}</td>
+                        <td>{{ payment.amount }}</td>
+                        <td>{{ payment.due_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{% if payment.paid %}Opłacone{% else %}Nieopłacone{% endif %}</td>
+                        <td>
+                            {% if not payment.paid %}
+                            <form action="{{ url_for('views.create_checkout_session') }}" method="POST">
+                                <input type="hidden" name="payment_id" value="{{ payment.id }}">
+                                <button type="submit" class="btn-pay">Zapłać</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Nie masz żadnych płatności do wyświetlenia.</p>
+        {% endif %}
     </div>
-    </div>
+</div>
 {% endblock %}

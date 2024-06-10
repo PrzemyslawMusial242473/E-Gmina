@@ -6,4 +6,3 @@ stripe
 Flask-Mail
 pandas
 openpyxl
-flask_migrate
